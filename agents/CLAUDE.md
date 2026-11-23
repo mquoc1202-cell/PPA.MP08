@@ -80,6 +80,13 @@ Hoàn tất (COMPLETED) ──[Giải phóng lịch xe & tài xế]
 * Dùng Session-based Cookie (HTTP-Only, Secure). Cấm dùng JWT khi chưa có yêu cầu đồng thuận.
 * Bảo vệ router bằng Dependency Injection (`Depends(get_current_user)`, `Depends(require_role(["DSP", "MGR"]))`).
 
+### 4. Frontend & UI Design System (Jinja2 + Bootstrap 5):
+* Đồng bộ 100% với `frontend/DESIGN.md`: Primary Corporate Blue `#1c69d4`, Dark accent `#1a2129`, Canvas `#f8f9fa`, Cards trắng nổi bo góc 8px.
+* Mọi view kế thừa từ `templates/base.html`, dùng Bootstrap Icons 1.11+ (`<i class="bi bi-..."></i>`).
+* Chuẩn hóa Badges trạng thái: `ACTIVE/COMPLETED` (Xanh lá `#22c55e`), `MAINTENANCE/ASSIGNED` (Vàng `#f59e0b`), `IN_PROGRESS/IN_TRANSIT` (Xanh dương `#1c69d4`), `INACTIVE` (Xám `#6c757d`).
+* Xử lý lỗi form: HTTP 400 + Alert banner + giữ nguyên giá trị người dùng đã nhập.
+* Cảnh báo xung đột (HTTP 409): Hiển thị Modal/bảng chi tiết các booking bị trùng lịch trong tương lai.
+
 ---
 
 ## NHỮNG GÌ ĐÃ KHÔNG HOẠT ĐỘNG (Lessons Learned)

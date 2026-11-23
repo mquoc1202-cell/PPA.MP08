@@ -254,6 +254,80 @@ except Exception as e:
 
 ---
 
+## Quy chuẩn phát triển Frontend (Jinja2 + Bootstrap 5 + Design System)
+
+Toàn bộ giao diện người dùng (UI) PHẢI đồng bộ theo Design System được quy định tại `frontend/DESIGN.md` và tuân thủ các quy tắc sau:
+
+### 1. Bảng màu & Visual Tokens chuẩn (Đồng bộ `frontend/DESIGN.md`)
+* **Màu chủ đạo (Brand Colors):**
+  * Primary Corporate Blue: `#1c69d4` (Navbar, primary CTA buttons, important links).
+  * Primary Active/Hover: `#0653b6`.
+  * Dark Surface / Accent: `#1a2129` (Navy header bands, elevated containers).
+* **Nền & Bề mặt (Canvas & Surfaces):**
+  * Body Background: `#f8f9fa` (Canvas dịu mắt, tương phản tốt).
+  * Card Surface: `#ffffff` với bo góc `border-radius: 8px`, bóng đổ nhẹ `box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075)`.
+* **Trạng thái & Badges hệ thống:**
+  * `ACTIVE` / `COMPLETED` / `CONFIRMED`: Màu xanh lá `#22c55e` (`badge bg-success`).
+  * `MAINTENANCE` / `PENDING` / `ASSIGNED`: Màu vàng cam `#f59e0b` (`badge bg-warning text-dark`).
+  * `IN_PROGRESS` / `IN_TRANSIT` / `PICKED_UP`: Màu xanh dương `#1c69d4` (`badge bg-primary`).
+  * `INACTIVE` / `CANCELLED`: Màu xám `#6c757d` (`badge bg-secondary`).
+  * `OVERWEIGHT` / `DELAYED` / `ISSUE`: Màu đỏ `#dc2626` (`badge bg-danger`).
+* **Icon set:** BẮT BUỘC dùng **Bootstrap Icons 1.11+** (`<i class="bi bi-..."></i>`), không dùng icon rời rạc hay emoji tự do.
+
+### 2. Cấu trúc Kế thừa Template Jinja2 (Layout Hierarchy)
+* Mọi trang giao diện BẮT BUỘC kế thừa từ `templates/base.html`:
+  ```jinja2
+  {% extends "base.html" %}
+  {% block title %}Tiêu đề trang - Freight ERP{% endblock %}
+  {% block content %}
+    <!-- Nội dung chính -->
+  {% endblock %}
+  {% block extra_scripts %}
+    <!-- Script riêng nếu có -->
+  {% endblock %}
+  ```
+* `templates/base.html` chứa:
+  * Top Navigation Bar cố định hiển thị Logo, điều hướng các phân hệ (`Đội Xe`, `Tài Xế`, `Chuyến Hàng`, `Sự Cố`), Badge hiển thị vai trò (`DSP`, `SAL`, `MGR`), và nút xem OpenAPI Docs.
+  * Vùng hiển thị thông báo flash message tự động (`error_message`, `success_message`).
+  * Responsive layout chuẩn cho màn hình điều phối Desktop (tối thiểu 1280px) và Mobile/Tablet.
+
+### 3. Quy chuẩn Form & Tương tác Dữ liệu (Forms & User Inputs)
+* Các trường bắt buộc nhập PHẢI có dấu hoa thị đỏ: `<span class="text-danger">*</span>`.
+* Dưới mỗi input quan trọng PHẢI có dòng hướng dẫn định dạng (`<div class="form-text text-muted">...</div>`).
+* **Khi Submit Form:**
+  * Thành công: Chuyển hướng với HTTP 303: `RedirectResponse(url="/admin/resource?success=true", status_code=303)`.
+  * Lỗi nghiệp vụ hoặc dữ liệu không hợp lệ: Render lại form với HTTP status 400, hiển thị thông báo lỗi trong `<div class="alert alert-danger">` và GIỮ NGUYÊN các giá trị người dùng đã nhập trong form (không bắt người dùng nhập lại từ đầu).
+
+### 4. Quy chuẩn Bảng Dữ liệu (Data Tables & Empty States)
+* Bảng hiển thị thông tin phải có header `thead class="table-light"`.
+* Cột ID/Mã định danh in đậm: `<td class="fw-bold">...</td>`.
+* Cột trạng thái phải dùng Badge chuẩn (`badge bg-...`).
+* Cột Thao tác căn lề phải (`text-end pe-3`) với nút kích thước nhỏ (`btn-sm`).
+* **Empty State:** Khi không có dữ liệu hoặc không khớp bộ lọc, BẮT BUỘC hiển thị icon trống và thông báo rõ ràng:
+  ```html
+  <tr>
+    <td colspan="N" class="text-center py-4 text-muted">
+      <i class="bi bi-inbox fs-2 d-block mb-2"></i> Chưa có dữ liệu nào trong danh mục hoặc không khớp bộ lọc.
+    </td>
+  </tr>
+  ```
+
+### 5. Hộp thoại Cảnh báo & Modal Xung đột (Confirmation & Conflict Modals)
+* **Xác nhận xóa/chuyển trạng thái nguy hiểm:** Phải có dialog xác nhận từ người dùng (`data-bs-toggle="modal"` hoặc confirm dialog).
+* **Xung đột lịch trình (HTTP 409 Schedule Conflict):** Khi điều phối viên cố tình chuyển trạng thái xe/tài xế sang `MAINTENANCE` hoặc `INACTIVE` mà còn lịch tương lai, giao diện BẮT BUỘC mở Modal hoặc bảng cảnh báo liệt kê chi tiết: Mã đơn (`reference_code`), thời gian bắt đầu (`start_time`), thời gian kết thúc (`end_time`) bị xung đột.
+
+### 6. Phân quyền hiển thị giao diện theo Vai trò (Role-Based UI Rendering)
+* Mọi view PHẢI truyền `current_user` vào template context.
+* Nút thao tác điều phối (Thêm, Sửa, Gán lịch, Đổi trạng thái) CHỈ hiển thị khi người dùng là `DSP`:
+  ```jinja2
+  {% if current_user.role == 'DSP' %}
+    <a href="/admin/trucks/create" class="btn btn-primary">Thêm Xe Mới</a>
+  {% endif %}
+  ```
+* Người dùng vai trò `SAL` hoặc `MGR` chỉ nhìn thấy dữ liệu ở chế độ Read-only.
+
+---
+
 # 4. CẤU TRÚC THƯ MỤC CHUẨN
 
 ```text
