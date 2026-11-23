@@ -22,9 +22,9 @@ def admin_list_drivers(
 ):
     drivers, total = service.list_drivers(status=status, search=search, page=1, page_size=100)
     return templates.TemplateResponse(
-        "drivers/list.html",
-        {
-            "request": request,
+        request=request,
+        name="drivers/list.html",
+        context={
             "drivers": drivers,
             "total": total,
             "status": status,
@@ -36,8 +36,9 @@ def admin_list_drivers(
 @router.get("/create", response_class=HTMLResponse)
 def admin_create_driver_form(request: Request):
     return templates.TemplateResponse(
-        "drivers/form.html",
-        {"request": request, "driver": None, "active_tab": "drivers"}
+        request=request,
+        name="drivers/form.html",
+        context={"driver": None, "active_tab": "drivers"}
     )
 
 @router.post("/create")
@@ -58,9 +59,9 @@ def admin_create_driver_submit(
         return RedirectResponse(url="/admin/drivers?success=true", status_code=status.HTTP_303_SEE_OTHER)
     except (DomainException, ValueError) as e:
         return templates.TemplateResponse(
-            "drivers/form.html",
-            {
-                "request": request,
+            request=request,
+            name="drivers/form.html",
+            context={
                 "driver": None,
                 "error_message": str(e),
                 "active_tab": "drivers"
@@ -76,8 +77,9 @@ def admin_edit_driver_form(
 ):
     driver = service.get_driver_by_id(id)
     return templates.TemplateResponse(
-        "drivers/form.html",
-        {"request": request, "driver": driver, "active_tab": "drivers"}
+        request=request,
+        name="drivers/form.html",
+        context={"driver": driver, "active_tab": "drivers"}
     )
 
 @router.post("/{id}/edit")
@@ -101,9 +103,9 @@ def admin_edit_driver_submit(
     except (DomainException, ValueError) as e:
         driver = service.get_driver_by_id(id)
         return templates.TemplateResponse(
-            "drivers/form.html",
-            {
-                "request": request,
+            request=request,
+            name="drivers/form.html",
+            context={
                 "driver": driver,
                 "error_message": str(e),
                 "active_tab": "drivers"

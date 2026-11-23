@@ -22,9 +22,9 @@ def admin_list_trucks(
 ):
     trucks, total = service.list_trucks(status=status, search=search, page=1, page_size=100)
     return templates.TemplateResponse(
-        "trucks/list.html",
-        {
-            "request": request,
+        request=request,
+        name="trucks/list.html",
+        context={
             "trucks": trucks,
             "total": total,
             "status": status,
@@ -36,8 +36,9 @@ def admin_list_trucks(
 @router.get("/create", response_class=HTMLResponse)
 def admin_create_truck_form(request: Request):
     return templates.TemplateResponse(
-        "trucks/form.html",
-        {"request": request, "truck": None, "active_tab": "trucks"}
+        request=request,
+        name="trucks/form.html",
+        context={"truck": None, "active_tab": "trucks"}
     )
 
 @router.post("/create")
@@ -60,9 +61,9 @@ def admin_create_truck_submit(
         return RedirectResponse(url="/admin/trucks?success=true", status_code=status.HTTP_303_SEE_OTHER)
     except (DomainException, ValueError) as e:
         return templates.TemplateResponse(
-            "trucks/form.html",
-            {
-                "request": request,
+            request=request,
+            name="trucks/form.html",
+            context={
                 "truck": None,
                 "error_message": str(e),
                 "active_tab": "trucks"
@@ -78,8 +79,9 @@ def admin_edit_truck_form(
 ):
     truck = service.get_truck_by_id(id)
     return templates.TemplateResponse(
-        "trucks/form.html",
-        {"request": request, "truck": truck, "active_tab": "trucks"}
+        request=request,
+        name="trucks/form.html",
+        context={"truck": truck, "active_tab": "trucks"}
     )
 
 @router.post("/{id}/edit")
@@ -107,9 +109,9 @@ def admin_edit_truck_submit(
     except (DomainException, ValueError) as e:
         truck = service.get_truck_by_id(id)
         return templates.TemplateResponse(
-            "trucks/form.html",
-            {
-                "request": request,
+            request=request,
+            name="trucks/form.html",
+            context={
                 "truck": truck,
                 "error_message": str(e),
                 "active_tab": "trucks"

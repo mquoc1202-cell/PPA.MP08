@@ -13,6 +13,8 @@
     </a>
 </div>
 
+<div id="alertContainer"></div>
+
 {% if error_message %}
 <div class="alert alert-danger alert-dismissible fade show" role="alert">
     <i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Lỗi:</strong> {{ error_message }}
@@ -32,7 +34,7 @@
     <form method="get" action="/admin/trucks" class="row g-3 align-items-center">
         <div class="col-md-4">
             <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
                 <input type="text" name="search" class="form-control" placeholder="Tìm theo biển số, loại xe..." value="{{ search or '' }}">
             </div>
         </div>
@@ -45,7 +47,7 @@
             </select>
         </div>
         <div class="col-md-2">
-            <button type="submit" class="btn btn-secondary w-100"><i class="bi bi-funnel me-1"></i> Lọc</button>
+            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel me-1"></i> Lọc</button>
         </div>
         <div class="col-md-2">
             <a href="/admin/trucks" class="btn btn-outline-secondary w-100">Đặt lại</a>
@@ -72,12 +74,12 @@
             <tbody>
                 {% if trucks %}
                     {% for truck in trucks %}
-                    <tr>
+                    <tr id="truck-row-{{ truck.id }}">
                         <td class="ps-3 fw-bold text-muted">#{{ truck.id }}</td>
                         <td class="fw-bold text-primary">{{ truck.plate_number }}</td>
-                        <td><code>{{ truck.normalized_plate }}</code></td>
+                        <td><code class="text-dark bg-light px-2 py-1 rounded">{{ truck.normalized_plate }}</code></td>
                         <td>{{ truck.truck_type }}</td>
-                        <td><span class="badge bg-info text-dark">{{ "{:,}".format(truck.capacity_kg) }} kg</span></td>
+                        <td><span class="badge bg-light text-dark border">{{ "{:,}".format(truck.capacity_kg) }} kg</span></td>
                         <td>
                             {% if truck.status == 'ACTIVE' %}
                                 <span class="badge bg-success">ACTIVE</span>
@@ -89,16 +91,22 @@
                         </td>
                         <td class="text-muted small">{{ truck.description or '—' }}</td>
                         <td class="text-end pe-3">
-                            <a href="/admin/trucks/{{ truck.id }}/edit" class="btn btn-outline-primary btn-sm me-1" title="Chỉnh sửa">
-                                <i class="bi bi-pencil"></i> Sửa
-                            </a>
+                            <div class="btn-group btn-group-sm">
+                                <a href="/admin/trucks/{{ truck.id }}/edit" class="btn btn-outline-primary" title="Chỉnh sửa">
+                                    <i class="bi bi-pencil"></i> Sửa
+                                </a>
+                                <button type="button" class="btn btn-outline-danger" onclick="confirmDeleteTruck({{ truck.id }}, '{{ truck.plate_number }}')" title="Xóa xe">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="8" class="text-center py-4 text-muted">
-                            <i class="bi bi-inbox fs-2 d-block mb-2"></i> Chưa có xe nào trong danh mục hoặc không khớp bộ lọc.
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                            Chưa có xe nào trong danh mục hoặc không khớp bộ lọc tìm kiếm.
                         </td>
                     </tr>
                 {% endif %}
@@ -106,4 +114,97 @@
         </table>
     </div>
 </div>
+
+<!-- Modal Thông báo Lỗi Nghiệp vụ / Xung Đột (Soft-Delete Guard & Schedule Conflict) -->
+<div class="modal fade" id="businessRuleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-shield-x me-2"></i>Quy Tắc Nghiệp Vụ Chặn Thao Tác</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="businessRuleMessage" class="fw-bold text-danger mb-2"></p>
+                <div id="conflictsDetail" class="small text-muted"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đã hiểu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Xác Nhận Xóa Xe -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Xác Nhận Xóa Phương Tiện</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa xe biển số <strong id="deletePlateName"></strong>?</p>
+                <div class="alert alert-warning small mb-0">
+                    <i class="bi bi-info-circle me-1"></i><strong>Quy tắc bảo toàn lịch sử:</strong> Nếu xe đã từng có đơn hàng hoặc chuyến đi trong quá khứ, hệ thống sẽ <strong>từ chối xóa cứng</strong> để bảo vệ tính toàn vẹn kiểm toán.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-danger" id="executeDeleteBtn">Xác nhận xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let targetTruckId = null;
+const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+const ruleModal = new bootstrap.Modal(document.getElementById('businessRuleModal'));
+
+function confirmDeleteTruck(id, plate) {
+    targetTruckId = id;
+    document.getElementById('deletePlateName').innerText = plate;
+    deleteModal.show();
+}
+
+document.getElementById('executeDeleteBtn').addEventListener('click', async function() {
+    if (!targetTruckId) return;
+    deleteModal.hide();
+
+    try {
+        const response = await fetch('/api/v1/trucks/' + targetTruckId, {
+            method: 'DELETE',
+            headers: { 'Accept': 'application/json' }
+        });
+        const resData = await response.json();
+
+        if (response.ok && resData.success) {
+            // Success: remove row
+            const row = document.getElementById('truck-row-' + targetTruckId);
+            if (row) row.remove();
+            showAlert('success', 'Xóa phương tiện thành công.');
+        } else {
+            // Blocked by Business Rule (e.g. Soft-Delete Guard)
+            document.getElementById('businessRuleMessage').innerText = resData.error || 'Thao tác không được phép.';
+            document.getElementById('conflictsDetail').innerText = 'Xe này đã tham gia vận chuyển trong lịch sử. Vui lòng chuyển trạng thái sang INACTIVE.';
+            ruleModal.show();
+        }
+    } catch (err) {
+        showAlert('danger', 'Lỗi kết nối máy chủ: ' + err.message);
+    }
+});
+
+function showAlert(type, msg) {
+    const container = document.getElementById('alertContainer');
+    container.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            <i class="bi bi-info-circle-fill me-2"></i>${msg}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+}
+</script>
 {% endblock %}
