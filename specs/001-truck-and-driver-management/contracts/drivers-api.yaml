@@ -1,0 +1,338 @@
+openapi: 3.0.3
+info:
+  title: Driver Management API (TRN-01)
+  description: API endpoints for managing driver profiles, code uniqueness, status transitions, and soft-delete protections.
+  version: 1.0.0
+
+paths:
+  /api/v1/drivers:
+    get:
+      summary: List drivers
+      tags: [Drivers]
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, INACTIVE]
+        - name: search
+          in: query
+          description: Search by driver code, full name, or phone number
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DriverListResponse'
+
+    post:
+      summary: Create a new driver
+      tags: [Drivers]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDriverRequest'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DriverDetailResponse'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Driver code already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/drivers/{id}:
+    get:
+      summary: Get driver details by ID
+      tags: [Drivers]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DriverDetailResponse'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Update driver information
+      tags: [Drivers]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDriverRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DriverDetailResponse'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete driver (Hard delete forbidden if history exists)
+      tags: [Drivers]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResponse'
+        '400':
+          description: Prohibited hard deletion due to historical records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/drivers/{id}/status:
+    patch:
+      summary: Change driver status (ACTIVE, INACTIVE)
+      description: Validates future booking schedules before permitting transition to INACTIVE.
+      tags: [Drivers]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeDriverStatusRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DriverDetailResponse'
+        '409':
+          description: Conflict due to existing future schedules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleConflictResponse'
+
+components:
+  schemas:
+    Driver:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        driver_code:
+          type: string
+          example: "TX001"
+        full_name:
+          type: string
+          example: "Nguyễn Văn A"
+        phone_number:
+          type: string
+          example: "0912345678"
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE]
+          example: "ACTIVE"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateDriverRequest:
+      type: object
+      required: [driver_code, full_name, phone_number]
+      properties:
+        driver_code:
+          type: string
+          example: "TX001"
+        full_name:
+          type: string
+          example: "Nguyễn Văn A"
+        phone_number:
+          type: string
+          example: "0912345678"
+
+    UpdateDriverRequest:
+      type: object
+      required: [full_name, phone_number]
+      properties:
+        full_name:
+          type: string
+          example: "Nguyễn Văn A"
+        phone_number:
+          type: string
+          example: "0987654321"
+
+    ChangeDriverStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE]
+          example: "INACTIVE"
+        reason:
+          type: string
+          nullable: true
+          example: "Xin nghỉ phép"
+
+    DriverListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Driver'
+        error:
+          type: string
+          nullable: true
+        meta:
+          type: object
+          properties:
+            page:
+              type: integer
+            page_size:
+              type: integer
+            total_items:
+              type: integer
+
+    DriverDetailResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Driver'
+        error:
+          type: string
+          nullable: true
+        meta:
+          type: object
+
+    ActionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+        error:
+          type: string
+          nullable: true
+        meta:
+          type: object
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: object
+          nullable: true
+        error:
+          type: string
+          example: "Mã tài xế TX001 đã tồn tại trong hệ thống."
+        meta:
+          type: object
+
+    ScheduleConflictResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: object
+          properties:
+            conflicting_bookings:
+              type: array
+              items:
+                type: object
+                properties:
+                  booking_id:
+                    type: integer
+                  reference_code:
+                    type: string
+                  start_time:
+                    type: string
+                    format: date-time
+                  end_time:
+                    type: string
+                    format: date-time
+        error:
+          type: string
+          example: "Không thể đổi trạng thái: Tài xế đang có lịch chạy trong tương lai."
+        meta:
+          type: object

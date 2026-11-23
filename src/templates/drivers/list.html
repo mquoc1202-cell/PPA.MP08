@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý Tài Xế - Freight ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-0"><i class="bi bi-person-badge text-primary me-2"></i>Danh Mục Tài Xế</h3>
+        <p class="text-muted mb-0">Quản lý hồ sơ lái xe, mã định danh và trạng thái sẵn sàng điều phối</p>
+    </div>
+    <a href="/admin/drivers/create" class="btn btn-primary">
+        <i class="bi bi-person-plus me-1"></i> Thêm Tài Xế Mới
+    </a>
+</div>
+
+{% if error_message %}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Lỗi:</strong> {{ error_message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endif %}
+
+{% if success_message %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i>{{ success_message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endif %}
+
+<!-- Filters -->
+<div class="card p-3 mb-4">
+    <form method="get" action="/admin/drivers" class="row g-3 align-items-center">
+        <div class="col-md-5">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" class="form-control" placeholder="Tìm theo mã tài xế, họ tên, số điện thoại..." value="{{ search or '' }}">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select name="status" class="form-select">
+                <option value="">-- Tất cả trạng thái --</option>
+                <option value="ACTIVE" {% if status == 'ACTIVE' %}selected{% endif %}>ACTIVE (Đang làm việc)</option>
+                <option value="INACTIVE" {% if status == 'INACTIVE' %}selected{% endif %}>INACTIVE (Nghỉ việc/Tạm dừng)</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-secondary w-100"><i class="bi bi-funnel me-1"></i> Lọc</button>
+        </div>
+        <div class="col-md-2">
+            <a href="/admin/drivers" class="btn btn-outline-secondary w-100">Đặt lại</a>
+        </div>
+    </form>
+</div>
+
+<!-- Drivers Table -->
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-3">ID</th>
+                    <th>Mã Tài Xế</th>
+                    <th>Họ và Tên</th>
+                    <th>Số Điện Thoại</th>
+                    <th>Trạng Thái</th>
+                    <th>Ngày Tạo</th>
+                    <th class="text-end pe-3">Thao Tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if drivers %}
+                    {% for driver in drivers %}
+                    <tr>
+                        <td class="ps-3 fw-bold text-muted">#{{ driver.id }}</td>
+                        <td><span class="badge bg-dark">{{ driver.driver_code }}</span></td>
+                        <td class="fw-bold">{{ driver.full_name }}</td>
+                        <td><a href="tel:{{ driver.phone_number }}" class="text-decoration-none"><i class="bi bi-telephone me-1"></i>{{ driver.phone_number }}</a></td>
+                        <td>
+                            {% if driver.status == 'ACTIVE' %}
+                                <span class="badge bg-success">ACTIVE</span>
+                            {% else %}
+                                <span class="badge bg-secondary">INACTIVE</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted small">{{ driver.created_at.strftime('%d/%m/%Y %H:%M') if driver.created_at else '—' }}</td>
+                        <td class="text-end pe-3">
+                            <a href="/admin/drivers/{{ driver.id }}/edit" class="btn btn-outline-primary btn-sm me-1" title="Chỉnh sửa">
+                                <i class="bi bi-pencil"></i> Sửa
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            <i class="bi bi-people fs-2 d-block mb-2"></i> Chưa có tài xế nào trong danh mục hoặc không khớp bộ lọc.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

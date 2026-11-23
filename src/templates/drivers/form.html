@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Chỉnh Sửa Tài Xế #' ~ driver.driver_code if driver else 'Thêm Tài Xế Mới' }} - Freight ERP{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card p-4 shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="fw-bold mb-0">
+                    <i class="bi bi-person-badge text-primary me-2"></i>
+                    {{ 'Chỉnh Sửa Hồ Sơ: ' ~ driver.full_name ~ ' (' ~ driver.driver_code ~ ')' if driver else 'Thêm Mới Tài Xế' }}
+                </h4>
+                <a href="/admin/drivers" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Quay lại
+                </a>
+            </div>
+            <hr>
+
+            {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error_message }}
+            </div>
+            {% endif %}
+
+            <form method="post" action="{{ '/admin/drivers/' ~ driver.id ~ '/edit' if driver else '/admin/drivers/create' }}">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Mã Tài Xế <span class="text-danger">*</span></label>
+                    <input type="text" name="driver_code" class="form-control" placeholder="Ví dụ: TX001" 
+                           value="{{ driver.driver_code if driver else '' }}" 
+                           {% if driver %}readonly disabled{% endif %} required>
+                    <div class="form-text">Mã định danh duy nhất của tài xế trong toàn bộ hệ thống vận tải.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Họ và Tên Tài Xế <span class="text-danger">*</span></label>
+                    <input type="text" name="full_name" class="form-control" placeholder="Ví dụ: Nguyễn Văn A" 
+                           value="{{ driver.full_name if driver else '' }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Số Điện Thoại Liên Hệ <span class="text-danger">*</span></label>
+                    <input type="tel" name="phone_number" class="form-control" placeholder="Ví dụ: 0912345678" 
+                           value="{{ driver.phone_number if driver else '' }}" required>
+                    <div class="form-text">Số điện thoại liên lạc trực tiếp phục vụ tài xế nhận chuyến và khách hàng gọi điện.</div>
+                </div>
+
+                {% if driver %}
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Trạng Thái Làm Việc</label>
+                    <select name="status" class="form-select">
+                        <option value="ACTIVE" {% if driver.status == 'ACTIVE' %}selected{% endif %}>ACTIVE (Đang làm việc)</option>
+                        <option value="INACTIVE" {% if driver.status == 'INACTIVE' %}selected{% endif %}>INACTIVE (Nghỉ việc/Tạm dừng)</option>
+                    </select>
+                    <div class="form-text text-warning">
+                        <i class="bi bi-info-circle"></i> Chuyển sang INACTIVE sẽ bị chặn nếu tài xế còn lịch chạy trong tương lai chưa phân công lại.
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a href="/admin/drivers" class="btn btn-secondary">Hủy</a>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-check-circle me-1"></i> {{ 'Lưu Thay Đổi' if driver else 'Tạo Tài Xế Mới' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
