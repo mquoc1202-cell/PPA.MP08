@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from src.core.config import settings
 from src.core.logging import setup_logging, get_logger
 from src.core.database import Base, engine, SessionLocal
@@ -36,6 +37,9 @@ app = FastAPI(
 
 # Register central error masking & exception handling
 register_exception_handlers(app)
+
+# Mount Static assets (CSS, JS, images, design tokens)
+app.mount("/static", StaticFiles(directory="src/static"), name="static")
 
 # Include REST API Routers (/api/v1/trucks, /api/v1/drivers)
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
