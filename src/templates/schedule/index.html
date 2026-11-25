@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Tra Cứu Lịch Trình Nguồn Lực - Freight ERP{% endblock %}
+
+{% block content %}
+<!-- Modern Page Hero Banner (Light Theme Edition) -->
+<div class="dashboard-hero mb-4 animate-fade-in-up">
+    <div class="row align-items-center">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="m-stripe-pill me-1"></span>
+                <span class="text-uppercase small fw-bold text-primary" style="letter-spacing: 1.5px;">GIÁM SÁT TIẾN ĐỘ & TÀI NGUYÊN</span>
+            </div>
+            <h2 class="dashboard-hero-title">Tra Cứu Lịch Trình Chiếm Dụng</h2>
+            <p class="dashboard-hero-subtitle mb-0">
+                Xem toàn bộ lịch trình điều phối chuyến hàng (FREIGHT) và đơn cho thuê (RENTAL) của xe và tài xế.
+            </p>
+        </div>
+        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+            <a href="/trips" class="btn btn-outline-primary shadow-sm">
+                <i class="bi bi-send-check me-1"></i> Điều Phối Chuyến Hàng
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Card -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-4">
+        <form method="GET" action="/schedule" class="row g-3 align-items-end" id="scheduleFilterForm">
+            <!-- Resource Type Toggle -->
+            <div class="col-md-3">
+                <label class="form-label small fw-bold text-muted text-uppercase">Loại Nguồn Lực</label>
+                <div class="btn-group w-100" role="group">
+                    <a href="/schedule?resource_type=truck" class="btn btn-outline-primary {% if resource_type == 'truck' %}active{% endif %}">
+                        <i class="bi bi-truck me-1"></i> Xe Tải
+                    </a>
+                    <a href="/schedule?resource_type=driver" class="btn btn-outline-primary {% if resource_type == 'driver' %}active{% endif %}">
+                        <i class="bi bi-person-badge me-1"></i> Tài Xế
+                    </a>
+                </div>
+                <input type="hidden" name="resource_type" value="{{ resource_type }}">
+            </div>
+
+            <!-- Resource Selector -->
+            <div class="col-md-3">
+                {% if resource_type == 'truck' %}
+                    <label class="form-label small fw-bold text-muted text-uppercase">Chọn Xe Tải</label>
+                    <select name="resource_id" class="form-select" onchange="this.form.submit()">
+                        {% for t in trucks %}
+                            <option value="{{ t.id }}" {% if selected_truck and selected_truck.id == t.id %}selected{% endif %}>
+                                {{ t.plate_number }} ({{ t.truck_type }} - {{ "{:,}".format(t.capacity_kg) }} kg)
+                            </option>
+                        {% endfor %}
+                    </select>
+                {% else %}
+                    <label class="form-label small fw-bold text-muted text-uppercase">Chọn Tài Xế</label>
+                    <select name="resource_id" class="form-select" onchange="this.form.submit()">
+                        {% for d in drivers %}
+                            <option value="{{ d.id }}" {% if selected_driver and selected_driver.id == d.id %}selected{% endif %}>
+                                {{ d.full_name }} ({{ d.driver_code }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                {% endif %}
+            </div>
+
+            <!-- Start Date -->
+            <div class="col-md-2">
+                <label class="form-label small fw-bold text-muted text-uppercase">Từ Ngày</label>
+                <input type="date" name="start_date" class="form-control" value="{{ start_date }}">
+            </div>
+
+            <!-- End Date -->
+            <div class="col-md-2">
+                <label class="form-label small fw-bold text-muted text-uppercase">Đến Ngày</label>
+                <input type="date" name="end_date" class="form-control" value="{{ end_date }}">
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1">
+                    <i class="bi bi-funnel me-1"></i> Lọc
+                </button>
+                <a href="/schedule?resource_type={{ resource_type }}" class="btn btn-outline-secondary" title="Xóa bộ lọc">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Resource Info Overview -->
+{% if selected_truck %}
+<div class="card shadow-sm border-0 mb-4 bg-light">
+    <div class="card-body py-3 px-4 d-flex justify-content-between align-items-center">
+        <div>
+            <span class="text-muted small text-uppercase fw-bold">Xe đang tra cứu:</span>
+            <span class="fs-5 fw-bold text-primary ms-2">{{ selected_truck.plate_number }}</span>
+            <span class="text-secondary ms-2 small">({{ selected_truck.truck_type }})</span>
+            <span class="badge bg-secondary ms-2">Tải trọng: {{ "{:,}".format(selected_truck.capacity_kg) }} kg</span>
+        </div>
+        <div>
+            <span class="badge {% if selected_truck.status == 'ACTIVE' %}bg-success{% elif selected_truck.status == 'MAINTENANCE' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                {% if selected_truck.status == 'ACTIVE' %}Sẵn sàng{% elif selected_truck.status == 'MAINTENANCE' %}Bảo dưỡng{% else %}Ngừng hoạt động{% endif %}
+            </span>
+        </div>
+    </div>
+</div>
+{% elif selected_driver %}
+<div class="card shadow-sm border-0 mb-4 bg-light">
+    <div class="card-body py-3 px-4 d-flex justify-content-between align-items-center">
+        <div>
+            <span class="text-muted small text-uppercase fw-bold">Tài xế đang tra cứu:</span>
+            <span class="fs-5 fw-bold text-primary ms-2">{{ selected_driver.full_name }}</span>
+            <span class="badge bg-dark ms-2">{{ selected_driver.driver_code }}</span>
+            <span class="text-secondary ms-2 small"><i class="bi bi-telephone me-1"></i>{{ selected_driver.phone_number }}</span>
+        </div>
+        <div>
+            <span class="badge {% if selected_driver.status == 'ACTIVE' %}bg-success{% else %}bg-secondary{% endif %}">
+                {% if selected_driver.status == 'ACTIVE' %}Đang làm việc{% else %}Nghỉ việc{% endif %}
+            </span>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Bookings Schedule Table -->
+<div class="card shadow-sm border-0">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-3">Mã Tham Chiếu</th>
+                    <th>Loại Dịch Vụ</th>
+                    <th>Thời Gian Bắt Đầu</th>
+                    <th>Thời Gian Kết Thúc</th>
+                    <th>Thời Lượng</th>
+                    <th>Trạng Thái Booking</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if bookings %}
+                    {% for b in bookings %}
+                    <tr>
+                        <td class="ps-3 fw-bold">
+                            <span class="text-primary">{{ b.reference_code }}</span>
+                        </td>
+                        <td>
+                            {% if b.service_type == 'FREIGHT' %}
+                                <span class="badge bg-primary">VẬN TẢI HÀNG HÓA</span>
+                            {% elif b.service_type == 'RENTAL' %}
+                                <span class="badge bg-warning text-dark">CHO THUÊ XE</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ b.service_type }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <i class="bi bi-clock text-success me-1"></i>
+                            {{ b.start_time.strftime('%d/%m/%Y %H:%M') }}
+                        </td>
+                        <td>
+                            <i class="bi bi-clock-history text-danger me-1"></i>
+                            {{ b.end_time.strftime('%d/%m/%Y %H:%M') }}
+                        </td>
+                        <td>
+                            <span class="text-muted small">
+                                {% set duration_hours = ((b.end_time - b.start_time).total_seconds() / 3600) | round(1) %}
+                                {{ duration_hours }} giờ
+                            </span>
+                        </td>
+                        <td>
+                            {% if b.status == 'CONFIRMED' %}
+                                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Đã xác nhận</span>
+                            {% elif b.status == 'IN_PROGRESS' %}
+                                <span class="badge bg-info text-dark"><i class="bi bi-arrow-repeat me-1"></i>Đang thực hiện</span>
+                            {% elif b.status == 'CANCELLED' %}
+                                <span class="badge bg-secondary"><i class="bi bi-x-circle me-1"></i>Đã hủy</span>
+                            {% else %}
+                                <span class="badge bg-light text-dark border">{{ b.status }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="bi bi-calendar-check fs-1 d-block mb-2 text-secondary"></i>
+                            Không có lịch trình chiếm dụng nào trong khoảng thời gian đã chọn.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -7,5 +7,7 @@ class Settings(BaseModel):
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./freight_dev.db")
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     SECRET_KEY: str = os.getenv("SECRET_KEY", "freight-transport-secret-key-2026")
+    SESSION_COOKIE_NAME: str = "freight_session"
+    SESSION_MAX_AGE: int = 86400  # 24 hours
 
 settings = Settings()

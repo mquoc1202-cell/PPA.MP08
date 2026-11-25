@@ -15,9 +15,9 @@
 
 **Purpose**: Bổ sung thư viện bảo mật và cấu hình phiên làm việc
 
-- [ ] T001 Cập nhật thư viện `bcrypt>=5.0.0` trong `requirements.txt` phục vụ băm mật khẩu bảo mật
-- [ ] T002 [P] Xây dựng các hàm băm và xác thực mật khẩu bcrypt trong `src/core/security.py`
-- [ ] T003 [P] Cấu hình `SessionMiddleware` với Signed Cookie an toàn (HTTP-Only, SameSite=Lax) trong `src/main.py`
+- [X] T001 Cập nhật thư viện `bcrypt>=5.0.0` trong `requirements.txt` phục vụ băm mật khẩu bảo mật
+- [X] T002 [P] Xây dựng các hàm băm và xác thực mật khẩu bcrypt trong `src/core/security.py`
+- [X] T003 [P] Cấu hình `SessionMiddleware` với Signed Cookie an toàn (HTTP-Only, SameSite=Lax) trong `src/main.py`
 
 ---
 
@@ -27,11 +27,11 @@
 
 ⚠️ **CRITICAL**: Không bắt đầu triển khai các User Story trước khi Phase 2 hoàn thành.
 
-- [ ] T004 Tạo SQLAlchemy model `User` trong `src/models/user.py` trích dẫn canonical constraints từ `data-model.md` cho `User.username` (VARCHAR(50), UNIQUE, INDEX), `User.password_hash` (VARCHAR(255), NOT NULL), `User.role` (CHECK role IN ('DSP', 'SAL', 'MGR')), và `User.is_active` (BOOLEAN, DEFAULT TRUE)
-- [ ] T005 [P] Xây dựng `UserRepository` trong `src/repositories/user_repo.py` hỗ trợ tra cứu theo username và ID
-- [ ] T006 [P] Tạo Pydantic v2 schemas cho Auth (`LoginRequest`, `UserSession`, `AuthResponse`, `UserProfileResponse`) trong `src/schemas/auth.py` tuân thủ `contracts/auth-api.yaml`
-- [ ] T007 [P] Xây dựng authentication và authorization dependencies (`get_current_user`, `require_role`) trong `src/core/security.py`
-- [ ] T008 Cập nhật hàm `seed_initial_data` trong `src/core/seed.py` để tự động nạp sẵn 3 tài khoản demo (`dsp_user`, `sal_user`, `mgr_user`) với mật khẩu băm bcrypt
+- [X] T004 Tạo SQLAlchemy model `User` trong `src/models/user.py` trích dẫn canonical constraints từ `data-model.md` cho `User.username` (VARCHAR(50), UNIQUE, INDEX), `User.password_hash` (VARCHAR(255), NOT NULL), `User.role` (CHECK role IN ('DSP', 'SAL', 'MGR')), và `User.is_active` (BOOLEAN, DEFAULT TRUE)
+- [X] T005 [P] Xây dựng `UserRepository` trong `src/repositories/user_repo.py` hỗ trợ tra cứu theo username và ID
+- [X] T006 [P] Tạo Pydantic v2 schemas cho Auth (`LoginRequest`, `UserSession`, `AuthResponse`, `UserProfileResponse`) trong `src/schemas/auth.py` tuân thủ `contracts/auth-api.yaml`
+- [X] T007 [P] Xây dựng authentication và authorization dependencies (`get_current_user`, `require_role`) trong `src/core/security.py`
+- [X] T008 Cập nhật hàm `seed_initial_data` trong `src/core/seed.py` để tự động nạp sẵn 3 tài khoản demo (`dsp_user`, `sal_user`, `mgr_user`) với mật khẩu băm bcrypt
 
 **Checkpoint**: Nền tảng xác thực sẵn sàng - các User Story bắt đầu triển khai độc lập.
 
@@ -44,13 +44,13 @@
 **Independent Test**: Chạy `pytest tests/unit/test_auth.py` - kiểm tra xác thực username/password đúng, từ chối mật khẩu sai, từ chối tài khoản bị khóa.
 
 ### Tests for User Story 1 (TDD - Write first) ⚠️
-- [ ] T009 [P] [US1] Viết unit tests kiểm tra logic xác thực mật khẩu, đăng nhập thành công, và từ chối mật khẩu sai trong `tests/unit/test_auth.py`
+- [X] T009 [P] [US1] Viết unit tests kiểm tra logic xác thực mật khẩu, đăng nhập thành công, và từ chối mật khẩu sai trong `tests/unit/test_auth.py`
 
 ### Implementation for User Story 1
-- [ ] T010 [US1] Hiện thực hóa `AuthService` trong `src/services/auth_service.py` xử lý xác thực tài khoản, kiểm tra `is_active` và khởi tạo phiên làm việc
-- [ ] T011 [US1] Hiện thực hóa REST API login endpoint `POST /api/v1/auth/login` và `GET /api/v1/auth/me` trong `src/api/v1/auth.py` tuân thủ `contracts/auth-api.yaml`
-- [ ] T012 [US1] Hiện thực hóa Web Login controller (`GET /login`, `POST /login`) trong `src/web/auth.py`
-- [ ] T013 [US1] Xây dựng template giao diện đăng nhập hiện đại trong `src/templates/auth/login.html` kế thừa `base.html` và đồng bộ `frontend/DESIGN.md`
+- [X] T010 [US1] Hiện thực hóa `AuthService` trong `src/services/auth_service.py` xử lý xác thực tài khoản, kiểm tra `is_active` và khởi tạo phiên làm việc
+- [X] T011 [US1] Hiện thực hóa REST API login endpoint `POST /api/v1/auth/login` và `GET /api/v1/auth/me` trong `src/api/v1/auth.py` tuân thủ `contracts/auth-api.yaml`
+- [X] T012 [US1] Hiện thực hóa Web Login controller (`GET /login`, `POST /login`) trong `src/web/auth.py`
+- [X] T013 [US1] Xây dựng template giao diện đăng nhập hiện đại trong `src/templates/auth/login.html` kế thừa `base.html` và đồng bộ `frontend/DESIGN.md`
 
 **Checkpoint**: User Story 1 hoàn thành độc lập và kiểm thử pass 100%. Đạt mốc MVP!
 
@@ -63,12 +63,12 @@
 **Independent Test**: Gọi endpoint `/logout`, kiểm tra session bị hủy, truy cập `/dashboard` bị chuyển hướng ngay về `/login`.
 
 ### Tests for User Story 2 (TDD - Write first) ⚠️
-- [ ] T014 [P] [US2] Viết test kiểm tra cơ chế xóa sạch session khi gọi logout trong `tests/unit/test_auth.py`
+- [X] T014 [P] [US2] Viết test kiểm tra cơ chế xóa sạch session khi gọi logout trong `tests/unit/test_auth.py`
 
 ### Implementation for User Story 2
-- [ ] T015 [US2] Hiện thực hóa REST API logout endpoint `POST /api/v1/auth/logout` trong `src/api/v1/auth.py`
-- [ ] T016 [US2] Hiện thực hóa Web Logout router `GET /logout` trong `src/web/auth.py` xóa session và chuyển hướng về `/login?logged_out=true`
-- [ ] T017 [US2] Cập nhật Top Navigation Bar trong `src/templates/base.html` hiển thị tên người dùng đang đăng nhập, Badge vai trò và nút Đăng xuất trực quan
+- [X] T015 [US2] Hiện thực hóa REST API logout endpoint `POST /api/v1/auth/logout` trong `src/api/v1/auth.py`
+- [X] T016 [US2] Hiện thực hóa Web Logout router `GET /logout` trong `src/web/auth.py` xóa session và chuyển hướng về `/login?logged_out=true`
+- [X] T017 [US2] Cập nhật Top Navigation Bar trong `src/templates/base.html` hiển thị tên người dùng đang đăng nhập, Badge vai trò và nút Đăng xuất trực quan
 
 **Checkpoint**: User Story 1 và User Story 2 hoàn tất trọn vẹn vòng đời đăng nhập - đăng xuất.
 
@@ -81,13 +81,13 @@
 **Independent Test**: Chạy `pytest tests/integration/test_rbac.py` - người dùng chưa đăng nhập bị chuyển hướng về `/login`, tài khoản `sal_user` gọi POST/PUT/DELETE bị trả HTTP 403.
 
 ### Tests for User Story 3 (TDD - Write first) ⚠️
-- [ ] T018 [P] [US3] Viết integration test trong `tests/integration/test_rbac.py` kiểm tra chuyển hướng khi chưa đăng nhập và chặn mã 403 đối với vai trò `SAL`
+- [X] T018 [P] [US3] Viết integration test trong `tests/integration/test_rbac.py` kiểm tra chuyển hướng khi chưa đăng nhập và chặn mã 403 đối với vai trò `SAL`
 
 ### Implementation for User Story 3
-- [ ] T019 [US3] Xây dựng trang thông báo lỗi phân quyền `src/templates/error/403.html` hiển thị giao diện thân thiện khi không đủ thẩm quyền
-- [ ] T020 [US3] Gắn dependency `get_current_user` và `require_role(["DSP"])` bảo vệ các endpoint ghi dữ liệu trong `src/api/v1/trucks.py` và `src/api/v1/drivers.py`
-- [ ] T021 [US3] Gắn dependency bảo vệ các router web trong `src/web/admin_trucks.py`, `src/web/admin_drivers.py`, và `src/web/dashboard.py`
-- [ ] T022 [US3] Cập nhật các nút thao tác nghiệp vụ trong `src/templates/trucks/list.html`, `src/templates/drivers/list.html`, và `src/templates/dashboard/index.html` chỉ hiển thị khi `current_user.role == 'DSP'`
+- [X] T019 [US3] Xây dựng trang thông báo lỗi phân quyền `src/templates/error/403.html` hiển thị giao diện thân thiện khi không đủ thẩm quyền
+- [X] T020 [US3] Gắn dependency `get_current_user` và `require_role(["DSP"])` bảo vệ các endpoint ghi dữ liệu trong `src/api/v1/trucks.py` và `src/api/v1/drivers.py`
+- [X] T021 [US3] Gắn dependency bảo vệ các router web trong `src/web/admin_trucks.py`, `src/web/admin_drivers.py`, và `src/web/dashboard.py`
+- [X] T022 [US3] Cập nhật các nút thao tác nghiệp vụ trong `src/templates/trucks/list.html`, `src/templates/drivers/list.html`, và `src/templates/dashboard/index.html` chỉ hiển thị khi `current_user.role == 'DSP'`
 
 **Checkpoint**: Toàn bộ hệ thống được bảo vệ an toàn với phân quyền RBAC đa vai trò.
 
@@ -99,7 +99,7 @@
 
 **Independent Test**: Mở trang `/login`, bấm nút demo DSP hoặc SAL, kiểm tra thông tin form được điền chính xác.
 
-- [ ] T023 [US4] Bổ sung các nút bấm 1-Click Fill Demo Accounts trên giao diện `src/templates/auth/login.html`
+- [X] T023 [US4] Bổ sung các nút bấm 1-Click Fill Demo Accounts trên giao diện `src/templates/auth/login.html`
 
 ---
 
@@ -107,8 +107,8 @@
 
 **Purpose**: Tích hợp toàn diện, chuẩn hóa giao diện và nghiệm thu hệ thống
 
-- [ ] T024 [P] Đăng ký auth routers vào `src/main.py` và `src/api/v1/api_router.py`
-- [ ] T025 Thực thi toàn bộ bộ kiểm thử tự động `pytest tests/ -v` xác nhận 100% test cases (cả Auth và TRN-01) đạt trạng thái PASS
+- [X] T024 [P] Đăng ký auth routers vào `src/main.py` và `src/api/v1/api_router.py`
+- [X] T025 Thực thi toàn bộ bộ kiểm thử tự động `pytest tests/ -v` xác nhận 100% test cases (cả Auth và TRN-01) đạt trạng thái PASS
 
 ---
 

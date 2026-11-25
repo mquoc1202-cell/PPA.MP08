@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% block title %}Ghi Nhận Nhận Hàng {{ trip.reference_code }} - Freight ERP{% endblock %}
+
+{% block content %}
+<!-- Modern Page Hero Banner (Light Theme Edition) -->
+<div class="dashboard-hero mb-4 animate-fade-in-up">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <a href="/trips" class="btn btn-sm btn-outline-secondary py-1 px-2">
+                    <i class="bi bi-arrow-left me-1"></i> Danh sách chuyến hàng
+                </a>
+                <span class="m-stripe-pill mx-1"></span>
+                <span class="text-uppercase small fw-bold text-success" style="letter-spacing: 1.5px;">GHI NHẬN NHẬN HÀNG THỰC TẾ</span>
+            </div>
+            <h2 class="dashboard-hero-title mb-1">
+                <i class="bi bi-box-arrow-in-down text-success me-2"></i>
+                Ghi Nhận Nhận Hàng: <span class="text-primary">{{ trip.reference_code }}</span>
+            </h2>
+            <p class="dashboard-hero-subtitle mb-0">
+                Xác nhận thời điểm nhận hàng, đối soát tải trọng thực tế (BR-06) và chuyển trạng thái chuyến sang Đã lấy hàng.
+            </p>
+        </div>
+        <div>
+            <span class="badge bg-primary px-3 py-2 fs-6 shadow-sm">
+                {% if trip.status == 'ASSIGNED' %}<i class="bi bi-check2-circle me-1"></i> Đã điều phối
+                {% elif trip.status == 'PICKED_UP' %}<i class="bi bi-box-arrow-in-down me-1"></i> Đã lấy hàng
+                {% else %}{{ trip.status }}{% endif %}
+            </span>
+        </div>
+    </div>
+</div>
+
+        <!-- Business Rule Error Alert -->
+        {% if error_message %}
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+            <strong>Lỗi xác nhận:</strong> {{ error_message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endif %}
+
+        <div class="row g-4">
+            <!-- Left Column: Order & Assigned Resource Info -->
+            <div class="col-xl-4 col-lg-5">
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header bg-white py-3 border-bottom">
+                        <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-info-circle me-2 text-primary"></i>Thông Tin Chuyến Hàng</h6>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <span class="text-muted small text-uppercase fw-bold d-block">Mã Đơn</span>
+                            <span class="fs-5 fw-bold text-primary">{{ trip.reference_code }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <span class="text-muted small text-uppercase fw-bold d-block">Người Gửi</span>
+                            <div class="fw-semibold">{{ trip.sender_name }}</div>
+                            <small class="text-muted"><i class="bi bi-telephone me-1"></i>{{ trip.sender_phone }}</small>
+                        </div>
+                        <div class="mb-3">
+                            <span class="text-muted small text-uppercase fw-bold d-block">Điểm Lấy Hàng</span>
+                            <div class="small text-secondary"><i class="bi bi-geo-alt-fill text-success me-1"></i>{{ trip.pickup_address }}</div>
+                        </div>
+                        <div class="mb-3">
+                            <span class="text-muted small text-uppercase fw-bold d-block">Khối Lượng Dự Kiến</span>
+                            <span class="badge bg-light text-dark border fs-6 px-3 py-2 mt-1">
+                                {{ "{:,}".format(trip.cargo_weight_kg) }} kg
+                            </span>
+                        </div>
+                        <div>
+                            <span class="text-muted small text-uppercase fw-bold d-block">Loại Hàng Hóa</span>
+                            <span class="small text-dark">{{ trip.cargo_type }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assigned Truck & Driver Card -->
+                <div class="card shadow-sm border-0 bg-light">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold text-uppercase small text-muted mb-3"><i class="bi bi-shield-check text-primary me-2"></i>Nguồn Lực Đã Phân Công</h6>
+                        {% if trip.truck %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <i class="bi bi-truck text-primary fs-5 me-2"></i>
+                                <strong>{{ trip.truck.plate_number }}</strong>
+                                <span class="small text-muted ms-1">({{ trip.truck.truck_type }})</span>
+                            </div>
+                            <span class="badge bg-dark" id="truckCapacityBadge" data-capacity="{{ trip.truck.capacity_kg }}">
+                                Tối đa: {{ "{:,}".format(trip.truck.capacity_kg) }} kg
+                            </span>
+                        </div>
+                        {% endif %}
+                        {% if trip.driver %}
+                        <div class="d-flex align-items-center mt-3 pt-2 border-top">
+                            <i class="bi bi-person-badge text-primary fs-5 me-2"></i>
+                            <div>
+                                <strong>{{ trip.driver.full_name }}</strong>
+                                <span class="badge bg-secondary ms-1">{{ trip.driver.driver_code }}</span>
+                                <div class="small text-muted"><i class="bi bi-telephone me-1"></i>{{ trip.driver.phone_number }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Actual Pickup Confirmation Form -->
+            <div class="col-xl-8 col-lg-7">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white py-3 border-bottom">
+                        <h5 class="mb-0 fw-bold text-dark">
+                            <i class="bi bi-clipboard-check text-success me-2"></i>Biên Bản Nhận Hàng Thực Tế
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="POST" action="/trips/{{ trip.id }}/pickup" id="pickupForm">
+                            <!-- Actual Pickup Time -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    Thời Điểm Nhận Hàng Thực Tế <span class="text-danger">*</span>
+                                </label>
+                                <input
+                                    type="datetime-local"
+                                    class="form-control"
+                                    name="actual_pickup_time"
+                                    id="actualPickupTime"
+                                    value="{{ default_pickup_time }}"
+                                    required
+                                >
+                                <div class="form-text text-muted small">Thời điểm tài xế hoàn tất nhận hàng và ký biên bản tại kho gửi.</div>
+                            </div>
+
+                            <!-- Handover Person -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    Người Bàn Giao Hàng (Kho Gửi) <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        name="handover_person"
+                                        placeholder="Ví dụ: Nguyễn Văn Kho (Thủ kho A)"
+                                        value="{{ handover_person or '' }}"
+                                        required
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Actual Weight with Real-Time Capacity Guard (US2) -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    Khối Lượng Hàng Thực Tế (kg) <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-speedometer2"></i></span>
+                                    <input
+                                        type="number"
+                                        class="form-control"
+                                        name="actual_cargo_weight_kg"
+                                        id="actualCargoWeight"
+                                        value="{{ actual_weight or trip.cargo_weight_kg }}"
+                                        min="1"
+                                        required
+                                    >
+                                    <span class="input-group-text">kg</span>
+                                </div>
+                                <div id="weightFeedback" class="mt-2"></div>
+                            </div>
+
+                            <!-- Cargo Condition -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    Quy Cách & Tình Trạng Hàng Hóa <span class="text-danger">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    name="cargo_condition"
+                                    placeholder="Ví dụ: Nguyên đai nguyên kiện, niêm phong kẹp chì đầy đủ"
+                                    value="{{ cargo_condition or 'Nguyên đai nguyên kiện' }}"
+                                    required
+                                >
+                            </div>
+
+                            <!-- Discrepancy Notes -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Ghi Chú Sai Lệch (Nếu có)</label>
+                                <textarea
+                                    class="form-control"
+                                    name="discrepancy_notes"
+                                    rows="2"
+                                    placeholder="Ghi nhận nếu khối lượng thực tế sai lệch so với đơn ban đầu hoặc có lưu ý đặc biệt..."
+                                >{{ discrepancy_notes or '' }}</textarea>
+                            </div>
+
+                            <!-- Notice / Alert -->
+                            <div class="alert alert-light border small text-muted mb-4">
+                                <i class="bi bi-info-circle text-primary me-1"></i>
+                                Khi xác nhận nhận hàng, trạng thái chuyến chuyển sang <strong>PICKED_UP</strong> và lịch trình của xe/tài xế sẽ tự động chuyển sang <strong>IN_PROGRESS</strong>.
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex justify-content-end gap-2">
+                                <a href="/trips" class="btn btn-outline-secondary px-3">Hủy Bỏ</a>
+                                <button type="submit" class="btn btn-success px-4" id="submitPickupBtn">
+                                    <i class="bi bi-check-circle me-1"></i> Xác Nhận Đã Nhận Hàng
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const weightInput = document.getElementById("actualCargoWeight");
+    const feedbackDiv = document.getElementById("weightFeedback");
+    const submitBtn = document.getElementById("submitPickupBtn");
+    const capacityBadge = document.getElementById("truckCapacityBadge");
+
+    const truckCapacity = capacityBadge ? parseInt(capacityBadge.getAttribute("data-capacity"), 10) : 0;
+
+    function validateCapacity() {
+        const currentWeight = parseInt(weightInput.value, 10);
+        if (isNaN(currentWeight) || currentWeight <= 0) {
+            feedbackDiv.innerHTML = '<span class="text-danger small"><i class="bi bi-exclamation-circle me-1"></i>Vui lòng nhập khối lượng hợp lệ (> 0).</span>';
+            weightInput.classList.add("is-invalid");
+            weightInput.classList.remove("is-valid");
+            submitBtn.disabled = true;
+            return;
+        }
+
+        if (truckCapacity > 0 && currentWeight > truckCapacity) {
+            const excess = currentWeight - truckCapacity;
+            feedbackDiv.innerHTML = `<div class="alert alert-danger py-2 px-3 small mb-0">
+                <i class="bi bi-exclamation-octagon-fill me-1"></i>
+                <strong>CẢNH BÁO QUÁ TẢI (BR-06):</strong> Khối lượng thực tế (${currentWeight.toLocaleString()} kg) vượt quá tải trọng xe (${truckCapacity.toLocaleString()} kg) là <strong>${excess.toLocaleString()} kg</strong>. Hệ thống sẽ từ chối nhận hàng.
+            </div>`;
+            weightInput.classList.add("is-invalid");
+            weightInput.classList.remove("is-valid");
+            submitBtn.disabled = true;
+        } else {
+            const percentage = truckCapacity > 0 ? Math.round((currentWeight / truckCapacity) * 100) : 0;
+            feedbackDiv.innerHTML = `<span class="text-success small fw-semibold">
+                <i class="bi bi-check-circle-fill me-1"></i>
+                Tải trọng an toàn (${percentage}% công suất xe ${truckCapacity.toLocaleString()} kg).
+            </span>`;
+            weightInput.classList.remove("is-invalid");
+            weightInput.classList.add("is-valid");
+            submitBtn.disabled = false;
+        }
+    }
+
+    weightInput.addEventListener("input", validateCapacity);
+    validateCapacity();
+});
+</script>
+{% endblock %}

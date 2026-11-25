@@ -1,7 +1,10 @@
 from fastapi.testclient import TestClient
 
-def test_api_truck_flow(client: TestClient):
+def test_api_truck_flow(client: TestClient, seed_test_users):
     """Verifies complete Truck REST API lifecycle matching contracts/trucks-api.yaml."""
+    # Authenticate as DSP to perform admin mutations
+    client.post("/api/v1/auth/login", json={"username": "dsp_test", "password": "password123"})
+
     # 1. Create Truck
     create_res = client.post("/api/v1/trucks", json={
         "plate_number": "29C-789.01",
@@ -47,8 +50,11 @@ def test_api_truck_flow(client: TestClient):
     assert del_res.status_code == 200
     assert del_res.json()["success"] is True
 
-def test_api_driver_flow(client: TestClient):
+def test_api_driver_flow(client: TestClient, seed_test_users):
     """Verifies complete Driver REST API lifecycle matching contracts/drivers-api.yaml."""
+    # Authenticate as DSP to perform admin mutations
+    client.post("/api/v1/auth/login", json={"username": "dsp_test", "password": "password123"})
+
     # 1. Create Driver
     create_res = client.post("/api/v1/drivers", json={
         "driver_code": "TX100",

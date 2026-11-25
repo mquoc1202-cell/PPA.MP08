@@ -1,0 +1,412 @@
+openapi: 3.0.3
+info:
+  title: Freight Transportation - TRN-05 Incident & Delay Management API
+  description: API endpoints for logging incidents, resolving issues, detecting operational delays, and managing schedule extensions and conflicts.
+  version: 1.0.0
+paths:
+  /api/v1/trips/{id}/issues:
+    get:
+      summary: Lấy danh sách sự cố của chuyến hàng
+      description: Trả về danh sách tất cả các sự cố đã ghi nhận cho chuyến hàng theo ID (quyền truy cập DSP, SAL, MGR).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID của chuyến hàng
+      responses:
+        '200':
+          description: Danh sách sự cố thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripIssuesListResponse'
+        '404':
+          description: Không tìm thấy chuyến hàng
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Lập biên bản sự cố mới cho chuyến hàng
+      description: Tạo sự cố mới cho chuyến hàng ở trạng thái OPEN. Yêu cầu vai trò DSP.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID của chuyến hàng
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTripIssueRequest'
+      responses:
+        '201':
+          description: Lập biên bản sự cố thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripIssueDetailResponse'
+        '400':
+          description: Dữ liệu không hợp lệ hoặc thiếu thông tin bắt buộc
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Không có quyền thao tác (chỉ DSP)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Không tìm thấy chuyến hàng
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/trips/{id}/issues/{issue_id}/resolve:
+    post:
+      summary: Đóng / Giải quyết sự cố chuyến hàng
+      description: Chuyển trạng thái sự cố từ OPEN sang RESOLVED kèm kết quả giải quyết. Yêu cầu vai trò DSP.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID của chuyến hàng
+        - name: issue_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID của sự cố
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResolveTripIssueRequest'
+      responses:
+        '200':
+          description: Đóng sự cố thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripIssueDetailResponse'
+        '400':
+          description: Thiếu thông tin kết quả giải quyết hoặc sự cố đã đóng
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Không có quyền thao tác (chỉ DSP)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Không tìm thấy sự cố
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/trips/{id}/reschedule:
+    post:
+      summary: Điều chỉnh lùi mốc thời gian kết thúc dự kiến & Kiểm tra xung đột lịch
+      description: Gia hạn estimated_end_time cho chuyến hàng do chậm trễ; quét và cảnh báo các booking tương lai bị xung đột. Yêu cầu vai trò DSP.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID của chuyến hàng
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RescheduleTripRequest'
+      responses:
+        '200':
+          description: Gia hạn lịch thành công và không có xung đột lịch tương lai
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RescheduleSuccessResponse'
+        '409':
+          description: Gia hạn lịch thành công nhưng phát hiện xung đột với booking tương lai của xe hoặc tài xế
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RescheduleConflictResponse'
+        '400':
+          description: Mốc thời gian mới không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Không có quyền thao tác (chỉ DSP)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    CreateTripIssueRequest:
+      type: object
+      required:
+        - issue_type
+        - description
+        - occurred_at
+      properties:
+        issue_type:
+          type: string
+          enum:
+            - VEHICLE_BREAKDOWN
+            - TRAFFIC_CONGESTION
+            - ACCIDENT
+            - CARGO_DAMAGE
+            - WEATHER_DELAY
+            - DELIVERY_FAILED
+            - OTHER
+          example: VEHICLE_BREAKDOWN
+        description:
+          type: string
+          maxLength: 1000
+          example: Xe bị thủng lốp trên quốc lộ 1A đoạn qua Phủ Lý, đang chờ xe cứu hộ thay lốp phụ.
+        occurred_at:
+          type: string
+          format: date-time
+          example: '2026-11-25T14:30:00Z'
+        handled_by:
+          type: string
+          maxLength: 150
+          nullable: true
+          example: Tài xế Nguyễn Văn A & Cứu hộ lốp Phủ Lý (0912345678)
+        estimated_resolution_time:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2026-11-25T16:00:00Z'
+
+    ResolveTripIssueRequest:
+      type: object
+      required:
+        - resolution_notes
+      properties:
+        resolution_notes:
+          type: string
+          maxLength: 1000
+          example: Đã thay xong lốp dự phòng lúc 15:45, xe tiếp tục hành trình giao hàng an toàn.
+
+    RescheduleTripRequest:
+      type: object
+      required:
+        - new_estimated_end_time
+      properties:
+        new_estimated_end_time:
+          type: string
+          format: date-time
+          example: '2026-11-25T19:00:00Z'
+        reason:
+          type: string
+          maxLength: 500
+          nullable: true
+          example: Do sự cố thủng lốp và ùn tắc phà, dự kiến trễ 2 giờ so với kế hoạch ban đầu.
+
+    TripIssueItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        trip_id:
+          type: integer
+          example: 10
+        issue_type:
+          type: string
+          example: VEHICLE_BREAKDOWN
+        description:
+          type: string
+          example: Xe bị thủng lốp trên đường vận chuyển.
+        status:
+          type: string
+          enum: [OPEN, RESOLVED, CANCELLED]
+          example: OPEN
+        occurred_at:
+          type: string
+          format: date-time
+          example: '2026-11-25T14:30:00Z'
+        handled_by:
+          type: string
+          nullable: true
+          example: Tài xế Nguyễn Văn A
+        estimated_resolution_time:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2026-11-25T16:00:00Z'
+        resolution_notes:
+          type: string
+          nullable: true
+          example: null
+        resolved_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        reported_by_user_id:
+          type: integer
+          nullable: true
+          example: 2
+        created_at:
+          type: string
+          format: date-time
+          example: '2026-11-25T14:35:00Z'
+
+    ConflictBookingItem:
+      type: object
+      properties:
+        trip_id:
+          type: integer
+          example: 12
+        reference_code:
+          type: string
+          example: TRIP-2026-1002
+        service_type:
+          type: string
+          example: FREIGHT
+        resource_type:
+          type: string
+          enum: [TRUCK, DRIVER]
+          example: TRUCK
+        resource_name:
+          type: string
+          example: 29C-123.45
+        start_time:
+          type: string
+          format: date-time
+          example: '2026-11-25T17:00:00Z'
+        end_time:
+          type: string
+          format: date-time
+          example: '2026-11-25T21:00:00Z'
+
+    TripIssuesListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TripIssueItem'
+        error:
+          type: string
+          nullable: true
+          example: null
+        meta:
+          type: object
+          properties:
+            total:
+              type: integer
+              example: 1
+            has_open_issues:
+              type: boolean
+              example: true
+
+    TripIssueDetailResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/TripIssueItem'
+        error:
+          type: string
+          nullable: true
+          example: null
+
+    RescheduleSuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            trip_id:
+              type: integer
+              example: 10
+            new_estimated_end_time:
+              type: string
+              format: date-time
+              example: '2026-11-25T19:00:00Z'
+            has_conflicts:
+              type: boolean
+              example: false
+            conflicts:
+              type: array
+              items:
+                $ref: '#/components/schemas/ConflictBookingItem'
+        error:
+          type: string
+          nullable: true
+          example: null
+
+    RescheduleConflictResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            trip_id:
+              type: integer
+              example: 10
+            new_estimated_end_time:
+              type: string
+              format: date-time
+              example: '2026-11-25T19:00:00Z'
+            has_conflicts:
+              type: boolean
+              example: true
+            conflicts:
+              type: array
+              items:
+                $ref: '#/components/schemas/ConflictBookingItem'
+        error:
+          type: string
+          example: Lịch trình đã được cập nhật nhưng phát hiện xung đột với 1 booking tương lai. Vui lòng kiểm tra và dời hoặc gán lại xe/tài xế cho các đơn bị ảnh hưởng.
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: object
+          nullable: true
+          example: null
+        error:
+          type: string
+          example: Có lỗi xảy ra trong quá trình xử lý.

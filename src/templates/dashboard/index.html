@@ -3,107 +3,187 @@
 {% block title %}Bảng Điều Khiển Tổng Quan - Freight ERP{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h2 class="fw-bold mb-1">Bảng Điều Khiển Vận Tải</h2>
-        <p class="text-muted mb-0">Theo dõi nguồn lực phương tiện, nhân sự lái xe và tính sẵn sàng của hệ thống vận chuyển.</p>
-    </div>
-    <div class="d-flex gap-2">
-        <a href="/admin/trucks/create" class="btn btn-primary">
-            <i class="bi bi-plus-circle me-1"></i> Thêm Xe Mới
-        </a>
-        <a href="/admin/drivers/create" class="btn btn-outline-primary">
-            <i class="bi bi-person-plus me-1"></i> Thêm Tài Xế Mới
-        </a>
+<!-- Modern Dashboard Hero Banner (BMW Design System) -->
+<div class="dashboard-hero mb-4 animate-fade-in-up">
+    <div class="row align-items-center">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="m-stripe-pill me-1"></span>
+                <span class="text-uppercase small fw-bold text-primary" style="letter-spacing: 1.5px;">HỆ THỐNG QUẢN LÝ VẬN TẢI HÀNG HÓA</span>
+                {% if current_user %}
+                <span class="badge {% if current_user.role == 'DSP' %}bg-success{% elif current_user.role == 'SAL' %}bg-warning text-dark{% else %}bg-info text-dark{% endif %} px-2 py-1 ms-2">
+                    {{ current_user.role }} • {{ current_user.full_name or current_user.username }}
+                </span>
+                {% endif %}
+            </div>
+            <h2 class="dashboard-hero-title">Bảng Điều Khiển & Giám Sát Vận Tải</h2>
+            <p class="dashboard-hero-subtitle mb-0">
+                Kiểm soát thời gian thực nguồn lực đội xe, nhân sự lái xe và trạng thái luồng hàng theo tiêu chuẩn vận hành chính xác.
+            </p>
+        </div>
+        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+            {% if current_user and current_user.role == 'DSP' %}
+            <div class="d-inline-flex gap-2">
+                <a href="/admin/trucks/create" class="btn btn-primary shadow-sm">
+                    <i class="bi bi-plus-circle me-1"></i> Thêm Xe Mới
+                </a>
+                <a href="/admin/drivers/create" class="btn btn-outline-primary shadow-sm">
+                    <i class="bi bi-person-plus me-1"></i> Thêm Tài Xế
+                </a>
+            </div>
+            {% else %}
+            <div class="d-inline-flex gap-2">
+                <a href="/trips" class="btn btn-primary shadow-sm">
+                    <i class="bi bi-send-check me-1"></i> Xem Chuyến Hàng
+                </a>
+                <a href="/schedule" class="btn btn-outline-secondary shadow-sm">
+                    <i class="bi bi-calendar3 me-1"></i> Xem Lịch Trình
+                </a>
+            </div>
+            {% endif %}
+        </div>
     </div>
 </div>
 
-<!-- KPI Stat Cards -->
+<!-- Modern KPI Stat Cards Grid -->
 <div class="row g-3 mb-4">
-    <div class="col-xl-3 col-md-6">
-        <div class="card p-3 stat-card success">
-            <div class="d-flex justify-content-between align-items-center">
+    <!-- Card 1: Active Trucks -->
+    <div class="col-xl-3 col-md-6 animate-fade-in-up delay-1">
+        <div class="stat-card-modern success h-100">
+            <div class="d-flex justify-content-between align-items-start mb-2">
                 <div>
-                    <span class="text-muted small text-uppercase fw-bold">Xe Sẵn Sàng (Active)</span>
-                    <h3 class="fw-bold text-success mt-1 mb-0">{{ active_trucks }} <small class="text-muted fs-6">/ {{ total_trucks }} xe</small></h3>
+                    <span class="text-muted small text-uppercase fw-bold" style="letter-spacing: 0.5px;">Xe Sẵn Sàng Vận Hành</span>
+                    <h3 class="fw-bold text-ink mt-1 mb-0 fs-2">
+                        {{ active_trucks }} <small class="text-muted fs-6 fw-normal">/ {{ total_trucks }} xe</small>
+                    </h3>
                 </div>
-                <div class="p-3 bg-light rounded-circle text-success fs-3">
+                <div class="stat-icon-wrapper icon-soft-success">
                     <i class="bi bi-truck"></i>
                 </div>
             </div>
-            <div class="mt-2 text-muted small">
-                <i class="bi bi-check-circle-fill text-success"></i> Sẵn sàng nhận chuyến
+            <div>
+                <div class="stat-progress">
+                    <div class="stat-progress-bar bg-success" style="width: {% if total_trucks > 0 %}{{ (active_trucks / total_trucks * 100)|round }}{% else %}0{% endif %}%;"></div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2 small">
+                    <span class="text-success fw-semibold">
+                        <span class="status-dot status-dot-active me-1"></span>
+                        {% if total_trucks > 0 %}{{ (active_trucks / total_trucks * 100)|round }}%{% else %}0%{% endif %} khả dụng
+                    </span>
+                    <a href="/admin/trucks?status=ACTIVE" class="text-decoration-none text-muted">Chi tiết <i class="bi bi-chevron-right" style="font-size: 0.7rem;"></i></a>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6">
-        <div class="card p-3 stat-card warning">
-            <div class="d-flex justify-content-between align-items-center">
+    <!-- Card 2: Maintenance Trucks -->
+    <div class="col-xl-3 col-md-6 animate-fade-in-up delay-2">
+        <div class="stat-card-modern warning h-100">
+            <div class="d-flex justify-content-between align-items-start mb-2">
                 <div>
-                    <span class="text-muted small text-uppercase fw-bold">Xe Bảo Dưỡng (Maintenance)</span>
-                    <h3 class="fw-bold text-warning mt-1 mb-0">{{ maintenance_trucks }} <small class="text-muted fs-6">xe</small></h3>
+                    <span class="text-muted small text-uppercase fw-bold" style="letter-spacing: 0.5px;">Xe Đang Bảo Dưỡng</span>
+                    <h3 class="fw-bold text-ink mt-1 mb-0 fs-2">
+                        {{ maintenance_trucks }} <small class="text-muted fs-6 fw-normal">xe</small>
+                    </h3>
                 </div>
-                <div class="p-3 bg-light rounded-circle text-warning fs-3">
+                <div class="stat-icon-wrapper icon-soft-warning">
                     <i class="bi bi-tools"></i>
                 </div>
             </div>
-            <div class="mt-2 text-muted small">
-                <i class="bi bi-exclamation-triangle-fill text-warning"></i> Đang bảo dưỡng / sửa chữa
+            <div>
+                <div class="stat-progress">
+                    <div class="stat-progress-bar bg-warning" style="width: {% if total_trucks > 0 %}{{ (maintenance_trucks / total_trucks * 100)|round }}{% else %}0{% endif %}%;"></div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2 small">
+                    <span class="text-warning fw-semibold">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Tạm dừng nhận lệnh
+                    </span>
+                    <a href="/admin/trucks?status=MAINTENANCE" class="text-decoration-none text-muted">Quản lý <i class="bi bi-chevron-right" style="font-size: 0.7rem;"></i></a>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6">
-        <div class="card p-3 stat-card">
-            <div class="d-flex justify-content-between align-items-center">
+    <!-- Card 3: Active Drivers -->
+    <div class="col-xl-3 col-md-6 animate-fade-in-up delay-3">
+        <div class="stat-card-modern info h-100">
+            <div class="d-flex justify-content-between align-items-start mb-2">
                 <div>
-                    <span class="text-muted small text-uppercase fw-bold">Tài Xế Đang Làm Việc</span>
-                    <h3 class="fw-bold text-primary mt-1 mb-0">{{ active_drivers }} <small class="text-muted fs-6">/ {{ total_drivers }} người</small></h3>
+                    <span class="text-muted small text-uppercase fw-bold" style="letter-spacing: 0.5px;">Tài Xế Hoạt Động</span>
+                    <h3 class="fw-bold text-ink mt-1 mb-0 fs-2">
+                        {{ active_drivers }} <small class="text-muted fs-6 fw-normal">/ {{ total_drivers }} người</small>
+                    </h3>
                 </div>
-                <div class="p-3 bg-light rounded-circle text-primary fs-3">
+                <div class="stat-icon-wrapper icon-soft-info">
                     <i class="bi bi-people"></i>
                 </div>
             </div>
-            <div class="mt-2 text-muted small">
-                <i class="bi bi-person-check-fill text-primary"></i> Sẵn sàng điều phối
+            <div>
+                <div class="stat-progress">
+                    <div class="stat-progress-bar bg-info" style="width: {% if total_drivers > 0 %}{{ (active_drivers / total_drivers * 100)|round }}{% else %}0{% endif %}%;"></div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2 small">
+                    <span class="text-info fw-semibold">
+                        <span class="status-dot status-dot-pulse-blue me-1"></span>
+                        Sẵn sàng điều phối
+                    </span>
+                    <a href="/admin/drivers" class="text-decoration-none text-muted">Danh mục <i class="bi bi-chevron-right" style="font-size: 0.7rem;"></i></a>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6">
-        <div class="card p-3 stat-card secondary">
-            <div class="d-flex justify-content-between align-items-center">
+    <!-- Card 4: Bookings / Schedule -->
+    <div class="col-xl-3 col-md-6 animate-fade-in-up delay-4">
+        <div class="stat-card-modern danger h-100">
+            <div class="d-flex justify-content-between align-items-start mb-2">
                 <div>
-                    <span class="text-muted small text-uppercase fw-bold">Lịch Trình Chiếm Dụng</span>
-                    <h3 class="fw-bold text-dark mt-1 mb-0">{{ active_bookings }} <small class="text-muted fs-6">lượt</small></h3>
+                    <span class="text-muted small text-uppercase fw-bold" style="letter-spacing: 0.5px;">Lịch Trình Chiếm Dụng</span>
+                    <h3 class="fw-bold text-ink mt-1 mb-0 fs-2">
+                        {{ active_bookings }} <small class="text-muted fs-6 fw-normal">lượt đặt</small>
+                    </h3>
                 </div>
-                <div class="p-3 bg-light rounded-circle text-dark fs-3">
-                    <i class="bi bi-calendar-check"></i>
+                <div class="stat-icon-wrapper icon-soft-danger">
+                    <i class="bi bi-calendar2-week"></i>
                 </div>
             </div>
-            <div class="mt-2 text-muted small">
-                <i class="bi bi-clock-history"></i> Kiểm soát xung đột tự động
+            <div>
+                <div class="stat-progress">
+                    <div class="stat-progress-bar bg-danger" style="width: 100%;"></div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2 small">
+                    <span class="text-danger fw-semibold">
+                        <i class="bi bi-shield-check me-1"></i> Khóa chống trùng lịch
+                    </span>
+                    <a href="/schedule" class="text-decoration-none text-muted">Lịch Gantt <i class="bi bi-chevron-right" style="font-size: 0.7rem;"></i></a>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Two Column Tables: Trucks & Drivers -->
-<div class="row g-4">
+<!-- Two Column Tables: Trucks & Drivers with Modern Polish -->
+<div class="row g-4 animate-fade-in-up delay-3">
     <!-- Trucks Column -->
     <div class="col-lg-7">
-        <div class="card shadow-sm h-100">
+        <div class="card h-100 card-hover">
             <div class="card-header d-flex justify-content-between align-items-center py-3">
-                <h5 class="mb-0 fw-bold"><i class="bi bi-truck text-primary me-2"></i>Đội Xe Mới Cập Nhật</h5>
-                <a href="/admin/trucks" class="btn btn-sm btn-outline-secondary">Xem tất cả ({{ total_trucks }})</a>
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon-wrapper icon-soft-primary me-2" style="width: 32px; height: 32px; font-size: 1rem;">
+                        <i class="bi bi-truck"></i>
+                    </div>
+                    <h5 class="mb-0 fw-bold fs-6">Đội Xe Vận Tải Gần Đây</h5>
+                </div>
+                <a href="/admin/trucks" class="btn btn-sm btn-outline-secondary">
+                    Xem tất cả ({{ total_trucks }}) <i class="bi bi-arrow-right ms-1"></i>
+                </a>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
                             <th class="ps-3">Biển Số Xe</th>
-                            <th>Loại Xe</th>
+                            <th>Loại Phương Tiện</th>
                             <th>Tải Trọng</th>
                             <th>Trạng Thái</th>
                             <th class="text-end pe-3">Thao Tác</th>
@@ -114,23 +194,43 @@
                         <tr>
                             <td class="ps-3">
                                 <span class="fw-bold text-primary">{{ truck.plate_number }}</span>
-                                <div class="text-muted small">ID: <code>{{ truck.normalized_plate }}</code></div>
+                                <div class="text-muted" style="font-size: 0.72rem;">{{ truck.normalized_plate }}</div>
                             </td>
-                            <td>{{ truck.truck_type }}</td>
-                            <td><span class="badge bg-light text-dark border">{{ "{:,}".format(truck.capacity_kg) }} kg</span></td>
+                            <td><span class="fw-medium">{{ truck.truck_type }}</span></td>
+                            <td>
+                                <span class="badge bg-light text-dark border font-monospace">
+                                    {{ "{:,}".format(truck.capacity_kg) }} kg
+                                </span>
+                            </td>
                             <td>
                                 {% if truck.status == 'ACTIVE' %}
-                                    <span class="badge bg-success">ACTIVE</span>
+                                    <span class="badge-status badge-status-active">
+                                        <span class="status-dot status-dot-active"></span> Sẵn sàng
+                                    </span>
                                 {% elif truck.status == 'MAINTENANCE' %}
-                                    <span class="badge bg-warning text-dark">MAINTENANCE</span>
+                                    <span class="badge-status badge-status-maintenance">
+                                        <i class="bi bi-tools" style="font-size: 0.65rem;"></i> Bảo dưỡng
+                                    </span>
                                 {% else %}
-                                    <span class="badge bg-secondary">INACTIVE</span>
+                                    <span class="badge-status badge-status-inactive">Ngừng hoạt động</span>
                                 {% endif %}
                             </td>
                             <td class="text-end pe-3">
-                                <a href="/admin/trucks/{{ truck.id }}/edit" class="btn btn-outline-primary btn-sm">
-                                    <i class="bi bi-pencil"></i> Sửa
-                                </a>
+                                <div class="table-action-toolbar">
+                                    {% if current_user and current_user.role == 'DSP' %}
+                                    <a href="/admin/trucks/{{ truck.id }}/edit" class="btn-action-main btn-primary" title="Chỉnh sửa xe">
+                                        <i class="bi bi-pencil"></i> Sửa
+                                    </a>
+                                    {% else %}
+                                    <span class="badge-action-readonly"><i class="bi bi-lock"></i> Chỉ xem</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox fs-3 d-block mb-1"></i> Chưa có dữ liệu xe vận tải.
                             </td>
                         </tr>
                         {% endfor %}
@@ -142,17 +242,24 @@
 
     <!-- Drivers Column -->
     <div class="col-lg-5">
-        <div class="card shadow-sm h-100">
+        <div class="card h-100 card-hover">
             <div class="card-header d-flex justify-content-between align-items-center py-3">
-                <h5 class="mb-0 fw-bold"><i class="bi bi-person-badge text-primary me-2"></i>Danh Sách Tài Xế</h5>
-                <a href="/admin/drivers" class="btn btn-sm btn-outline-secondary">Xem tất cả ({{ total_drivers }})</a>
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon-wrapper icon-soft-info me-2" style="width: 32px; height: 32px; font-size: 1rem;">
+                        <i class="bi bi-person-badge"></i>
+                    </div>
+                    <h5 class="mb-0 fw-bold fs-6">Nhân Sự Lái Xe</h5>
+                </div>
+                <a href="/admin/drivers" class="btn btn-sm btn-outline-secondary">
+                    Xem tất cả ({{ total_drivers }}) <i class="bi bi-arrow-right ms-1"></i>
+                </a>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
                             <th class="ps-3">Tài Xế</th>
-                            <th>Số Điện Thoại</th>
+                            <th>Điện Thoại</th>
                             <th>Trạng Thái</th>
                             <th class="text-end pe-3">Thao Tác</th>
                         </tr>
@@ -161,21 +268,39 @@
                         {% for driver in recent_drivers %}
                         <tr>
                             <td class="ps-3">
-                                <span class="fw-bold">{{ driver.full_name }}</span>
-                                <div class="text-muted small"><span class="badge bg-dark">{{ driver.driver_code }}</span></div>
+                                <div class="fw-bold">{{ driver.full_name }}</div>
+                                <span class="badge bg-dark" style="font-size: 0.68rem;">{{ driver.driver_code }}</span>
                             </td>
-                            <td><a href="tel:{{ driver.phone_number }}" class="text-decoration-none small"><i class="bi bi-telephone me-1"></i>{{ driver.phone_number }}</a></td>
+                            <td>
+                                <a href="tel:{{ driver.phone_number }}" class="text-decoration-none small text-muted">
+                                    <i class="bi bi-telephone text-primary me-1"></i>{{ driver.phone_number }}
+                                </a>
+                            </td>
                             <td>
                                 {% if driver.status == 'ACTIVE' %}
-                                    <span class="badge bg-success">ACTIVE</span>
+                                    <span class="badge-status badge-status-active">
+                                        <span class="status-dot status-dot-active"></span> Đang làm việc
+                                    </span>
                                 {% else %}
-                                    <span class="badge bg-secondary">INACTIVE</span>
+                                    <span class="badge-status badge-status-inactive">Nghỉ việc</span>
                                 {% endif %}
                             </td>
                             <td class="text-end pe-3">
-                                <a href="/admin/drivers/{{ driver.id }}/edit" class="btn btn-outline-primary btn-sm">
-                                    <i class="bi bi-pencil"></i> Sửa
-                                </a>
+                                <div class="table-action-toolbar">
+                                    {% if current_user and current_user.role == 'DSP' %}
+                                    <a href="/admin/drivers/{{ driver.id }}/edit" class="btn-action-main btn-primary" title="Chỉnh sửa tài xế">
+                                        <i class="bi bi-pencil"></i> Sửa
+                                    </a>
+                                    {% else %}
+                                    <span class="badge-action-readonly"><i class="bi bi-lock"></i> Chỉ xem</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">
+                                <i class="bi bi-person-x fs-3 d-block mb-1"></i> Chưa có dữ liệu tài xế.
                             </td>
                         </tr>
                         {% endfor %}

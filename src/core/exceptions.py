@@ -1,8 +1,10 @@
 from typing import Any, List, Optional
-from fastapi import FastAPI, Request, status
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, Request, status, HTTPException
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.exceptions import RequestValidationError
 from src.core.logging import get_logger
+from src.core.templates import templates
+from src.core.security import AuthenticationRequiredError, PermissionDeniedError
 
 logger = get_logger("exception_handler")
 
@@ -30,8 +32,77 @@ class ScheduleConflictError(ConflictError):
         super().__init__(message)
         self.conflicting_bookings = conflicting_bookings or []
 
+# Convenient Aliases
+NotFoundException = EntityNotFoundError
+BusinessRuleException = BusinessRuleViolationError
+ScheduleConflictException = ScheduleConflictError
+
 def register_exception_handlers(app: FastAPI) -> None:
-    """Registers centralized exception handlers to guarantee masked errors and standard JSON response."""
+    """Registers centralized exception handlers to guarantee masked errors and standard responses."""
+
+    @app.exception_handler(AuthenticationRequiredError)
+    async def auth_required_handler(request: Request, exc: AuthenticationRequiredError):
+        is_api = request.url.path.startswith("/api/") or "application/json" in request.headers.get("accept", "")
+        if is_api:
+            return JSONResponse(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                content={
+                    "success": False,
+                    "data": None,
+                    "error": "Vui lòng đăng nhập để tiếp tục.",
+                    "meta": {}
+                }
+            )
+        return RedirectResponse(url=f"/login?next={exc.next_url}", status_code=status.HTTP_303_SEE_OTHER)
+
+    @app.exception_handler(PermissionDeniedError)
+    async def permission_denied_handler(request: Request, exc: PermissionDeniedError):
+        is_api = request.url.path.startswith("/api/") or "application/json" in request.headers.get("accept", "")
+        if is_api:
+            return JSONResponse(
+                status_code=status.HTTP_403_FORBIDDEN,
+                content={
+                    "success": False,
+                    "data": None,
+                    "error": exc.message,
+                    "meta": {}
+                }
+            )
+        return templates.TemplateResponse(
+            request=request,
+            name="error/403.html",
+            context={
+                "error_message": exc.message,
+                "current_user": request.session.get("current_user")
+            },
+            status_code=status.HTTP_403_FORBIDDEN
+        )
+
+    @app.exception_handler(HTTPException)
+    async def http_exception_handler(request: Request, exc: HTTPException):
+        is_api = request.url.path.startswith("/api/") or "application/json" in request.headers.get("accept", "")
+        if not is_api:
+            if exc.status_code == status.HTTP_401_UNAUTHORIZED:
+                return RedirectResponse(url=f"/login?next={request.url.path}", status_code=status.HTTP_303_SEE_OTHER)
+            if exc.status_code == status.HTTP_403_FORBIDDEN:
+                return templates.TemplateResponse(
+                    request=request,
+                    name="error/403.html",
+                    context={
+                        "error_message": exc.detail,
+                        "current_user": request.session.get("current_user")
+                    },
+                    status_code=status.HTTP_403_FORBIDDEN
+                )
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={
+                "success": False,
+                "data": None,
+                "error": exc.detail,
+                "meta": {}
+            }
+        )
 
     @app.exception_handler(EntityNotFoundError)
     async def entity_not_found_handler(request: Request, exc: EntityNotFoundError):
@@ -106,7 +177,14 @@ def register_exception_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(Exception)
     async def unhandled_exception_handler(request: Request, exc: Exception):
-        logger.error(f"Unhandled server error on {request.url.path}", exc_info=True)
+        logger.error(f"Unhandled server error on {request.url.path}: {exc}", exc_info=True)
+        if not request.url.path.startswith("/api/") and "text/html" in request.headers.get("accept", ""):
+            return templates.TemplateResponse(
+                request=request,
+                name="error/500.html",
+                context={"error_message": "Có lỗi xảy ra trong quá trình xử lý, vui lòng thử lại sau."},
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={

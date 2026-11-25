@@ -3,14 +3,30 @@
 {% block title %}Quản lý Đội Xe - Freight ERP{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h3 class="fw-bold mb-0"><i class="bi bi-truck text-primary me-2"></i>Danh Mục Xe Vận Tải</h3>
-        <p class="text-muted mb-0">Quản lý phương tiện, kiểm tra chuẩn hóa biển số và tải trọng khả dụng</p>
+<!-- Modern Page Hero Banner (Light Theme Edition) -->
+<div class="dashboard-hero mb-4 animate-fade-in-up">
+    <div class="row align-items-center">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="m-stripe-pill me-1"></span>
+                <span class="text-uppercase small fw-bold text-primary" style="letter-spacing: 1.5px;">QUẢN LÝ PHƯƠNG TIỆN VẬN TẢI</span>
+                <span class="badge bg-light text-dark border px-2 py-1 ms-2">
+                    Tổng: {{ total }} phương tiện
+                </span>
+            </div>
+            <h2 class="dashboard-hero-title">Danh Mục Xe Vận Tải</h2>
+            <p class="dashboard-hero-subtitle mb-0">
+                Quản lý phương tiện, kiểm tra chuẩn hóa biển số, định mức tải trọng và trạng thái sẵn sàng điều phối.
+            </p>
+        </div>
+        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+            {% if current_user and current_user.role == 'DSP' %}
+            <a href="/admin/trucks/create" class="btn btn-primary shadow-sm">
+                <i class="bi bi-plus-circle me-1"></i> Thêm Xe Mới
+            </a>
+            {% endif %}
+        </div>
     </div>
-    <a href="/admin/trucks/create" class="btn btn-primary">
-        <i class="bi bi-plus-circle me-1"></i> Thêm Xe Mới
-    </a>
 </div>
 
 <div id="alertContainer"></div>
@@ -30,16 +46,16 @@
 {% endif %}
 
 <!-- Filters -->
-<div class="card p-3 mb-4">
+<div class="card p-3 mb-4 shadow-sm border-0 animate-fade-in-up">
     <form method="get" action="/admin/trucks" class="row g-3 align-items-center">
         <div class="col-md-4">
             <div class="input-group">
-                <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
-                <input type="text" name="search" class="form-control" placeholder="Tìm theo biển số, loại xe..." value="{{ search or '' }}">
+                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Tìm theo biển số, loại xe..." value="{{ search or '' }}" style="height: 44px;">
             </div>
         </div>
         <div class="col-md-3">
-            <select name="status" class="form-select">
+            <select name="status" class="form-select" style="height: 44px;">
                 <option value="">-- Tất cả trạng thái --</option>
                 <option value="ACTIVE" {% if status == 'ACTIVE' %}selected{% endif %}>ACTIVE (Sẵn sàng)</option>
                 <option value="MAINTENANCE" {% if status == 'MAINTENANCE' %}selected{% endif %}>MAINTENANCE (Bảo dưỡng)</option>
@@ -47,16 +63,16 @@
             </select>
         </div>
         <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel me-1"></i> Lọc</button>
+            <button type="submit" class="btn btn-primary w-100" style="height: 44px;"><i class="bi bi-funnel me-1"></i> Lọc</button>
         </div>
         <div class="col-md-2">
-            <a href="/admin/trucks" class="btn btn-outline-secondary w-100">Đặt lại</a>
+            <a href="/admin/trucks" class="btn btn-outline-secondary w-100" style="height: 44px; display: flex; align-items: center; justify-content: center;">Đặt lại</a>
         </div>
     </form>
 </div>
 
 <!-- Trucks Table -->
-<div class="card shadow-sm">
+<div class="card shadow-sm border-0 card-hover animate-fade-in-up delay-1">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
@@ -82,22 +98,30 @@
                         <td><span class="badge bg-light text-dark border">{{ "{:,}".format(truck.capacity_kg) }} kg</span></td>
                         <td>
                             {% if truck.status == 'ACTIVE' %}
-                                <span class="badge bg-success">ACTIVE</span>
+                                <span class="badge-status badge-status-active">
+                                    <span class="status-dot status-dot-active"></span> Sẵn sàng
+                                </span>
                             {% elif truck.status == 'MAINTENANCE' %}
-                                <span class="badge bg-warning text-dark">MAINTENANCE</span>
+                                <span class="badge-status badge-status-maintenance">
+                                    <i class="bi bi-tools" style="font-size: 0.65rem;"></i> Bảo dưỡng
+                                </span>
                             {% else %}
-                                <span class="badge bg-secondary">INACTIVE</span>
+                                <span class="badge-status badge-status-inactive">Ngừng hoạt động</span>
                             {% endif %}
                         </td>
                         <td class="text-muted small">{{ truck.description or '—' }}</td>
                         <td class="text-end pe-3">
-                            <div class="btn-group btn-group-sm">
-                                <a href="/admin/trucks/{{ truck.id }}/edit" class="btn btn-outline-primary" title="Chỉnh sửa">
+                            <div class="table-action-toolbar">
+                                {% if current_user and current_user.role == 'DSP' %}
+                                <a href="/admin/trucks/{{ truck.id }}/edit" class="btn-action-main btn-primary" title="Chỉnh sửa xe">
                                     <i class="bi bi-pencil"></i> Sửa
                                 </a>
-                                <button type="button" class="btn btn-outline-danger" onclick="confirmDeleteTruck({{ truck.id }}, '{{ truck.plate_number }}')" title="Xóa xe">
+                                <button type="button" class="btn-action-icon btn-action-delete" onclick="confirmDeleteTruck({{ truck.id }}, '{{ truck.plate_number }}')" title="Xóa xe">
                                     <i class="bi bi-trash"></i>
                                 </button>
+                                {% else %}
+                                <span class="badge-action-readonly"><i class="bi bi-lock"></i> Chỉ xem</span>
+                                {% endif %}
                             </div>
                         </td>
                     </tr>

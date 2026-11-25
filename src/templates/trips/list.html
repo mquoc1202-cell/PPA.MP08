@@ -1,0 +1,403 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý Chuyến Hàng & Điều Phối - Freight ERP{% endblock %}
+
+{% block content %}
+<!-- Modern Page Hero Banner (Light Theme Edition) -->
+<div class="dashboard-hero mb-4 animate-fade-in-up">
+    <div class="row align-items-center">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="m-stripe-pill me-1"></span>
+                <span class="text-uppercase small fw-bold text-primary" style="letter-spacing: 1.5px;">ĐIỀU PHỐI VẬN
+                    CHUYỂN HÀNG HÓA</span>
+                <span class="badge bg-light text-dark border px-2 py-1 ms-2">
+                    Tổng: {{ total }} đơn hàng
+                </span>
+            </div>
+            <h2 class="dashboard-hero-title">Danh Mục Chuyến Hàng & Điều Phối</h2>
+            <p class="dashboard-hero-subtitle mb-0">
+                Theo dõi tiến độ đơn vận chuyển, phân công xe, tài xế và kiểm soát xung đột lịch trình toàn hệ thống.
+            </p>
+        </div>
+        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+            <a href="/schedule" class="btn btn-outline-primary shadow-sm">
+                <i class="bi bi-calendar3 me-1"></i> Tra Cứu Lịch Trình
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Alert messages -->
+{% if request.query_params.get("success") == "dispatched" %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i>Điều phối phân công xe và tài xế thành công!
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% elif request.query_params.get("success") == "unassigned" %}
+<div class="alert alert-info alert-dismissible fade show" role="alert">
+    <i class="bi bi-info-circle-fill me-2"></i>Đã hủy phân công chuyến hàng và giải phóng toàn bộ lịch chiếm dụng.
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% elif request.query_params.get("error") %}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ request.query_params.get("error") }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endif %}
+
+<!-- Filters & Tabs -->
+<div class="card p-3 mb-4 shadow-sm border-0 animate-fade-in-up">
+    <div class="row g-3 align-items-center">
+        <!-- Modern Status Tabs -->
+        <div class="col-12 border-bottom pb-3">
+            <div class="filter-tabs-container">
+                <a class="filter-tab {% if not status and not filter_mode %}active{% endif %}" href="/trips">
+                    Tất cả <span class="badge bg-light text-dark">{{ total }}</span>
+                </a>
+                <a class="filter-tab {% if status == 'UNASSIGNED' %}active{% endif %}" href="/trips?status=UNASSIGNED">
+                    <i class="bi bi-clock me-1"></i> Chưa điều phối
+                    <span class="badge bg-warning text-dark">{{ unassigned_count }}</span>
+                </a>
+                <a class="filter-tab {% if status == 'ASSIGNED' %}active{% endif %}" href="/trips?status=ASSIGNED">
+                    <i class="bi bi-check2-circle me-1"></i> Đã điều phối
+                    <span class="badge bg-primary text-white">{{ assigned_count }}</span>
+                </a>
+                <a class="filter-tab {% if status == 'PICKED_UP' %}active{% endif %}" href="/trips?status=PICKED_UP">
+                    <i class="bi bi-box-arrow-in-down me-1"></i> Đã lấy hàng
+                    <span class="badge bg-info text-dark">{{ picked_up_count }}</span>
+                </a>
+                <a class="filter-tab {% if status == 'IN_TRANSIT' %}active{% endif %}" href="/trips?status=IN_TRANSIT">
+                    <i class="bi bi-truck me-1"></i> Đang vận chuyển
+                    <span class="badge bg-primary text-white">{{ in_transit_count }}</span>
+                </a>
+                <a class="filter-tab {% if status == 'DELIVERED' %}active{% endif %}" href="/trips?status=DELIVERED">
+                    <i class="bi bi-box-seam me-1"></i> Đã giao hàng
+                    <span class="badge bg-info text-dark">{{ delivered_count }}</span>
+                </a>
+                <a class="filter-tab {% if status == 'COMPLETED' %}active{% endif %}" href="/trips?status=COMPLETED">
+                    <i class="bi bi-check2-all me-1"></i> Hoàn tất
+                    <span class="badge bg-success text-white">{{ completed_count }}</span>
+                </a>
+                <a class="filter-tab {% if filter_mode == 'delayed' %}active-delayed{% endif %}"
+                    href="/trips?filter_mode=delayed">
+                    <i class="bi bi-alarm-fill me-1 text-danger"></i> Quá hạn
+                    <span class="badge bg-danger text-white">{{ delayed_count }}</span>
+                </a>
+                <a class="filter-tab {% if filter_mode == 'issues' %}active-issues{% endif %}"
+                    href="/trips?filter_mode=issues">
+                    <i class="bi bi-exclamation-triangle-fill me-1 text-warning"></i> Có sự cố
+                    <span class="badge bg-warning text-dark">{{ issues_count }}</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="col-12">
+            <form method="get" action="/trips" class="row g-2 align-items-center">
+                {% if status %}
+                <input type="hidden" name="status" value="{{ status }}">
+                {% endif %}
+                <div class="col-md-9">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i
+                                class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="search" class="form-control border-start-0 ps-0"
+                            placeholder="Tìm kiếm theo mã chuyến, người gửi, địa chỉ nhận/giao, loại hàng hóa..."
+                            value="{{ search or '' }}" style="height: 44px;">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100" style="height: 44px;">
+                        <i class="bi bi-funnel me-1"></i> Tìm Kiếm
+                    </button>
+                </div>
+                <div class="col-md-1">
+                    <a href="/trips" class="btn btn-outline-secondary w-100" title="Đặt lại bộ lọc"
+                        style="height: 44px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Trips Data Table -->
+<div class="card shadow-sm border-0 card-hover animate-fade-in-up delay-1">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-3">Mã Chuyến</th>
+                    <th>Người Gửi</th>
+                    <th>Lộ Trình (Nhận ➔ Giao)</th>
+                    <th>Khối Lượng</th>
+                    <th>Loại Hàng</th>
+                    <th>Trạng Thái</th>
+                    <th>Nguồn Lực Được Gán</th>
+                    <th class="text-end pe-3">Thao Tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if trips %}
+                {% for trip in trips %}
+                <tr>
+                    <td class="ps-3">
+                        <a href="/trips/{{ trip.id }}" class="fw-bold text-primary text-decoration-none"
+                            title="Xem chi tiết & Dòng thời gian">
+                            {{ trip.reference_code }}
+                        </a>
+                        <div class="text-muted small">
+                            {{ trip.created_at.strftime('%d/%m/%Y %H:%M') if trip.created_at else '' }}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fw-semibold">{{ trip.sender_name }}</div>
+                        <small class="text-muted"><i class="bi bi-telephone me-1"></i>{{ trip.sender_phone }}</small>
+                    </td>
+                    <td style="max-width: 260px;">
+                        <div class="text-truncate text-secondary small" title="{{ trip.pickup_address }}">
+                            <i class="bi bi-geo-alt text-success me-1"></i>{{ trip.pickup_address }}
+                        </div>
+                        <div class="text-truncate text-secondary small" title="{{ trip.delivery_address }}">
+                            <i class="bi bi-flag text-danger me-1"></i>{{ trip.delivery_address }}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge bg-light text-dark border">
+                            {{ "{:,}".format(trip.cargo_weight_kg) }} kg
+                        </span>
+                    </td>
+                    <td><span class="small">{{ trip.cargo_type }}</span></td>
+                    <td>
+                        {% if trip.status == 'UNASSIGNED' %}
+                        <span class="badge-status badge-status-unassigned">
+                            <i class="bi bi-clock"></i> Chưa điều phối
+                        </span>
+                        {% elif trip.status == 'ASSIGNED' %}
+                        <span class="badge-status badge-status-assigned">
+                            <i class="bi bi-check2-circle"></i> Đã điều phối
+                        </span>
+                        {% elif trip.status == 'PICKED_UP' %}
+                        <span class="badge-status badge-status-picked-up">
+                            <i class="bi bi-box-arrow-in-down"></i> Đã lấy hàng
+                        </span>
+                        {% elif trip.status == 'IN_TRANSIT' %}
+                        <span class="badge-status badge-status-in-transit">
+                            <span class="status-dot status-dot-pulse-blue"></span> Đang vận chuyển
+                        </span>
+                        {% elif trip.status == 'DELIVERED' %}
+                        <span class="badge-status badge-status-confirmed">
+                            <i class="bi bi-box-seam"></i> Đã giao hàng
+                        </span>
+                        {% elif trip.status == 'COMPLETED' %}
+                        <span class="badge-status badge-status-completed">
+                            <i class="bi bi-check2-all"></i> Hoàn tất
+                        </span>
+                        {% elif trip.status == 'CANCELLED' %}
+                        <span class="badge-status badge-status-inactive">
+                            <i class="bi bi-x-circle"></i> Đã hủy
+                        </span>
+                        {% else %}
+                        <span class="badge-status badge-status-inactive">{{ trip.status }}</span>
+                        {% endif %}
+                        {% if trip.is_delayed %}
+                        <span class="badge-status badge-status-delayed mt-1" title="Quá hạn cam kết vận hành">
+                            <span class="status-dot status-dot-pulse-red"></span> Quá hạn
+                        </span>
+                        {% endif %}
+                        {% if trip.has_open_issues %}
+                        <span class="badge-status badge-status-danger mt-1" title="Đang có sự cố chưa giải quyết">
+                            <i class="bi bi-exclamation-triangle-fill"></i> Sự cố
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if trip.status == 'ASSIGNED' and trip.truck and trip.driver %}
+                        <div class="small">
+                            <i class="bi bi-truck text-primary me-1"></i><strong>{{ trip.truck.plate_number }}</strong>
+                        </div>
+                        <div class="small text-muted">
+                            <i class="bi bi-person me-1"></i>{{ trip.driver.full_name }} ({{ trip.driver.driver_code }})
+                        </div>
+                        {% if trip.estimated_start_time and trip.estimated_end_time %}
+                        <div class="text-muted" style="font-size: 0.72rem;">
+                            {{ trip.estimated_start_time.strftime('%d/%m %H:%M') }} - {{
+                            trip.estimated_end_time.strftime('%d/%m %H:%M') }}
+                        </div>
+                        {% endif %}
+                        {% elif trip.status in ['PICKED_UP', 'IN_TRANSIT'] and trip.truck and trip.driver %}
+                        <div class="small">
+                            <i class="bi bi-truck text-primary me-1"></i><strong>{{ trip.truck.plate_number }}</strong>
+                        </div>
+                        <div class="small text-muted">
+                            <i class="bi bi-person me-1"></i>{{ trip.driver.full_name }}
+                        </div>
+                        {% else %}
+                        <span class="text-muted small fst-italic">Chưa có nguồn lực</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end pe-3">
+                        <div class="table-action-toolbar">
+                            <a href="/trips/{{ trip.id }}" class="btn-action-icon" title="Xem chi tiết & Dòng thời gian"
+                                data-bs-toggle="tooltip">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            {% if current_user and current_user.role == 'DSP' %}
+                            {% if trip.status == 'UNASSIGNED' %}
+                            <a href="/trips/{{ trip.id }}/dispatch" class="btn-action-main btn-primary"
+                                title="Điều phối xe & tài xế">
+                                <i class="bi bi-send-check"></i> Điều Phối
+                            </a>
+                            {% elif trip.status == 'ASSIGNED' %}
+                            <a href="/trips/{{ trip.id }}/pickup" class="btn-action-main btn-success"
+                                title="Ghi nhận nhận hàng thực tế">
+                                <i class="bi bi-box-arrow-in-down"></i> Nhận Hàng
+                            </a>
+                            <a href="/trips/{{ trip.id }}/dispatch" class="btn-action-icon btn-action-swap"
+                                title="Đổi xe hoặc tài xế" data-bs-toggle="tooltip">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </a>
+                            <button type="button" class="btn-action-icon btn-action-cancel"
+                                onclick="confirmUnassign({{ trip.id }}, '{{ trip.reference_code }}')"
+                                title="Hủy gán nguồn lực" data-bs-toggle="tooltip">
+                                <i class="bi bi-x-circle"></i>
+                            </button>
+                            {% elif trip.status == 'PICKED_UP' %}
+                            <button type="button" class="btn-action-main btn-primary"
+                                onclick="openQuickDepartModal({{ trip.id }}, '{{ trip.reference_code }}')"
+                                title="Ghi nhận xe xuất phát khởi hành">
+                                <i class="bi bi-truck-flatbed"></i> Khởi Hành
+                            </button>
+                            {% elif trip.status == 'IN_TRANSIT' %}
+                            <a href="/trips/{{ trip.id }}/deliver" class="btn-action-main btn-success"
+                                title="Xác nhận giao hàng & Tải biên bản POD">
+                                <i class="bi bi-box-seam"></i> Giao Hàng
+                            </a>
+                            {% elif trip.status == 'DELIVERED' %}
+                            <a href="/trips/{{ trip.id }}" class="btn-action-main btn-primary"
+                                title="Chốt hoàn tất chuyến hàng & giải phóng nguồn lực">
+                                <i class="bi bi-check2-all"></i> Hoàn Tất
+                            </a>
+                            {% elif trip.status == 'COMPLETED' %}
+                            <span class="badge-action-done">
+                                <i class="bi bi-check2-circle"></i> Hoàn tất
+                            </span>
+                            {% else %}
+                            <span class="badge bg-light text-muted border">Đang vận hành</span>
+                            {% endif %}
+                            {% else %}
+                            <span class="badge-action-readonly">
+                                <i class="bi bi-lock"></i> Chỉ xem
+                            </span>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                        Chưa có chuyến hàng nào hoặc không khớp với bộ lọc tìm kiếm.
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Xác nhận Hủy Phân Công (Unassign) -->
+<div class="modal fade" id="unassignModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Xác Nhận Hủy Phân Công
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn hủy phân công nguồn lực cho chuyến hàng <strong id="unassignRefCode"></strong>?
+                </p>
+                <div class="alert alert-warning small mb-0">
+                    <i class="bi bi-info-circle me-1"></i> Toàn bộ lịch chiếm dụng của Xe tải và Tài xế sẽ được giải
+                    phóng lập tức và chuyến sẽ chuyển về trạng thái <strong>Chưa điều phối</strong>.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <form id="unassignForm" method="POST" action="">
+                    <button type="submit" class="btn btn-danger">Xác Nhận Hủy Phân Công</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Xác nhận Khởi Hành Nhanh (Quick Depart Modal) -->
+<div class="modal fade" id="quickDepartModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-truck-flatbed me-2"></i>Ghi Nhận Xe Xuất Bến
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="quickDepartForm" method="POST" action="">
+                <div class="modal-body">
+                    <p>Xác nhận xe đã rời điểm lấy hàng cho chuyến <strong id="quickDepartRefCode"
+                            class="text-primary"></strong> và bắt đầu hành trình?</p>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Thời điểm xuất phát thực tế <span
+                                class="text-danger">*</span></label>
+                        <input type="datetime-local" name="actual_depart_time" id="quickDepartInputTime"
+                            class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ghi chú hành trình (nếu có)</label>
+                        <textarea name="notes" class="form-control" rows="2"
+                            placeholder="Tình hình giao thông, thời tiết hoặc lưu ý đặc biệt..."></textarea>
+                    </div>
+                    <div class="alert alert-info small mb-0">
+                        <i class="bi bi-info-circle me-1"></i> Chuyến hàng sẽ được chuyển trạng thái sang <strong>Đang
+                            vận chuyển</strong> và ghi nhận sự kiện vào dòng thời gian.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary fw-bold">
+                        <i class="bi bi-check2-circle me-1"></i> Xác Nhận Khởi Hành
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function confirmUnassign(tripId, refCode) {
+        document.getElementById('unassignRefCode').textContent = refCode;
+        document.getElementById('unassignForm').action = '/trips/' + tripId + '/unassign';
+        const modal = new bootstrap.Modal(document.getElementById('unassignModal'));
+        modal.show();
+    }
+
+    function openQuickDepartModal(tripId, refCode) {
+        document.getElementById('quickDepartRefCode').textContent = refCode;
+        document.getElementById('quickDepartForm').action = '/trips/' + tripId + '/depart';
+
+        // Set current local time
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('quickDepartInputTime').value = now.toISOString().slice(0, 16);
+
+        const modal = new bootstrap.Modal(document.getElementById('quickDepartModal'));
+        modal.show();
+    }
+</script>
+{% endblock %}

@@ -1,18 +1,24 @@
 from fastapi import APIRouter, Request, Depends
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from src.core.database import get_db
+from src.core.templates import templates
+from src.core.security import get_current_user
+from src.schemas.auth import UserSession
 from src.models.truck import Truck, TruckStatus
 from src.models.driver import Driver, DriverStatus
 from src.models.booking import ResourceBooking, BookingStatus
 
 router = APIRouter(tags=["Dashboard Web"])
-templates = Jinja2Templates(directory="src/templates")
+
 
 @router.get("/dashboard", response_class=HTMLResponse)
 @router.get("/", response_class=HTMLResponse)
-def dashboard_view(request: Request, db: Session = Depends(get_db)):
+def dashboard_view(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: UserSession = Depends(get_current_user),
+):
     # Truck metrics
     total_trucks = db.query(Truck).count()
     active_trucks = db.query(Truck).filter(Truck.status == TruckStatus.ACTIVE.value).count()
@@ -38,6 +44,7 @@ def dashboard_view(request: Request, db: Session = Depends(get_db)):
         name="dashboard/index.html",
         context={
             "active_tab": "dashboard",
+            "current_user": current_user,
             "total_trucks": total_trucks,
             "active_trucks": active_trucks,
             "maintenance_trucks": maintenance_trucks,
@@ -48,5 +55,5 @@ def dashboard_view(request: Request, db: Session = Depends(get_db)):
             "active_bookings": active_bookings,
             "recent_trucks": recent_trucks,
             "recent_drivers": recent_drivers,
-        }
+        },
     )

@@ -3,14 +3,30 @@
 {% block title %}Quản lý Tài Xế - Freight ERP{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h3 class="fw-bold mb-0"><i class="bi bi-person-badge text-primary me-2"></i>Danh Mục Tài Xế</h3>
-        <p class="text-muted mb-0">Quản lý hồ sơ lái xe, mã định danh và trạng thái sẵn sàng điều phối</p>
+<!-- Modern Page Hero Banner (Light Theme Edition) -->
+<div class="dashboard-hero mb-4 animate-fade-in-up">
+    <div class="row align-items-center">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="m-stripe-pill me-1"></span>
+                <span class="text-uppercase small fw-bold text-primary" style="letter-spacing: 1.5px;">QUẢN LÝ NHÂN SỰ VẬN TẢI</span>
+                <span class="badge bg-light text-dark border px-2 py-1 ms-2">
+                    Tổng: {{ total }} tài xế
+                </span>
+            </div>
+            <h2 class="dashboard-hero-title">Danh Mục Nhân Sự Lái Xe</h2>
+            <p class="dashboard-hero-subtitle mb-0">
+                Quản lý thông tin hồ sơ lái xe, mã định danh nhân sự và giám sát trạng thái sẵn sàng điều phối.
+            </p>
+        </div>
+        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+            {% if current_user and current_user.role == 'DSP' %}
+            <a href="/admin/drivers/create" class="btn btn-primary shadow-sm">
+                <i class="bi bi-person-plus me-1"></i> Thêm Tài Xế Mới
+            </a>
+            {% endif %}
+        </div>
     </div>
-    <a href="/admin/drivers/create" class="btn btn-primary">
-        <i class="bi bi-person-plus me-1"></i> Thêm Tài Xế Mới
-    </a>
 </div>
 
 <div id="alertContainer"></div>
@@ -30,32 +46,37 @@
 {% endif %}
 
 <!-- Filters -->
-<div class="card p-3 mb-4">
+<div class="card p-3 mb-4 shadow-sm border-0 animate-fade-in-up">
     <form method="get" action="/admin/drivers" class="row g-3 align-items-center">
         <div class="col-md-5">
             <div class="input-group">
-                <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
-                <input type="text" name="search" class="form-control" placeholder="Tìm theo mã tài xế, họ tên, số điện thoại..." value="{{ search or '' }}">
+                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" name="search" class="form-control border-start-0 ps-0"
+                    placeholder="Tìm theo mã tài xế, họ tên, số điện thoại..." value="{{ search or '' }}"
+                    style="height: 44px;">
             </div>
         </div>
         <div class="col-md-3">
-            <select name="status" class="form-select">
+            <select name="status" class="form-select" style="height: 44px;">
                 <option value="">-- Tất cả trạng thái --</option>
-                <option value="ACTIVE" {% if status == 'ACTIVE' %}selected{% endif %}>ACTIVE (Đang làm việc)</option>
-                <option value="INACTIVE" {% if status == 'INACTIVE' %}selected{% endif %}>INACTIVE (Nghỉ việc/Tạm dừng)</option>
+                <option value="ACTIVE" {% if status=='ACTIVE' %}selected{% endif %}>ACTIVE (Đang làm việc)</option>
+                <option value="INACTIVE" {% if status=='INACTIVE' %}selected{% endif %}>INACTIVE (Nghỉ việc/Tạm dừng)
+                </option>
             </select>
         </div>
         <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel me-1"></i> Lọc</button>
+            <button type="submit" class="btn btn-primary w-100" style="height: 44px;"><i class="bi bi-funnel me-1"></i>
+                Lọc</button>
         </div>
         <div class="col-md-2">
-            <a href="/admin/drivers" class="btn btn-outline-secondary w-100">Đặt lại</a>
+            <a href="/admin/drivers" class="btn btn-outline-secondary w-100"
+                style="height: 44px; display: flex; align-items: center; justify-content: center;">Đặt lại</a>
         </div>
     </form>
 </div>
 
 <!-- Drivers Table -->
-<div class="card shadow-sm">
+<div class="card shadow-sm border-0 card-hover animate-fade-in-up delay-1">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
@@ -71,43 +92,53 @@
             </thead>
             <tbody>
                 {% if drivers %}
-                    {% for driver in drivers %}
-                    <tr id="driver-row-{{ driver.id }}">
-                        <td class="ps-3 fw-bold text-muted">#{{ driver.id }}</td>
-                        <td><span class="badge bg-dark px-2 py-1">{{ driver.driver_code }}</span></td>
-                        <td class="fw-bold">{{ driver.full_name }}</td>
-                        <td>
-                            <a href="tel:{{ driver.phone_number }}" class="text-decoration-none">
-                                <i class="bi bi-telephone text-primary me-1"></i>{{ driver.phone_number }}
+                {% for driver in drivers %}
+                <tr id="driver-row-{{ driver.id }}">
+                    <td class="ps-3 fw-bold text-muted">#{{ driver.id }}</td>
+                    <td><span class="badge bg-dark px-2 py-1">{{ driver.driver_code }}</span></td>
+                    <td class="fw-bold">{{ driver.full_name }}</td>
+                    <td>
+                        <a href="tel:{{ driver.phone_number }}" class="text-decoration-none">
+                            <i class="bi bi-telephone text-primary me-1"></i>{{ driver.phone_number }}
+                        </a>
+                    </td>
+                    <td>
+                        {% if driver.status == 'ACTIVE' %}
+                        <span class="badge-status badge-status-active">
+                            <span class="status-dot status-dot-active"></span> Đang làm việc
+                        </span>
+                        {% else %}
+                        <span class="badge-status badge-status-inactive">Nghỉ việc</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-muted small">{{ driver.created_at.strftime('%d/%m/%Y %H:%M') if driver.created_at
+                        else '—' }}</td>
+                    <td class="text-end pe-3">
+                        <div class="table-action-toolbar">
+                            {% if current_user and current_user.role == 'DSP' %}
+                            <a href="/admin/drivers/{{ driver.id }}/edit" class="btn-action-main btn-primary"
+                                title="Chỉnh sửa tài xế">
+                                <i class="bi bi-pencil"></i> Sửa
                             </a>
-                        </td>
-                        <td>
-                            {% if driver.status == 'ACTIVE' %}
-                                <span class="badge bg-success">ACTIVE</span>
+                            <button type="button" class="btn-action-icon btn-action-delete"
+                                onclick="confirmDeleteDriver({{ driver.id }}, '{{ driver.full_name }} ({{ driver.driver_code }})')"
+                                title="Xóa tài xế">
+                                <i class="bi bi-trash"></i>
+                            </button>
                             {% else %}
-                                <span class="badge bg-secondary">INACTIVE</span>
+                            <span class="badge-action-readonly"><i class="bi bi-lock"></i> Chỉ xem</span>
                             {% endif %}
-                        </td>
-                        <td class="text-muted small">{{ driver.created_at.strftime('%d/%m/%Y %H:%M') if driver.created_at else '—' }}</td>
-                        <td class="text-end pe-3">
-                            <div class="btn-group btn-group-sm">
-                                <a href="/admin/drivers/{{ driver.id }}/edit" class="btn btn-outline-primary" title="Chỉnh sửa">
-                                    <i class="bi bi-pencil"></i> Sửa
-                                </a>
-                                <button type="button" class="btn btn-outline-danger" onclick="confirmDeleteDriver({{ driver.id }}, '{{ driver.full_name }} ({{ driver.driver_code }})')" title="Xóa tài xế">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
                 {% else %}
-                    <tr>
-                        <td colspan="7" class="text-center py-5 text-muted">
-                            <i class="bi bi-people fs-1 d-block mb-2 text-secondary"></i>
-                            Chưa có tài xế nào trong danh mục hoặc không khớp bộ lọc tìm kiếm.
-                        </td>
-                    </tr>
+                <tr>
+                    <td colspan="7" class="text-center py-5 text-muted">
+                        <i class="bi bi-people fs-1 d-block mb-2 text-secondary"></i>
+                        Chưa có tài xế nào trong danh mục hoặc không khớp bộ lọc tìm kiếm.
+                    </td>
+                </tr>
                 {% endif %}
             </tbody>
         </table>
@@ -124,7 +155,8 @@
             </div>
             <div class="modal-body">
                 <p id="driverRuleMessage" class="fw-bold text-danger mb-2"></p>
-                <div class="small text-muted">Tài xế đã có lịch sử tham gia các chuyến hàng trong hệ thống. Vui lòng chuyển trạng thái làm việc sang INACTIVE thay vì xóa cứng.</div>
+                <div class="small text-muted">Tài xế đã có lịch sử tham gia các chuyến hàng trong hệ thống. Vui lòng
+                    chuyển trạng thái làm việc sang INACTIVE thay vì xóa cứng.</div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đã hiểu</button>
@@ -138,13 +170,15 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title fw-bold text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Xác Nhận Xóa Tài Xế</h5>
+                <h5 class="modal-title fw-bold text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Xác Nhận
+                    Xóa Tài Xế</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <p>Bạn có chắc chắn muốn xóa hồ sơ tài xế: <strong id="deleteDriverName"></strong>?</p>
                 <div class="alert alert-warning small mb-0">
-                    <i class="bi bi-info-circle me-1"></i><strong>Quy tắc bảo toàn dữ liệu:</strong> Chỉ tài xế chưa từng phát sinh chuyến hàng mới được phép xóa cứng.
+                    <i class="bi bi-info-circle me-1"></i><strong>Quy tắc bảo toàn dữ liệu:</strong> Chỉ tài xế chưa
+                    từng phát sinh chuyến hàng mới được phép xóa cứng.
                 </div>
             </div>
             <div class="modal-footer">
@@ -159,48 +193,48 @@
 
 {% block extra_scripts %}
 <script>
-let targetDriverId = null;
-const deleteDriverModal = new bootstrap.Modal(document.getElementById('deleteDriverModal'));
-const driverRuleModal = new bootstrap.Modal(document.getElementById('driverRuleModal'));
+    let targetDriverId = null;
+    const deleteDriverModal = new bootstrap.Modal(document.getElementById('deleteDriverModal'));
+    const driverRuleModal = new bootstrap.Modal(document.getElementById('driverRuleModal'));
 
-function confirmDeleteDriver(id, name) {
-    targetDriverId = id;
-    document.getElementById('deleteDriverName').innerText = name;
-    deleteDriverModal.show();
-}
-
-document.getElementById('executeDeleteDriverBtn').addEventListener('click', async function() {
-    if (!targetDriverId) return;
-    deleteDriverModal.hide();
-
-    try {
-        const response = await fetch('/api/v1/drivers/' + targetDriverId, {
-            method: 'DELETE',
-            headers: { 'Accept': 'application/json' }
-        });
-        const resData = await response.json();
-
-        if (response.ok && resData.success) {
-            const row = document.getElementById('driver-row-' + targetDriverId);
-            if (row) row.remove();
-            showAlert('success', 'Xóa tài xế thành công.');
-        } else {
-            document.getElementById('driverRuleMessage').innerText = resData.error || 'Thao tác không được phép.';
-            driverRuleModal.show();
-        }
-    } catch (err) {
-        showAlert('danger', 'Lỗi kết nối máy chủ: ' + err.message);
+    function confirmDeleteDriver(id, name) {
+        targetDriverId = id;
+        document.getElementById('deleteDriverName').innerText = name;
+        deleteDriverModal.show();
     }
-});
 
-function showAlert(type, msg) {
-    const container = document.getElementById('alertContainer');
-    container.innerHTML = `
+    document.getElementById('executeDeleteDriverBtn').addEventListener('click', async function () {
+        if (!targetDriverId) return;
+        deleteDriverModal.hide();
+
+        try {
+            const response = await fetch('/api/v1/drivers/' + targetDriverId, {
+                method: 'DELETE',
+                headers: { 'Accept': 'application/json' }
+            });
+            const resData = await response.json();
+
+            if (response.ok && resData.success) {
+                const row = document.getElementById('driver-row-' + targetDriverId);
+                if (row) row.remove();
+                showAlert('success', 'Xóa tài xế thành công.');
+            } else {
+                document.getElementById('driverRuleMessage').innerText = resData.error || 'Thao tác không được phép.';
+                driverRuleModal.show();
+            }
+        } catch (err) {
+            showAlert('danger', 'Lỗi kết nối máy chủ: ' + err.message);
+        }
+    });
+
+    function showAlert(type, msg) {
+        const container = document.getElementById('alertContainer');
+        container.innerHTML = `
         <div class="alert alert-${type} alert-dismissible fade show" role="alert">
             <i class="bi bi-info-circle-fill me-2"></i>${msg}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     `;
-}
+    }
 </script>
 {% endblock %}

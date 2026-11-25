@@ -1,0 +1,218 @@
+openapi: 3.0.3
+info:
+  title: Trip Pickup & Transit Tracking API (TRN-03)
+  description: API endpoints for recording actual cargo pickup and departure events, validating vehicle capacity, enforcing BR-09, and maintaining immutable audit timelines.
+  version: 1.0.0
+paths:
+  /api/v1/trips/{id}/pickup:
+    post:
+      summary: Record Actual Cargo Pickup (ASSIGNED -> PICKED_UP)
+      description: Confirms that cargo has been handed over, validates actual weight against truck capacity, checks BR-09 resource availability, updates booking status to IN_PROGRESS, and transitions trip to PICKED_UP.
+      tags: [Tracking]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordPickupRequest'
+      responses:
+        '200':
+          description: Pickup successfully recorded, trip is now PICKED_UP
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripDetailResponse'
+        '400':
+          description: Business rule violation (e.g. overweight rejection, invalid state transition, future date)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden (Only DSP role can confirm pickup)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Trip not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: BR-09 Conflict - Resource is currently busy with another in-progress trip
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/trips/{id}/depart:
+    post:
+      summary: Record Actual Departure (PICKED_UP -> IN_TRANSIT)
+      description: Confirms that the truck has started its journey from the pickup location, transitioning trip status from PICKED_UP to IN_TRANSIT.
+      tags: [Tracking]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordDepartureRequest'
+      responses:
+        '200':
+          description: Departure successfully recorded, trip is now IN_TRANSIT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripDetailResponse'
+        '400':
+          description: Business rule violation (e.g. trip not in PICKED_UP, departure time before pickup time)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden (Only DSP role can confirm departure)
+        '404':
+          description: Trip not found
+
+  /api/v1/trips/{id}/events:
+    get:
+      summary: Get Audit Timeline Events for Trip
+      description: Returns the immutable list of timestamped events (actual time vs system recorded time) for tracking progress.
+      tags: [Tracking]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of timeline events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripEventsResponse'
+        '404':
+          description: Trip not found
+
+components:
+  schemas:
+    RecordPickupRequest:
+      type: object
+      required: [actual_pickup_time, handover_person, actual_cargo_weight_kg]
+      properties:
+        actual_pickup_time:
+          type: string
+          format: date-time
+          example: "2026-11-25T10:30:00"
+        handover_person:
+          type: string
+          example: "Nguyễn Văn Kho"
+        actual_cargo_weight_kg:
+          type: integer
+          minimum: 1
+          example: 4800
+        cargo_condition:
+          type: string
+          default: "Nguyên đai nguyên kiện"
+          example: "Hàng đóng thùng carton, niêm phong kẹp chì nguyên vẹn"
+        discrepancy_notes:
+          type: string
+          nullable: true
+          example: "Thực tế cân tăng 300kg so với dự kiến ban đầu"
+
+    RecordDepartureRequest:
+      type: object
+      required: [actual_depart_time]
+      properties:
+        actual_depart_time:
+          type: string
+          format: date-time
+          example: "2026-11-25T11:00:00"
+        notes:
+          type: string
+          nullable: true
+          example: "Xe xuất phát đúng tiến độ theo đường cao tốc"
+
+    TripEventItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        trip_id:
+          type: integer
+          example: 10
+        event_type:
+          type: string
+          example: "PICKUP_CONFIRMED"
+        from_status:
+          type: string
+          example: "ASSIGNED"
+        to_status:
+          type: string
+          example: "PICKED_UP"
+        actual_time:
+          type: string
+          format: date-time
+        recorded_at:
+          type: string
+          format: date-time
+        recorded_by_user_id:
+          type: integer
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+
+    TripEventsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TripEventItem'
+        meta:
+          type: object
+
+    TripDetailResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+        error:
+          type: string
+          nullable: true
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: object
+          nullable: true
+        error:
+          type: string
+          example: "Khối lượng hàng hóa thực tế vượt quá tải trọng cho phép của xe."

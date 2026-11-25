@@ -1,42 +1,86 @@
 /**
  * Freight Transportation Management System
  * Design System Theme & Color Tokens (mapped from frontend/DESIGN.md)
+ * Modernized UI/UX with smooth transitions, refined cards, and micro-interactions
  */
 
 :root {
     /* 1. Primary Brand Colors (BMW Corporate Palette) */
     --brand-primary: #1c69d4;
     --brand-primary-active: #0653b6;
+    --brand-primary-hover: #1557b0;
+    --brand-primary-soft: rgba(28, 105, 212, 0.08);
+    --brand-primary-border: rgba(28, 105, 212, 0.2);
     --brand-primary-disabled: #d6d6d6;
 
     /* 2. Dark Accent & Elevation */
     --surface-dark: #1a2129;
     --surface-dark-elevated: #262e38;
+    --surface-dark-hover: #323b47;
 
     /* 3. Canvas & Surfaces */
-    --canvas-bg: #f8f9fa;
+    --canvas-bg: #f8fafc;
     --surface-card: #ffffff;
-    --surface-soft: #f7f7f7;
-    --border-hairline: #e5e7eb;
+    --surface-soft: #f8fafc;
+    --surface-muted: #f1f5f9;
+    --border-hairline: #e2e8f0;
+    --border-strong: #cbd5e1;
 
     /* 4. Text & Ink Tokens */
-    --text-ink: #262626;
-    --text-body: #3c3c3c;
-    --text-muted: #6b6b6b;
+    --text-ink: #1e293b;
+    --text-body: #334155;
+    --text-muted: #64748b;
+    --text-soft: #94a3b8;
 
-    /* 5. System Status Colors */
+    /* 5. System Status Colors (Tokens from DESIGN.md) */
     --status-success: #22c55e;
+    --status-success-soft: rgba(34, 197, 94, 0.1);
+    --status-success-border: rgba(34, 197, 94, 0.25);
+    
     --status-warning: #f59e0b;
+    --status-warning-soft: rgba(245, 158, 11, 0.1);
+    --status-warning-border: rgba(245, 158, 11, 0.25);
+    
     --status-danger: #dc2626;
-    --status-secondary: #6c757d;
+    --status-danger-soft: rgba(220, 38, 38, 0.1);
+    --status-danger-border: rgba(220, 38, 38, 0.25);
 
-    /* 6. Dimensions & Radii */
-    --radius-sm: 4px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
+    --status-info: #0284c7;
+    --status-info-soft: rgba(2, 132, 199, 0.1);
+    --status-info-border: rgba(2, 132, 199, 0.25);
+    
+    --status-secondary: #64748b;
+
+    /* 6. M-Stripe Brand Signature Colors */
+    --m-blue-light: #0066b1;
+    --m-blue-dark: #1c69d4;
+    --m-red: #e22718;
+
+    /* 7. Dimensions, Radii & Shadows */
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 18px;
+    --radius-pill: 9999px;
+
+    --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+    --shadow-card: 0 3px 10px -1px rgba(0, 0, 0, 0.05), 0 1px 4px -1px rgba(0, 0, 0, 0.03);
+    --shadow-elevated: 0 12px 28px -6px rgba(28, 105, 212, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+    --shadow-card-hover: 0 14px 30px -8px rgba(15, 23, 42, 0.12), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+    --shadow-glow-primary: 0 0 20px rgba(28, 105, 212, 0.25);
+
+    /* 8. Timing & Motion Curves */
+    --ease-out-cubic: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: 0.15s var(--ease-out-cubic);
+    --transition-normal: 0.25s var(--ease-out-cubic);
+    --transition-smooth: 0.35s var(--ease-out-cubic);
 }
 
-/* Base resets & typography */
+/* ==========================================================================
+   Base resets & typography
+   ========================================================================== */
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-color: var(--canvas-bg);
@@ -44,112 +88,844 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    letter-spacing: -0.011em;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* Top Navigation Bar */
+/* ==========================================================================
+   Brand Signature: M-Stripe Divider
+   ========================================================================== */
+.m-stripe-divider {
+    height: 2.5px;
+    background: linear-gradient(
+        90deg, 
+        var(--m-blue-light) 0%, 
+        var(--m-blue-light) 33.33%, 
+        var(--m-blue-dark) 33.33%, 
+        var(--m-blue-dark) 66.66%, 
+        var(--m-red) 66.66%, 
+        var(--m-red) 100%
+    );
+    width: 100%;
+}
+
+.m-stripe-pill {
+    height: 3.5px;
+    width: 30px;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(
+        90deg, 
+        var(--m-blue-light) 0%, 
+        var(--m-blue-light) 33.33%, 
+        var(--m-blue-dark) 33.33%, 
+        var(--m-blue-dark) 66.66%, 
+        var(--m-red) 66.66%, 
+        var(--m-red) 100%
+    );
+    display: inline-block;
+}
+
+/* ==========================================================================
+   Top Navigation Bar (Light Theme Edition)
+   ========================================================================== */
 .top-navbar {
-    background-color: var(--surface-dark);
-    border-bottom: 2px solid var(--brand-primary);
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-hairline);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    z-index: 1030;
+    min-height: 52px;
+    padding: 0.25rem 0;
 }
 
 .navbar-brand {
     font-weight: 700;
     letter-spacing: 0.5px;
-    color: #ffffff !important;
-    font-size: 1.25rem;
+    color: var(--text-ink) !important;
+    font-size: 1.02rem;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    transition: transform var(--transition-fast);
+}
+
+.navbar-brand:hover {
+    transform: scale(1.02);
 }
 
 .nav-link {
-    color: #d1d5db !important;
+    color: #475569 !important;
     font-weight: 500;
-    padding: 0.6rem 1rem !important;
-    border-radius: 6px;
-    transition: all 0.2s ease;
+    font-size: 0.84rem;
+    padding: 0.35rem 0.65rem !important;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: all var(--transition-normal);
+}
+
+.nav-link i {
+    font-size: 0.95rem;
 }
 
 .nav-link:hover {
-    color: #ffffff !important;
-    background-color: var(--surface-dark-elevated);
+    color: var(--brand-primary) !important;
+    background-color: #f1f5f9;
+    transform: translateY(-1px);
 }
 
 .nav-link.active {
     color: #ffffff !important;
     background-color: var(--brand-primary) !important;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(28, 105, 212, 0.3);
 }
 
-/* Card and Surface Containers */
+/* ==========================================================================
+   MODERN CARD ARCHITECTURE (Design System Overhaul)
+   ========================================================================== */
+
+/* Base Modern Card */
 .card {
     background-color: var(--surface-card);
     border-radius: var(--radius-md);
     border: 1px solid var(--border-hairline);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: var(--shadow-card);
+    transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
+    position: relative;
+    overflow: hidden;
 }
 
+/* Interactive Card with Smooth Lift */
+.card-hover {
+    transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
+}
+
+.card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: var(--brand-primary-border);
+}
+
+/* Card Header */
 .card-header {
-    background-color: var(--surface-card);
+    background-color: transparent;
     border-bottom: 1px solid var(--border-hairline);
     font-weight: 600;
+    padding: 1.1rem 1.4rem;
 }
 
-/* Buttons */
+.card-header-dark {
+    background-color: var(--surface-dark) !important;
+    color: #ffffff !important;
+    border-bottom: none;
+}
+
+.card-header-dark h6,
+.card-header-dark h5 {
+    color: #ffffff !important;
+}
+
+.card-body {
+    padding: 1.4rem;
+}
+
+/* ==========================================================================
+   STAT / KPI METRIC CARDS (High-Tech Automotive Aesthetic)
+   ========================================================================== */
+.stat-card-modern {
+    background: #ffffff;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-hairline);
+    padding: 1.4rem;
+    box-shadow: var(--shadow-card);
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.stat-card-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3.5px;
+    background: var(--brand-primary);
+    transition: height var(--transition-fast);
+}
+
+.stat-card-modern:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-elevated);
+    border-color: var(--brand-primary-border);
+}
+
+.stat-card-modern:hover::before {
+    height: 4.5px;
+}
+
+/* Color Accents for Stat Cards */
+.stat-card-modern.success::before {
+    background: var(--status-success);
+}
+.stat-card-modern.success:hover {
+    box-shadow: 0 12px 28px -6px rgba(34, 197, 94, 0.15), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+    border-color: var(--status-success-border);
+}
+
+.stat-card-modern.warning::before {
+    background: var(--status-warning);
+}
+.stat-card-modern.warning:hover {
+    box-shadow: 0 12px 28px -6px rgba(245, 158, 11, 0.15), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+    border-color: var(--status-warning-border);
+}
+
+.stat-card-modern.danger::before {
+    background: var(--status-danger);
+}
+.stat-card-modern.danger:hover {
+    box-shadow: 0 12px 28px -6px rgba(220, 38, 38, 0.15), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+    border-color: var(--status-danger-border);
+}
+
+.stat-card-modern.info::before {
+    background: var(--status-info);
+}
+.stat-card-modern.info:hover {
+    box-shadow: 0 12px 28px -6px rgba(2, 132, 199, 0.15), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+    border-color: var(--status-info-border);
+}
+
+/* Icon Box inside Stat Cards */
+.stat-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    transition: transform var(--transition-normal), background-color var(--transition-normal);
+}
+
+.stat-card-modern:hover .stat-icon-wrapper {
+    transform: scale(1.08) rotate(3deg);
+}
+
+.icon-soft-primary {
+    background-color: var(--brand-primary-soft);
+    color: var(--brand-primary);
+}
+
+.icon-soft-success {
+    background-color: var(--status-success-soft);
+    color: var(--status-success);
+}
+
+.icon-soft-warning {
+    background-color: var(--status-warning-soft);
+    color: var(--status-warning);
+}
+
+.icon-soft-danger {
+    background-color: var(--status-danger-soft);
+    color: var(--status-danger);
+}
+
+.icon-soft-info {
+    background-color: var(--status-info-soft);
+    color: var(--status-info);
+}
+
+/* Progress micro-bar */
+.stat-progress {
+    height: 5px;
+    border-radius: var(--radius-pill);
+    background-color: var(--surface-muted);
+    overflow: hidden;
+    margin-top: 0.8rem;
+}
+
+.stat-progress-bar {
+    height: 100%;
+    border-radius: var(--radius-pill);
+    transition: width 0.8s var(--ease-out-cubic);
+}
+
+/* ==========================================================================
+   PAGE HERO BANNER (Light Theme Edition)
+   ========================================================================== */
+.dashboard-hero {
+    background: #ffffff;
+    color: var(--text-ink);
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.6rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--m-blue-light) 0%, var(--brand-primary) 50%, var(--m-red) 100%);
+}
+
+.dashboard-hero-title {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-size: 1.45rem;
+    color: var(--text-ink);
+    margin-bottom: 0.25rem;
+}
+
+.dashboard-hero-subtitle {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    font-weight: 400;
+}
+
+/* ==========================================================================
+   BUTTONS & MICRO-INTERACTIONS
+   ========================================================================== */
+.btn {
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    padding: 0.55rem 1.15rem;
+    font-size: 0.88rem;
+    letter-spacing: 0.01em;
+    transition: all var(--transition-normal);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn:hover {
+    transform: translateY(-1.5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
 .btn-primary {
     background-color: var(--brand-primary);
     border-color: var(--brand-primary);
-    font-weight: 600;
+    color: #ffffff;
 }
 
 .btn-primary:hover, 
 .btn-primary:focus {
-    background-color: var(--brand-primary-active);
-    border-color: var(--brand-primary-active);
+    background-color: var(--brand-primary-hover);
+    border-color: var(--brand-primary-hover);
+    box-shadow: 0 4px 16px rgba(28, 105, 212, 0.35);
 }
 
 .btn-outline-primary {
     color: var(--brand-primary);
-    border-color: var(--brand-primary);
-    font-weight: 500;
+    border-color: var(--brand-primary-border);
+    background-color: transparent;
 }
 
 .btn-outline-primary:hover {
     background-color: var(--brand-primary);
     border-color: var(--brand-primary);
     color: #ffffff;
+    box-shadow: 0 4px 14px rgba(28, 105, 212, 0.28);
 }
 
-/* Badges & Status */
-.badge-active { 
-    background-color: var(--status-success) !important; 
-    color: #ffffff !important; 
+.btn-sm {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+    border-radius: var(--radius-xs);
 }
 
-.badge-maintenance { 
-    background-color: var(--status-warning) !important; 
-    color: #000000 !important; 
+/* ==========================================================================
+   MODERN CATEGORY FILTER TABS (BMW-style Category Pills)
+   ========================================================================== */
+.filter-tabs-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
-.badge-inactive { 
-    background-color: var(--status-secondary) !important; 
-    color: #ffffff !important; 
+.filter-tab {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-pill);
+    background-color: #ffffff;
+    border: 1px solid var(--border-hairline);
+    color: var(--text-body);
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all var(--transition-fast);
 }
 
-/* Stat KPI Cards */
-.stat-card {
-    border-left: 4px solid var(--brand-primary);
-}
-.stat-card.warning { 
-    border-left-color: var(--status-warning); 
-}
-.stat-card.success { 
-    border-left-color: var(--status-success); 
-}
-.stat-card.secondary { 
-    border-left-color: var(--status-secondary); 
+.filter-tab:hover {
+    background-color: var(--surface-muted);
+    color: var(--text-ink);
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
 }
 
-/* Footer */
+.filter-tab.active {
+    background-color: var(--brand-primary);
+    color: #ffffff !important;
+    border-color: var(--brand-primary);
+    box-shadow: 0 3px 10px rgba(28, 105, 212, 0.35);
+    font-weight: 600;
+}
+
+.filter-tab.active-delayed {
+    background-color: var(--status-danger) !important;
+    color: #ffffff !important;
+    border-color: var(--status-danger) !important;
+    box-shadow: 0 3px 10px rgba(220, 38, 38, 0.35);
+    font-weight: 600;
+}
+
+.filter-tab.active-issues {
+    background-color: var(--status-warning) !important;
+    color: #000000 !important;
+    border-color: var(--status-warning) !important;
+    box-shadow: 0 3px 10px rgba(245, 158, 11, 0.35);
+    font-weight: 600;
+}
+
+.filter-tab .badge {
+    margin-left: 0.45rem;
+    font-weight: 600;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-pill);
+}
+
+/* ==========================================================================
+   DATA TABLES & ROW HOVER INTERACTIONS
+   ========================================================================== */
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background-color: #f8fafc;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    border-bottom: 1px solid var(--border-hairline);
+    padding: 0.9rem 1rem;
+    white-space: nowrap;
+}
+
+.table tbody tr {
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.table tbody tr:hover {
+    background-color: #f8fafc !important;
+}
+
+.table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    font-size: 0.9rem;
+}
+
+/* ==========================================================================
+   STATUS BADGES & PULSING DOTS
+   ========================================================================== */
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.badge-status-active,
+.badge-status-completed,
+.badge-status-confirmed {
+    background-color: var(--status-success-soft);
+    color: #15803d;
+    border: 1px solid var(--status-success-border);
+}
+
+.badge-status-in-transit,
+.badge-status-picked-up,
+.badge-status-assigned {
+    background-color: var(--brand-primary-soft);
+    color: #0369a1;
+    border: 1px solid var(--brand-primary-border);
+}
+
+.badge-status-maintenance,
+.badge-status-unassigned {
+    background-color: var(--status-warning-soft);
+    color: #b45309;
+    border: 1px solid var(--status-warning-border);
+}
+
+.badge-status-inactive,
+.badge-status-cancelled {
+    background-color: var(--surface-muted);
+    color: var(--text-muted);
+    border: 1px solid var(--border-hairline);
+}
+
+.badge-status-danger,
+.badge-status-delayed,
+.badge-status-issue {
+    background-color: var(--status-danger-soft);
+    color: #b91c1c;
+    border: 1px solid var(--status-danger-border);
+}
+
+/* Pulsing Status Dot */
+.status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-dot-active {
+    background-color: var(--status-success);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    animation: pulseDot 2s infinite;
+}
+
+.status-dot-pulse-blue {
+    background-color: var(--brand-primary);
+    box-shadow: 0 0 0 0 rgba(28, 105, 212, 0.7);
+    animation: pulseDot 2s infinite;
+}
+
+.status-dot-pulse-red {
+    background-color: var(--status-danger);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+    animation: pulseDot 1.5s infinite;
+}
+
+@keyframes pulseDot {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+    }
+}
+
+/* ==========================================================================
+   DELIVERY STEPPER (Visual Journey on detail.html)
+   ========================================================================== */
+.journey-stepper {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin: 1.5rem 0 2rem 0;
+}
+
+.journey-stepper::before {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: 20px;
+    right: 20px;
+    height: 3px;
+    background-color: var(--border-hairline);
+    z-index: 1;
+}
+
+.journey-step {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    text-align: center;
+}
+
+.journey-step-circle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    border: 2px solid var(--border-hairline);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: var(--text-muted);
+    transition: all var(--transition-normal);
+}
+
+.journey-step.completed .journey-step-circle {
+    background-color: var(--status-success);
+    border-color: var(--status-success);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.35);
+}
+
+.journey-step.active .journey-step-circle {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(28, 105, 212, 0.2);
+    animation: pulseDot 2s infinite;
+}
+
+.journey-step-label {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.journey-step.completed .journey-step-label {
+    color: var(--status-success);
+}
+
+.journey-step.active .journey-step-label {
+    color: var(--brand-primary);
+    font-weight: 700;
+}
+
+/* ==========================================================================
+   LOGIN CARD & DEMO ROLE CARDS
+   ========================================================================== */
+.login-card {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-hairline);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08);
+    background: #ffffff;
+    overflow: hidden;
+}
+
+.role-select-card {
+    border: 1.5px solid var(--border-hairline);
+    border-radius: var(--radius-md);
+    padding: 0.9rem 0.6rem;
+    background: #ffffff;
+    transition: all var(--transition-normal);
+    cursor: pointer;
+    text-align: center;
+    position: relative;
+}
+
+.role-select-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--brand-primary);
+    box-shadow: 0 6px 18px rgba(28, 105, 212, 0.12);
+}
+
+.role-select-card.active {
+    border-color: var(--brand-primary);
+    background-color: var(--brand-primary-soft);
+    box-shadow: 0 0 0 3px rgba(28, 105, 212, 0.15);
+}
+
+.role-select-card .role-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 0.2rem;
+}
+
+.role-select-card .role-desc {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+/* ==========================================================================
+   SMOOTH KEYFRAME ANIMATIONS
+   ========================================================================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.4s var(--ease-out-cubic) both;
+}
+
+.delay-1 { animation-delay: 0.05s; }
+.delay-2 { animation-delay: 0.1s; }
+.delay-3 { animation-delay: 0.15s; }
+.delay-4 { animation-delay: 0.2s; }
+
+/* Footer styling */
 footer {
     margin-top: auto;
-    background-color: var(--surface-card);
+    background-color: var(--surface-soft);
     border-top: 1px solid var(--border-hairline);
+    color: var(--text-muted);
+}
+
+/* ==========================================================================
+   TABLE ACTION TOOLBAR & OPTIMIZED BUTTONS
+   ========================================================================== */
+.table-action-toolbar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    vertical-align: middle;
+}
+
+/* Standardized Icon Action Button (32px square) */
+.btn-action-icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    transition: all var(--transition-fast);
+    border: 1px solid var(--border-hairline);
+    background-color: #ffffff;
+    color: var(--text-body);
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.btn-action-icon:hover {
+    background-color: var(--surface-muted);
+    border-color: var(--border-strong);
+    color: var(--brand-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* Action Swap (Blue tint) */
+.btn-action-icon.btn-action-swap {
+    border-color: rgba(28, 105, 212, 0.25);
+    background-color: rgba(28, 105, 212, 0.06);
+    color: var(--brand-primary);
+}
+
+.btn-action-icon.btn-action-swap:hover {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: #ffffff;
+}
+
+/* Action Edit (Primary tint) */
+.btn-action-icon.btn-action-edit {
+    border-color: rgba(28, 105, 212, 0.25);
+    background-color: #ffffff;
+    color: var(--brand-primary);
+}
+
+.btn-action-icon.btn-action-edit:hover {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: #ffffff;
+}
+
+/* Action Cancel / Delete (Red tint) */
+.btn-action-icon.btn-action-cancel,
+.btn-action-icon.btn-action-delete {
+    border-color: rgba(220, 38, 38, 0.25);
+    background-color: rgba(220, 38, 38, 0.05);
+    color: var(--status-danger);
+}
+
+.btn-action-icon.btn-action-cancel:hover,
+.btn-action-icon.btn-action-delete:hover {
+    background-color: var(--status-danger);
+    border-color: var(--status-danger);
+    color: #ffffff;
+}
+
+/* Standardized Main Action Button (32px height) */
+.btn-action-main {
+    height: 32px;
+    padding: 0 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border-radius: var(--radius-sm);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
+    border: none;
+    transition: all var(--transition-fast);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.btn-action-main:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+}
+
+/* Badge for Completed Action (32px height) */
+.badge-action-done {
+    height: 32px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border-radius: var(--radius-sm);
+    font-size: 0.775rem;
+    font-weight: 600;
+    background-color: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+}
+
+/* Badge for Read-only State (32px height) */
+.badge-action-readonly {
+    height: 32px;
+    padding: 0 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 500;
+    background-color: var(--surface-muted);
+    color: var(--text-muted);
+    border: 1px solid var(--border-hairline);
 }

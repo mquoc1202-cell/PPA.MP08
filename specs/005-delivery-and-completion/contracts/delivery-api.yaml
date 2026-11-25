@@ -1,0 +1,319 @@
+openapi: 3.0.3
+info:
+  title: Freight Transportation System - TRN-04 Delivery & Completion API
+  description: RESTful API contracts for Cargo Delivery Confirmation, Proof of Delivery (POD) Evidence Management, and Trip Completion.
+  version: 1.0.0
+
+paths:
+  /api/v1/trips/{id}/deliver:
+    post:
+      summary: Confirm Cargo Delivery or Report Delivery Failure (TRN-04)
+      description: |
+        Processes delivery result for an IN_TRANSIT trip.
+        - When result = 'SUCCESS': Requires recipient_name, valid actual_delivery_time >= actual_pickup_time, and at least 1 POD evidence file. Transitions trip to DELIVERED.
+        - When result = 'FAILED': Retains IN_TRANSIT, logs TripIssue and TripEvent.
+        Protected by require_role(["DSP"]).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the trip
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - actual_delivery_time
+                - result
+              properties:
+                actual_delivery_time:
+                  type: string
+                  format: date-time
+                  description: Actual delivery timestamp (ISO 8601).
+                recipient_name:
+                  type: string
+                  maxLength: 100
+                  description: Full name of recipient (required if result is SUCCESS).
+                result:
+                  type: string
+                  enum: [SUCCESS, FAILED]
+                  description: Delivery outcome.
+                delivery_notes:
+                  type: string
+                  maxLength: 500
+                  description: Notes or failure reason.
+                evidence_files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Proof of Delivery files (PDF, JPG, PNG). At least 1 required if result is SUCCESS.
+      responses:
+        '200':
+          description: Delivery confirmation recorded successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseTripDetail'
+        '400':
+          description: Validation error (invalid state, missing POD files, or invalid timestamp).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: Forbidden - User lacks DSP role.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '404':
+          description: Trip not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+
+  /api/v1/trips/{id}/complete:
+    post:
+      summary: Complete Trip and Release Resources (TRN-04)
+      description: |
+        Closes a DELIVERED trip, validates presence of POD evidence, verifies no pending surcharges,
+        sets actual_completed_time, transitions trip to COMPLETED, and releases truck and driver bookings to COMPLETED.
+        Protected by require_role(["DSP"]).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - actual_completed_time
+              properties:
+                actual_completed_time:
+                  type: string
+                  format: date-time
+                  description: Actual release timestamp (>= delivery time and <= current time).
+                notes:
+                  type: string
+                  maxLength: 500
+                  description: Optional closing notes.
+      responses:
+        '200':
+          description: Trip successfully completed and resources released.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseTripDetail'
+        '400':
+          description: Business rule violation (not DELIVERED, missing POD, invalid timestamp, or pending surcharges).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: Forbidden - User lacks DSP role.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+
+  /api/v1/trips/{id}/evidence:
+    get:
+      summary: List Proof of Delivery Evidences for a Trip
+      description: Returns list of uploaded POD documents, weighing slips, and photos for the trip.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of trip evidences.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEvidenceList'
+        '404':
+          description: Trip not found.
+    post:
+      summary: Upload Additional Evidence Document
+      description: Allows DSP to upload additional POD or supporting documents to a DELIVERED or IN_TRANSIT trip.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                evidence_type:
+                  type: string
+                  enum: [POD, WEIGHING_SLIP, INCIDENT_PHOTO, OTHER]
+                  default: POD
+                notes:
+                  type: string
+                  maxLength: 500
+      responses:
+        '201':
+          description: Evidence file uploaded successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEvidenceItem'
+
+  /api/v1/trips/{id}/evidence/{evidence_id}/download:
+    get:
+      summary: Download or View Evidence Document
+      description: Streams the evidence file content with appropriate MIME type.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: evidence_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Binary file stream.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Evidence file not found.
+
+components:
+  schemas:
+    ApiResponseTripDetail:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+            reference_code:
+              type: string
+            status:
+              type: string
+              example: DELIVERED
+            actual_delivery_time:
+              type: string
+              format: date-time
+            actual_completed_time:
+              type: string
+              format: date-time
+            recipient_name:
+              type: string
+            evidence_count:
+              type: integer
+        error:
+          type: string
+          nullable: true
+        meta:
+          type: object
+
+    ApiResponseEvidenceList:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TripEvidenceItem'
+        error:
+          type: string
+          nullable: true
+
+    ApiResponseEvidenceItem:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/TripEvidenceItem'
+        error:
+          type: string
+          nullable: true
+
+    TripEvidenceItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        trip_id:
+          type: integer
+        file_name:
+          type: string
+          example: bien_ban_giao_hang.pdf
+        file_size_bytes:
+          type: integer
+          example: 245120
+        mime_type:
+          type: string
+          example: application/pdf
+        evidence_type:
+          type: string
+          example: POD
+        download_url:
+          type: string
+          example: /api/v1/trips/1/evidence/5/download
+        created_at:
+          type: string
+          format: date-time
+
+    ApiErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: object
+          nullable: true
+        error:
+          type: string
+          example: Không thể hoàn tất chuyến hàng khi chưa có tệp bằng chứng giao hàng (POD).
+        meta:
+          type: object
