@@ -3,25 +3,34 @@
 {% block title %}404 - Không Tìm Thấy Trang - Freight ERP{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center my-5 py-5">
+<div class="row justify-content-center my-5 py-5" id="error404Container">
   <div class="col-md-7 col-lg-5 text-center">
-    <div class="card shadow-sm border-0 p-4">
-      <div class="card-body">
-        <div class="mb-4">
-          <i class="bi bi-search text-secondary display-1"></i>
-        </div>
-        <h2 class="h4 fw-bold text-dark mb-2">Không Tìm Thấy Trang (404)</h2>
-        <p class="text-muted mb-4">
-          {{ error_message or "Đường dẫn bạn yêu cầu không tồn tại hoặc dữ liệu đã bị xóa khỏi hệ thống." }}
-        </p>
+    <div class="p-4 p-xl-5 border bg-white shadow-sm" style="border-radius: 0 !important; border-color: #e2e8f0; background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);">
+      <div class="mb-4">
+        <span class="m-stripe-pill mx-auto mb-3 d-block" style="width: 48px; height: 3px;"></span>
+        <i class="bi bi-search text-muted display-3 opacity-50"></i>
+      </div>
+      <span class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 2px;">ĐIỀU HƯỚNG HỆ THỐNG</span>
+      <h1 class="h3 fw-bold text-ink mb-2 text-uppercase" style="letter-spacing: -0.01em;">KHÔNG TÌM THẤY TRANG (404)</h1>
+      <p class="text-muted mb-4" style="font-weight: 300; font-size: 0.95rem; line-height: 1.6;">
+        {{ error_message or "Đường dẫn bạn yêu cầu không tồn tại trên hệ thống điều vận hoặc dữ liệu đã được gỡ bỏ." }}
+      </p>
 
-        <div class="d-flex justify-content-center gap-2">
-          <a href="/dashboard" class="btn btn-primary px-4">
-            <i class="bi bi-house-door me-1"></i> Về Bảng Điều Khiển
-          </a>
-        </div>
+      <div class="d-flex justify-content-center gap-2">
+        <a href="/dashboard" class="btn btn-primary px-4" style="border-radius: 0 !important; font-weight: 600; letter-spacing: 0.5px;">
+          <i class="bi bi-house-door me-1"></i> VỀ BẢNG ĐIỀU KHIỂN
+        </a>
       </div>
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    if (typeof gsap === "undefined") return;
+    gsap.from("#error404Container", { y: -20, autoAlpha: 0, duration: 0.45, ease: "power2.out" });
+});
+</script>
 {% endblock %}

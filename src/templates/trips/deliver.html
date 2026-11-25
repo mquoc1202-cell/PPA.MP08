@@ -3,335 +3,304 @@
 {% block title %}Ghi Nhận Giao Hàng {{ trip.reference_code }} - Freight ERP{% endblock %}
 
 {% block content %}
-<!-- Modern Page Hero Banner (Light Theme Edition) -->
-<div class="dashboard-hero mb-4 animate-fade-in-up">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div>
-            <div class="d-flex align-items-center gap-2 mb-2">
-                <a href="/trips/{{ trip.id }}" class="btn btn-sm btn-outline-secondary py-1 px-2">
-                    <i class="bi bi-arrow-left me-1"></i> Chi tiết chuyến hàng
-                </a>
-                <span class="m-stripe-pill mx-1"></span>
-                <span class="text-uppercase small fw-bold text-primary" style="letter-spacing: 1.5px;">XÁC NHẬN GIAO HÀNG & CHỨNG TỪ (POD)</span>
-            </div>
-            <h2 class="dashboard-hero-title mb-1">
-                <i class="bi bi-box-seam text-primary me-2"></i>
-                Ghi Nhận Giao Hàng: <span class="text-primary">{{ trip.reference_code }}</span>
-            </h2>
-            <p class="dashboard-hero-subtitle mb-0">
+<!-- Architectural Header & Telemetry Status Bar (Precision Engineering + BMW Design DNA) -->
+<div class="p-4 p-xl-5 mb-4 border bg-white" id="deliverHero" style="border-radius: 0 !important; border-color: #e2e8f0; background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);">
+    <!-- System Status Bar -->
+    <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+        <a href="/trips/{{ trip.id }}" class="btn btn-sm btn-outline-secondary py-1 px-3" style="border-radius: 0 !important; font-weight: 600; font-size: 0.75rem;">
+            <i class="bi bi-arrow-left me-1"></i> CHI TIẾT CHUYẾN HÀNG
+        </a>
+        <span class="m-stripe-pill mx-1"></span>
+        <span class="overline text-primary" style="font-size: 0.76rem; letter-spacing: 2px;">XÁC NHẬN GIAO HÀNG & CHỨNG TỪ (POD)</span>
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 ms-auto" style="font-size: 0.72rem; letter-spacing: 0.5px; border-radius: 0;">
+            {% if trip.status == 'IN_TRANSIT' %}<span class="status-dot status-dot-pulse-blue me-1"></span> ĐANG VẬN CHUYỂN
+            {% elif trip.status == 'DELIVERED' %}<i class="bi bi-box-seam me-1"></i> ĐÃ GIAO HÀNG
+            {% else %}{{ trip.status }}{% endif %}
+        </span>
+    </div>
+
+    <!-- Main Architectural Typography -->
+    <div class="row align-items-center g-3">
+        <div class="col-lg-12">
+            <h1 class="display-6 fw-bold text-ink mb-2" style="letter-spacing: -0.02em; line-height: 1.15; text-transform: uppercase;">
+                GHI NHẬN GIAO HÀNG: <span class="text-primary font-monospace">{{ trip.reference_code }}</span>
+            </h1>
+            <p class="text-muted mb-0" style="font-weight: 300; font-size: 1.05rem; line-height: 1.65; max-width: 680px;">
                 Xác nhận giao hàng thành công, tải lên chứng từ biên bản giao nhận (POD) hoặc lập biên bản sự cố giao hàng thất bại.
             </p>
-        </div>
-        <div>
-            <span class="badge bg-primary px-3 py-2 fs-6 shadow-sm">
-                {% if trip.status == 'IN_TRANSIT' %}<i class="bi bi-truck me-1"></i> Đang vận chuyển
-                {% elif trip.status == 'DELIVERED' %}<i class="bi bi-box-seam me-1"></i> Đã giao hàng
-                {% else %}{{ trip.status }}{% endif %}
-            </span>
         </div>
     </div>
 </div>
 
-        <!-- Business Rule Error Alert -->
-        {% if error_message %}
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
-            <strong>Lỗi xác nhận:</strong> {{ error_message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% endif %}
+<!-- Business Rule Error Alert -->
+{% if error_message %}
+<div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4 border" role="alert" style="border-radius: 0 !important; border-color: #fecaca; background: #fef2f2;">
+    <i class="bi bi-exclamation-triangle-fill me-2 fs-5 text-danger"></i>
+    <strong>Lỗi xác nhận:</strong> {{ error_message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endif %}
 
-        <div class="row g-4">
-            <!-- Left Column: Order & Assigned Resource Info -->
-            <div class="col-xl-4 col-lg-5">
-                <div class="card shadow-sm border-0 mb-3">
-                    <div class="card-header bg-white py-3 border-bottom">
-                        <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-info-circle me-2 text-primary"></i>Thông Tin Chuyến Hàng</h6>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="mb-3">
-                            <span class="text-muted small text-uppercase fw-bold d-block">Mã Đơn</span>
-                            <span class="fs-5 fw-bold text-primary">{{ trip.reference_code }}</span>
-                        </div>
-                        <div class="mb-3">
-                            <span class="text-muted small text-uppercase fw-bold d-block">Điểm Giao Hàng (Đích Đến)</span>
-                            <div class="fw-semibold text-danger"><i class="bi bi-flag-fill me-1"></i>{{ trip.delivery_address }}</div>
-                        </div>
-                        <div class="mb-3">
-                            <span class="text-muted small text-uppercase fw-bold d-block">Điểm Lấy Hàng</span>
-                            <div class="small text-secondary"><i class="bi bi-geo-alt-fill text-success me-1"></i>{{ trip.pickup_address }}</div>
-                        </div>
-                        <div class="row g-2 mb-3">
-                            <div class="col-6">
-                                <span class="text-muted small text-uppercase fw-bold d-block">Khối Lượng Thực Tế</span>
-                                <span class="badge bg-success fs-6 mt-1">
-                                    {{ "{:,}".format(trip.actual_cargo_weight_kg or trip.cargo_weight_kg) }} kg
-                                </span>
-                            </div>
-                            <div class="col-6">
-                                <span class="text-muted small text-uppercase fw-bold d-block">Loại Hàng</span>
-                                <span class="small text-dark">{{ trip.cargo_type }}</span>
-                            </div>
-                        </div>
-                        {% if trip.actual_pickup_time %}
-                        <div class="pt-2 border-top">
-                            <span class="text-muted small text-uppercase fw-bold d-block">Thời Điểm Nhận Hàng</span>
-                            <div class="small fw-semibold text-dark">
-                                <i class="bi bi-clock-history text-primary me-1"></i>
-                                {{ trip.actual_pickup_time.strftime('%d/%m/%Y %H:%M') }}
-                            </div>
-                            <input type="hidden" id="minPickupTime" value="{{ trip.actual_pickup_time.strftime('%Y-%m-%dT%H:%M') }}">
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Assigned Truck & Driver Card -->
-                <div class="card shadow-sm border-0 bg-light">
-                    <div class="card-body p-4">
-                        <h6 class="fw-bold text-uppercase small text-muted mb-3"><i class="bi bi-shield-check text-primary me-2"></i>Nguồn Lực Vận Chuyển</h6>
-                        {% if trip.truck %}
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div>
-                                <i class="bi bi-truck text-primary fs-5 me-2"></i>
-                                <strong>{{ trip.truck.plate_number }}</strong>
-                                <span class="small text-muted ms-1">({{ trip.truck.truck_type }})</span>
-                            </div>
-                            <span class="badge bg-dark">
-                                Tối đa: {{ "{:,}".format(trip.truck.capacity_kg) }} kg
-                            </span>
-                        </div>
-                        {% endif %}
-                        {% if trip.driver %}
-                        <div class="d-flex align-items-center mt-3 pt-2 border-top">
-                            <i class="bi bi-person-badge text-primary fs-5 me-2"></i>
-                            <div>
-                                <strong>{{ trip.driver.full_name }}</strong>
-                                <span class="badge bg-secondary ms-1">{{ trip.driver.driver_code }}</span>
-                                <div class="small text-muted"><i class="bi bi-telephone me-1"></i>{{ trip.driver.phone_number }}</div>
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
+<div class="row g-4 mb-4">
+    <!-- Left Column: Order & Assigned Resource Info -->
+    <div class="col-xl-4 col-lg-5">
+        <div class="card border shadow-sm mb-4" id="tripInfoCard" style="border-radius: 0 !important; border-color: #e2e8f0; background: #ffffff;">
+            <div class="card-header bg-white p-3 border-bottom d-flex align-items-center" style="border-color: #e2e8f0 !important; background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);">
+                <span class="m-stripe-pill me-2"></span>
+                <h6 class="mb-0 fw-bold text-ink text-uppercase" style="letter-spacing: 0.5px;">THÔNG TIN CHUYẾN HÀNG</h6>
             </div>
-
-            <!-- Right Column: Delivery Form -->
-            <div class="col-xl-8 col-lg-7">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-header bg-white py-3 border-bottom">
-                        <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-check2-circle text-primary me-2"></i>Biên Bản & Bằng Chứng Bàn Giao</h6>
+            <div class="card-body p-4">
+                <div class="mb-3">
+                    <span class="overline text-muted d-block" style="font-size: 0.7rem; letter-spacing: 1.2px;">MÃ ĐƠN</span>
+                    <span class="fs-5 fw-bold text-primary font-monospace">{{ trip.reference_code }}</span>
+                </div>
+                <div class="mb-3">
+                    <span class="overline text-muted d-block" style="font-size: 0.7rem; letter-spacing: 1.2px;">ĐIỂM GIAO HÀNG (ĐÍCH ĐẾN)</span>
+                    <div class="fw-semibold text-danger"><i class="bi bi-flag-fill me-1"></i>{{ trip.delivery_address }}</div>
+                </div>
+                <div class="mb-3">
+                    <span class="overline text-muted d-block" style="font-size: 0.7rem; letter-spacing: 1.2px;">ĐIỂM LẤY HÀNG</span>
+                    <div class="small text-secondary"><i class="bi bi-geo-alt-fill text-success me-1"></i>{{ trip.pickup_address }}</div>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <span class="overline text-muted d-block" style="font-size: 0.7rem; letter-spacing: 1.2px;">KHỐI LƯỢNG THỰC TẾ</span>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle fs-6 mt-1 font-monospace" style="border-radius: 0 !important;">
+                            {{ "{:,}".format(trip.actual_cargo_weight_kg or trip.cargo_weight_kg) }} kg
+                        </span>
                     </div>
-                    <div class="card-body p-4">
-                        <form method="POST" action="/trips/{{ trip.id }}/deliver" enctype="multipart/form-data" id="deliveryForm">
-                            <!-- Delivery Result Selection -->
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Kết quả giao hàng <span class="text-danger">*</span></label>
-                                <div class="d-flex gap-4">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="result" id="resultSuccess" value="SUCCESS" {% if result != 'FAILED' %}checked{% endif %} onchange="toggleDeliveryMode()">
-                                        <label class="form-check-label fw-semibold text-success" for="resultSuccess">
-                                            <i class="bi bi-check-circle me-1"></i> Giao thành công (DELIVERED)
-                                        </label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="result" id="resultFailed" value="FAILED" {% if result == 'FAILED' %}checked{% endif %} onchange="toggleDeliveryMode()">
-                                        <label class="form-check-label fw-semibold text-danger" for="resultFailed">
-                                            <i class="bi bi-x-circle me-1"></i> Giao không thành công (Sự cố)
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Actual Delivery Time -->
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Thời điểm giao hàng thực tế <span class="text-danger">*</span></label>
-                                <input
-                                    type="datetime-local"
-                                    class="form-control"
-                                    name="actual_delivery_time"
-                                    id="actualDeliveryTime"
-                                    value="{{ default_delivery_time }}"
-                                    required
-                                >
-                                <div class="form-text text-muted">Mốc thời gian giao hàng không được trước thời điểm nhận hàng.</div>
-                            </div>
-
-                            <!-- Success Mode Container -->
-                            <div id="successModeContainer">
-                                <!-- Recipient Name -->
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">Họ tên người nhận hàng <span class="text-danger">*</span></label>
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        name="recipient_name"
-                                        id="recipientNameInput"
-                                        placeholder="Ví dụ: Anh Nguyễn Văn Kho - Quản lý nhập hàng..."
-                                        value="{{ recipient_name }}"
-                                    >
-                                    <div class="form-text text-muted">Người đại diện bên nhận ký nhận hàng hóa tại kho đích.</div>
-                                </div>
-
-                                <!-- Evidence POD Files Upload -->
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">Tệp chứng từ bàn giao (POD) <span class="text-danger">*</span></label>
-                                    <input
-                                        type="file"
-                                        class="form-control"
-                                        name="evidence_files"
-                                        id="podFilesInput"
-                                        multiple
-                                        accept=".pdf,.jpg,.jpeg,.png"
-                                    >
-                                    <div class="form-text text-muted">
-                                        <i class="bi bi-file-earmark-check me-1"></i>
-                                        Bắt buộc tối thiểu 1 tệp (PDF, JPG, JPEG, PNG $\le 10$ MB). Có thể chọn nhiều tệp cùng lúc.
-                                    </div>
-                                    <div id="fileValidationAlert" class="alert alert-danger mt-2 d-none small py-2"></div>
-                                </div>
-
-                                <!-- Delivery Notes -->
-                                <div class="mb-3">
-                                    <label class="form-label">Ghi chú giao nhận (nếu có)</label>
-                                    <textarea
-                                        class="form-control"
-                                        name="delivery_notes"
-                                        rows="2"
-                                        placeholder="Tình trạng nguyên vẹn, số lượng kiện thực tế bàn giao..."
-                                    >{{ delivery_notes }}</textarea>
-                                </div>
-                            </div>
-
-                            <!-- Failure Mode Container -->
-                            <div id="failureModeContainer" class="d-none">
-                                <div class="alert alert-warning small mb-3">
-                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                                    <strong>Lưu ý:</strong> Chuyến hàng sẽ giữ nguyên trạng thái <strong>IN_TRANSIT</strong> và hệ thống sẽ tự động khởi tạo bản ghi sự cố để các bên cùng theo dõi và xử lý.
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold text-danger">Lý do giao hàng thất bại <span class="text-danger">*</span></label>
-                                    <textarea
-                                        class="form-control border-danger"
-                                        name="delivery_notes"
-                                        id="failureReasonInput"
-                                        rows="3"
-                                        placeholder="Mô tả cụ thể nguyên nhân (ví dụ: Khách từ chối nhận do hàng rách bao bì, sai địa chỉ, không thể liên hệ người nhận...)"
-                                    ></textarea>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">Ảnh chụp hiện trường / Biên bản sự cố (nếu có)</label>
-                                    <input
-                                        type="file"
-                                        class="form-control"
-                                        name="evidence_files"
-                                        multiple
-                                        accept=".pdf,.jpg,.jpeg,.png"
-                                    >
-                                    <div class="form-text text-muted">Tùy chọn: Tải ảnh chụp hàng hỏng hoặc biên bản xác nhận để lưu hồ sơ đối soát.</div>
-                                </div>
-                            </div>
-
-                            <!-- Submit & Cancel Buttons -->
-                            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
-                                <a href="/trips/{{ trip.id }}" class="btn btn-outline-secondary">
-                                    <i class="bi bi-arrow-left me-1"></i> Quay lại
-                                </a>
-                                <button type="submit" id="submitBtn" class="btn btn-success fw-bold px-4 py-2">
-                                    <i class="bi bi-check2-circle me-1"></i> Xác Nhận Giao Hàng
-                                </button>
-                            </div>
-                        </form>
+                    <div class="col-6">
+                        <span class="overline text-muted d-block" style="font-size: 0.7rem; letter-spacing: 1.2px;">LOẠI HÀNG</span>
+                        <span class="small text-dark">{{ trip.cargo_type }}</span>
                     </div>
                 </div>
+                {% if trip.actual_pickup_time %}
+                <div class="pt-2 border-top" style="border-color: #e2e8f0 !important;">
+                    <span class="overline text-muted d-block" style="font-size: 0.7rem; letter-spacing: 1.2px;">THỜI ĐIỂM NHẬN HÀNG</span>
+                    <div class="small fw-semibold text-dark font-monospace">
+                        <i class="bi bi-clock-history text-primary me-1"></i>
+                        {{ trip.actual_pickup_time.strftime('%d/%m/%Y %H:%M') }}
+                    </div>
+                    <input type="hidden" id="minPickupTime" value="{{ trip.actual_pickup_time.strftime('%Y-%m-%dT%H:%M') }}">
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Assigned Truck & Driver Card -->
+        <div class="card border shadow-sm" id="resourceCard" style="border-radius: 0 !important; border-color: #e2e8f0; background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);">
+            <div class="card-body p-4">
+                <h6 class="overline text-muted mb-3" style="font-size: 0.72rem; letter-spacing: 1.5px;">
+                    <i class="bi bi-shield-check text-primary me-2"></i>NGUỒN LỰC VẬN CHUYỂN
+                </h6>
+                {% if trip.truck %}
+                <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom" style="border-color: #e2e8f0 !important;">
+                    <div>
+                        <i class="bi bi-truck text-primary fs-5 me-2"></i>
+                        <strong class="font-monospace">{{ trip.truck.plate_number }}</strong>
+                        <span class="small text-muted ms-1">({{ trip.truck.truck_type }})</span>
+                    </div>
+                    <span class="badge bg-dark font-monospace px-2 py-1" style="border-radius: 0 !important;">
+                        TỐI ĐA: {{ "{:,}".format(trip.truck.capacity_kg) }} KG
+                    </span>
+                </div>
+                {% endif %}
+                {% if trip.driver %}
+                <div class="d-flex align-items-center mt-2">
+                    <i class="bi bi-person-badge text-primary fs-5 me-2"></i>
+                    <div>
+                        <strong class="text-ink">{{ trip.driver.full_name }}</strong>
+                        <span class="badge bg-secondary ms-1 font-monospace" style="border-radius: 0 !important;">{{ trip.driver.driver_code }}</span>
+                        <div class="small text-muted"><i class="bi bi-telephone me-1"></i>{{ trip.driver.phone_number }}</div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
+
+    <!-- Right Column: Delivery Form -->
+    <div class="col-xl-8 col-lg-7">
+        <div class="card border shadow-sm h-100" id="deliveryFormCard" style="border-radius: 0 !important; border-color: #e2e8f0; background: #ffffff;">
+            <div class="card-header bg-white p-3 border-bottom d-flex align-items-center" style="border-color: #e2e8f0 !important; background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);">
+                <i class="bi bi-check2-circle text-primary me-2 fs-5"></i>
+                <h6 class="mb-0 fw-bold text-ink text-uppercase" style="letter-spacing: 0.5px;">BIÊN BẢN & BẰNG CHỨNG BÀN GIAO</h6>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="/trips/{{ trip.id }}/deliver" enctype="multipart/form-data" id="deliveryForm">
+                    <!-- Delivery Result Selection -->
+                    <div class="mb-4">
+                        <label class="overline text-muted d-block mb-2" style="font-size: 0.72rem; letter-spacing: 1.2px;">KẾT QUẢ GIAO HÀNG <span class="text-danger">*</span></label>
+                        <div class="d-flex gap-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="result" id="resultSuccess" value="SUCCESS" {% if result != 'FAILED' %}checked{% endif %} onchange="toggleDeliveryMode()">
+                                <label class="form-check-label fw-semibold text-success" for="resultSuccess">
+                                    <i class="bi bi-check-circle me-1"></i> Giao thành công (DELIVERED)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="result" id="resultFailed" value="FAILED" {% if result == 'FAILED' %}checked{% endif %} onchange="toggleDeliveryMode()">
+                                <label class="form-check-label fw-semibold text-danger" for="resultFailed">
+                                    <i class="bi bi-x-circle me-1"></i> Giao không thành công (Sự cố)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actual Delivery Time -->
+                    <div class="mb-4">
+                        <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">THỜI ĐIỂM GIAO HÀNG THỰC TẾ <span class="text-danger">*</span></label>
+                        <input
+                            type="datetime-local"
+                            class="form-control"
+                            name="actual_delivery_time"
+                            id="actualDeliveryTime"
+                            value="{{ default_delivery_time }}"
+                            required
+                            style="height: 46px; border-radius: 0 !important; border-color: #e2e8f0; font-family: monospace;"
+                        >
+                        <div class="form-text text-muted" style="font-size: 0.78rem;">Mốc thời gian giao hàng không được trước thời điểm nhận hàng.</div>
+                    </div>
+
+                    <!-- Success Mode Container -->
+                    <div id="successModeContainer">
+                        <!-- Recipient Name -->
+                        <div class="mb-4">
+                            <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">HỌ TÊN NGƯỜI NHẬN HÀNG <span class="text-danger">*</span></label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                name="recipient_name"
+                                id="recipientNameInput"
+                                placeholder="Ví dụ: Anh Nguyễn Văn Kho - Quản lý nhập hàng..."
+                                value="{{ recipient_name }}"
+                                style="height: 46px; border-radius: 0 !important; border-color: #e2e8f0; font-weight: 600;"
+                            >
+                            <div class="form-text text-muted" style="font-size: 0.78rem;">Người đại diện bên nhận ký nhận hàng hóa tại kho đích.</div>
+                        </div>
+
+                        <!-- Evidence POD Files Upload -->
+                        <div class="mb-4">
+                            <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">TỆP CHỨNG TỪ BÀN GIAO (POD) <span class="text-danger">*</span></label>
+                            <input
+                                type="file"
+                                class="form-control"
+                                name="evidence_files"
+                                id="podFilesInput"
+                                multiple
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                style="border-radius: 0 !important; border-color: #e2e8f0;"
+                            >
+                            <div class="form-text text-muted" style="font-size: 0.78rem;">
+                                <i class="bi bi-file-earmark-check me-1"></i>
+                                Bắt buộc tối thiểu 1 tệp (PDF, JPG, JPEG, PNG $\le 10$ MB). Có thể chọn nhiều tệp cùng lúc.
+                            </div>
+                            <div id="fileValidationAlert" class="alert alert-danger mt-2 d-none small py-2 border" style="border-radius: 0 !important;"></div>
+                        </div>
+
+                        <!-- Delivery Notes -->
+                        <div class="mb-4">
+                            <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">GHI CHÚ GIAO NHẬN (NẾU CÓ)</label>
+                            <textarea
+                                class="form-control"
+                                name="delivery_notes"
+                                rows="2"
+                                placeholder="Tình trạng nguyên vẹn, số lượng kiện thực tế bàn giao..."
+                                style="border-radius: 0 !important; border-color: #e2e8f0;"
+                            >{{ delivery_notes }}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Failure Mode Container -->
+                    <div id="failureModeContainer" class="d-none">
+                        <div class="alert alert-warning small mb-4 border" style="border-radius: 0 !important; border-color: #fde68a; background: #fffbeb;">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                            <strong>Lưu ý:</strong> Chuyến hàng sẽ giữ nguyên trạng thái <strong>IN_TRANSIT</strong> và hệ thống sẽ tự động khởi tạo bản ghi sự cố để các bên cùng theo dõi và xử lý.
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="overline text-danger d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">LÝ DO GIAO HÀNG THẤT BẠI <span class="text-danger">*</span></label>
+                            <textarea
+                                class="form-control border-danger"
+                                name="delivery_notes"
+                                id="failureReasonInput"
+                                rows="3"
+                                placeholder="Mô tả cụ thể nguyên nhân (ví dụ: Khách từ chối nhận do hàng rách bao bì, sai địa chỉ, không thể liên hệ người nhận...)"
+                                style="border-radius: 0 !important;"
+                            ></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">ẢNH CHỤP HIỆN TRƯỜNG / BIÊN BẢN SỰ CỐ (NẾU CÓ)</label>
+                            <input
+                                type="file"
+                                class="form-control"
+                                name="evidence_files"
+                                multiple
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                style="border-radius: 0 !important; border-color: #e2e8f0;"
+                            >
+                            <div class="form-text text-muted" style="font-size: 0.78rem;">Tùy chọn: Tải ảnh chụp hàng hỏng hoặc biên bản xác nhận để lưu hồ sơ đối soát.</div>
+                        </div>
+                    </div>
+
+                    <!-- Submit & Cancel Buttons -->
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top" style="border-color: #e2e8f0 !important;">
+                        <a href="/trips/{{ trip.id }}" class="btn btn-outline-secondary px-4" style="border-radius: 0 !important; font-weight: 600;">
+                            <i class="bi bi-arrow-left me-1"></i> QUAY LẠI
+                        </a>
+                        <button type="submit" id="submitBtn" class="btn btn-success fw-bold px-4 py-2" style="border-radius: 0 !important; letter-spacing: 0.5px;">
+                            <i class="bi bi-check2-circle me-1"></i> XÁC NHẬN GIAO HÀNG
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
 function toggleDeliveryMode() {
-    const isSuccess = document.getElementById('resultSuccess').checked;
-    const successContainer = document.getElementById('successModeContainer');
-    const failureContainer = document.getElementById('failureModeContainer');
-    const submitBtn = document.getElementById('submitBtn');
-    const recipientInput = document.getElementById('recipientNameInput');
+    const isSuccess = document.getElementById("resultSuccess").checked;
+    const successContainer = document.getElementById("successModeContainer");
+    const failureContainer = document.getElementById("failureModeContainer");
+    const submitBtn = document.getElementById("submitBtn");
+    const recipientInput = document.getElementById("recipientNameInput");
+    const podInput = document.getElementById("podFilesInput");
+    const failureReason = document.getElementById("failureReasonInput");
 
     if (isSuccess) {
-        successContainer.classList.remove('d-none');
-        failureContainer.classList.add('d-none');
+        successContainer.classList.remove("d-none");
+        failureContainer.classList.add("d-none");
         recipientInput.required = true;
-        submitBtn.className = 'btn btn-success fw-bold px-4 py-2';
-        submitBtn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Xác Nhận Giao Hàng';
+        podInput.required = true;
+        failureReason.required = false;
+
+        submitBtn.className = "btn btn-success fw-bold px-4 py-2";
+        submitBtn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> XÁC NHẬN GIAO HÀNG';
     } else {
-        successContainer.classList.add('d-none');
-        failureContainer.classList.remove('d-none');
+        successContainer.classList.add("d-none");
+        failureContainer.classList.remove("d-none");
         recipientInput.required = false;
-        submitBtn.className = 'btn btn-danger fw-bold px-4 py-2';
-        submitBtn.innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i> Ghi Nhận Sự Cố Giao Hàng';
+        podInput.required = false;
+        failureReason.required = true;
+
+        submitBtn.className = "btn btn-danger fw-bold px-4 py-2";
+        submitBtn.innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i> GHI NHẬN SỰ CỐ GIAO HÀNG';
     }
 }
 
-// Client-side file validation
-document.getElementById('deliveryForm').addEventListener('submit', function(e) {
-    const isSuccess = document.getElementById('resultSuccess').checked;
-    const fileAlert = document.getElementById('fileValidationAlert');
-    fileAlert.classList.add('d-none');
-
-    // Time validation
-    const delivTimeInput = document.getElementById('actualDeliveryTime').value;
-    const minPickupInput = document.getElementById('minPickupTime');
-    if (minPickupInput && minPickupInput.value && delivTimeInput) {
-        if (delivTimeInput < minPickupInput.value) {
-            e.preventDefault();
-            alert('Thời điểm giao hàng không được trước thời điểm nhận hàng (' + minPickupInput.value.replace('T', ' ') + ')');
-            return;
-        }
-    }
-
-    if (isSuccess) {
-        const fileInput = document.getElementById('podFilesInput');
-        if (!fileInput.files || fileInput.files.length === 0) {
-            e.preventDefault();
-            fileAlert.textContent = 'Bắt buộc phải tải lên ít nhất một tệp chứng từ giao hàng (POD) khi xác nhận giao thành công.';
-            fileAlert.classList.remove('d-none');
-            return;
-        }
-
-        const allowedExts = ['pdf', 'jpg', 'jpeg', 'png'];
-        const maxSize = 10 * 1024 * 1024; // 10MB
-
-        for (let i = 0; i < fileInput.files.length; i++) {
-            const file = fileInput.files[i];
-            const ext = file.name.split('.').pop().toLowerCase();
-            if (!allowedExts.includes(ext)) {
-                e.preventDefault();
-                fileAlert.textContent = `Tệp "${file.name}" không hợp lệ. Chỉ chấp nhận các định dạng: PDF, JPG, JPEG, PNG.`;
-                fileAlert.classList.remove('d-none');
-                return;
-            }
-            if (file.size > maxSize) {
-                e.preventDefault();
-                fileAlert.textContent = `Tệp "${file.name}" dung lượng ${(file.size / 1024 / 1024).toFixed(1)} MB vượt quá giới hạn cho phép (10 MB).`;
-                fileAlert.classList.remove('d-none');
-                return;
-            }
-        }
-    } else {
-        const reasonInput = document.getElementById('failureReasonInput');
-        if (!reasonInput.value.trim()) {
-            e.preventDefault();
-            alert('Vui lòng nhập chi tiết lý do giao hàng không thành công để lập biên bản sự cố.');
-            reasonInput.focus();
-            return;
-        }
+document.addEventListener("DOMContentLoaded", function() {
+    toggleDeliveryMode();
+    if (typeof gsap !== "undefined") {
+        gsap.defaults({ duration: 0.45, ease: "power2.out" });
+        gsap.from("#deliverHero", { y: -15, autoAlpha: 0, duration: 0.45 });
+        gsap.from("#tripInfoCard", { y: 15, autoAlpha: 0, duration: 0.4, delay: 0.1 });
+        gsap.from("#resourceCard", { y: 15, autoAlpha: 0, duration: 0.4, delay: 0.15 });
+        gsap.from("#deliveryFormCard", { y: 20, autoAlpha: 0, duration: 0.45, delay: 0.2 });
     }
 });
-
-// Initialize on page load
-toggleDeliveryMode();
 </script>
 {% endblock %}

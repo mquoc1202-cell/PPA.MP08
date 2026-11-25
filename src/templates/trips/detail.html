@@ -3,70 +3,64 @@
 {% block title %}Chi Tiết Chuyến Hàng {{ trip.reference_code }} - Freight ERP{% endblock %}
 
 {% block content %}
-<!-- Modern Page Hero Banner (Light Theme Edition) -->
-<div class="dashboard-hero mb-4 animate-fade-in-up">
+<!-- Modern Page Hero Banner (Precision Engineering + BMW Design DNA) -->
+<div class="p-4 p-xl-5 mb-4 border bg-white" id="tripDetailHero" style="border-radius: 0 !important; border-color: #e2e8f0; background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
             <div class="d-flex align-items-center gap-2 mb-2">
-                <a href="/trips" class="btn btn-sm btn-outline-secondary py-1 px-2">
-                    <i class="bi bi-arrow-left me-1"></i> Danh sách chuyến hàng
+                <a href="/trips" class="btn btn-sm btn-outline-secondary py-1 px-3" style="border-radius: 0 !important; font-weight: 600; font-size: 0.75rem;">
+                    <i class="bi bi-arrow-left me-1"></i> DANH SÁCH CHUYẾN
                 </a>
                 <span class="m-stripe-pill mx-1"></span>
-                <span class="text-uppercase small fw-bold text-primary" style="letter-spacing: 1.5px;">GIÁM SÁT HÀNH
-                    TRÌNH CHUYẾN HÀNG</span>
+                <span class="overline text-primary" style="font-size: 0.76rem; letter-spacing: 2px;">GIÁM SÁT HÀNH TRÌNH & TIẾN ĐỘ VẬN CHUYỂN</span>
             </div>
-            <h2 class="dashboard-hero-title mb-1">
-                <i class="bi bi-box-seam text-primary me-2"></i>
-                Chi Tiết Chuyến Hàng: <span class="text-primary">{{ trip.reference_code }}</span>
-            </h2>
-            <p class="dashboard-hero-subtitle mb-0">
-                Theo dõi chi tiết tiến độ giao hàng, nguồn lực phụ trách, chứng từ giao nhận (POD) và dòng thời gian sự
-                kiện.
+            <h1 class="display-6 fw-bold text-ink mb-1" style="letter-spacing: -0.02em; line-height: 1.15; text-transform: uppercase;">
+                CHI TIẾT CHUYẾN HÀNG: <span class="text-primary font-monospace">{{ trip.reference_code }}</span>
+            </h1>
+            <p class="text-muted mb-0" style="font-weight: 300; font-size: 1.05rem; line-height: 1.65; max-width: 680px;">
+                Theo dõi chi tiết tiến độ giao nhận, nguồn lực phụ trách, chứng từ biên bản (POD) và dòng thời gian sự kiện.
             </p>
         </div>
         <div class="d-flex align-items-center gap-2 flex-wrap">
             <span
-                class="badge {% if trip.status == 'UNASSIGNED' %}bg-warning text-dark{% elif trip.status == 'ASSIGNED' %}bg-primary{% elif trip.status == 'PICKED_UP' %}bg-info text-dark{% elif trip.status == 'IN_TRANSIT' %}bg-primary{% elif trip.status == 'DELIVERED' %}bg-info text-dark{% elif trip.status == 'COMPLETED' %}bg-success{% else %}bg-secondary{% endif %} px-3 py-2 fs-6 shadow-sm">
+                class="badge {% if trip.status == 'UNASSIGNED' %}bg-warning-subtle text-warning border border-warning-subtle{% elif trip.status == 'ASSIGNED' %}bg-primary-subtle text-primary border border-primary-subtle{% elif trip.status == 'PICKED_UP' %}bg-info-subtle text-info border border-info-subtle{% elif trip.status == 'IN_TRANSIT' %}bg-primary-subtle text-primary border border-primary-subtle{% elif trip.status == 'DELIVERED' %}bg-info-subtle text-info border border-info-subtle{% elif trip.status == 'COMPLETED' %}bg-success-subtle text-success border border-success-subtle{% else %}bg-secondary-subtle text-secondary border border-secondary-subtle{% endif %} px-3 py-2 fs-6" style="border-radius: 0 !important;">
                 {% if trip.status == 'UNASSIGNED' %}<i class="bi bi-clock me-1"></i> Chưa điều phối
                 {% elif trip.status == 'ASSIGNED' %}<i class="bi bi-check2-circle me-1"></i> Đã điều phối
                 {% elif trip.status == 'PICKED_UP' %}<i class="bi bi-box-arrow-in-down me-1"></i> Đã lấy hàng
-                {% elif trip.status == 'IN_TRANSIT' %}<i class="bi bi-truck me-1"></i> Đang vận chuyển
+                {% elif trip.status == 'IN_TRANSIT' %}<span class="status-dot status-dot-pulse-blue me-1"></span> Đang vận chuyển
                 {% elif trip.status == 'DELIVERED' %}<i class="bi bi-box-seam me-1"></i> Đã giao hàng
                 {% elif trip.status == 'COMPLETED' %}<i class="bi bi-check2-all me-1"></i> Hoàn tất
                 {% else %}{{ trip.status }}{% endif %}
             </span>
             {% if current_user and current_user.role == 'DSP' %}
-            <button type="button" class="btn btn-outline-danger btn-sm shadow-sm" onclick="showCreateIssueModal()"
-                title="Báo cáo sự cố phát sinh">
+            <button type="button" class="btn btn-outline-danger btn-sm" onclick="showCreateIssueModal()" title="Báo cáo sự cố phát sinh" style="border-radius: 0 !important; font-weight: 600; font-size: 0.78rem;">
                 <i class="bi bi-exclamation-triangle-fill me-1"></i> Báo Cáo Sự Cố
             </button>
-            <button type="button" class="btn btn-outline-secondary btn-sm shadow-sm" onclick="showRescheduleModal()"
-                title="Gia hạn thời gian kết thúc dự kiến">
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="showRescheduleModal()" title="Gia hạn thời gian kết thúc dự kiến" style="border-radius: 0 !important; font-weight: 600; font-size: 0.78rem;">
                 <i class="bi bi-clock-history me-1"></i> Gia Hạn Lịch
             </button>
             {% if trip.status == 'UNASSIGNED' %}
-            <a href="/trips/{{ trip.id }}/dispatch" class="btn btn-primary btn-sm shadow-sm">
+            <a href="/trips/{{ trip.id }}/dispatch" class="btn btn-primary btn-sm" style="border-radius: 0 !important; font-weight: 600; font-size: 0.78rem;">
                 <i class="bi bi-send-check me-1"></i> Điều Phối
             </a>
             {% elif trip.status == 'ASSIGNED' %}
-            <a href="/trips/{{ trip.id }}/pickup" class="btn btn-success btn-sm shadow-sm">
+            <a href="/trips/{{ trip.id }}/pickup" class="btn btn-success btn-sm" style="border-radius: 0 !important; font-weight: 600; font-size: 0.78rem;">
                 <i class="bi bi-box-arrow-in-down me-1"></i> Ghi Nhận Nhận Hàng
             </a>
             {% elif trip.status == 'PICKED_UP' %}
-            <button type="button" class="btn btn-primary btn-sm shadow-sm" onclick="showDepartModal()">
+            <button type="button" class="btn btn-primary btn-sm" onclick="showDepartModal()" style="border-radius: 0 !important; font-weight: 600; font-size: 0.78rem;">
                 <i class="bi bi-truck-flatbed me-1"></i> Xuất Phát (Khởi Hành)
             </button>
             {% elif trip.status == 'IN_TRANSIT' %}
-            <a href="/trips/{{ trip.id }}/deliver" class="btn btn-success btn-sm shadow-sm">
+            <a href="/trips/{{ trip.id }}/deliver" class="btn btn-success btn-sm" style="border-radius: 0 !important; font-weight: 600; font-size: 0.78rem;">
                 <i class="bi bi-box-seam me-1"></i> Ghi Nhận Giao Hàng
             </a>
             {% elif trip.status == 'DELIVERED' %}
-            <button type="button" class="btn btn-primary btn-sm shadow-sm" onclick="showCompleteModal()">
+            <button type="button" class="btn btn-primary btn-sm" onclick="showCompleteModal()" style="border-radius: 0 !important; font-weight: 600; font-size: 0.78rem;">
                 <i class="bi bi-check2-all me-1"></i> Hoàn Tất Chuyến Hàng
             </button>
             {% elif trip.status == 'COMPLETED' %}
-            <span class="badge bg-success py-2 px-3 shadow-sm"><i class="bi bi-check-circle me-1"></i> Đã Hoàn
-                Tất</span>
+            <span class="badge bg-success-subtle text-success border border-success-subtle py-2 px-3" style="border-radius: 0 !important;"><i class="bi bi-check-circle me-1"></i> Đã Hoàn Tất</span>
             {% endif %}
             {% endif %}
         </div>
@@ -891,5 +885,12 @@
         const modal = new bootstrap.Modal(document.getElementById('rescheduleModal'));
         modal.show();
     }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        if (typeof gsap === "undefined") return;
+        gsap.defaults({ duration: 0.45, ease: "power2.out" });
+        gsap.from("#tripDetailHero", { y: -15, autoAlpha: 0, duration: 0.45 });
+        gsap.from(".card", { y: 15, autoAlpha: 0, duration: 0.4, stagger: 0.08, delay: 0.1 });
+    });
 </script>
 {% endblock %}

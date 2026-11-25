@@ -3,232 +3,233 @@
 {% block title %}Điều Phối Chuyến Hàng {{ trip.reference_code }} - Freight ERP{% endblock %}
 
 {% block content %}
-<!-- Modern Page Hero Banner (Light Theme Edition) -->
-<div class="dashboard-hero mb-4 animate-fade-in-up">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div>
-            <div class="d-flex align-items-center gap-2 mb-2">
-                <a href="/trips" class="btn btn-sm btn-outline-secondary py-1 px-2">
-                    <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
-                </a>
-                <span class="m-stripe-pill mx-1"></span>
-                <span class="text-uppercase small fw-bold text-primary" style="letter-spacing: 1.5px;">PHÂN CÔNG & ĐIỀU PHỐI NGUỒN LỰC</span>
-            </div>
-            <h2 class="dashboard-hero-title mb-1">
-                <i class="bi bi-send-check text-primary me-2"></i>
+<!-- Architectural Header & Telemetry Status Bar (Precision Engineering + BMW Design DNA) -->
+<div class="p-4 p-xl-5 mb-4 border bg-white" id="dispatchHero" style="border-radius: 0 !important; border-color: #e2e8f0; background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);">
+    <!-- System Status Bar -->
+    <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+        <a href="/trips" class="btn btn-sm btn-outline-secondary py-1 px-3" style="border-radius: 0 !important; font-weight: 600; font-size: 0.75rem;">
+            <i class="bi bi-arrow-left me-1"></i> DANH SÁCH CHUYẾN
+        </a>
+        <span class="m-stripe-pill mx-1"></span>
+        <span class="overline text-primary" style="font-size: 0.76rem; letter-spacing: 2px;">PHÂN CÔNG & ĐIỀU PHỐI NGUỒN LỰC VẬN TẢI</span>
+        <span class="badge {% if trip.status == 'UNASSIGNED' %}bg-warning-subtle text-warning border border-warning-subtle{% else %}bg-primary-subtle text-primary border border-primary-subtle{% endif %} px-2 py-1 ms-auto" style="font-size: 0.72rem; letter-spacing: 0.5px; border-radius: 0;">
+            {% if trip.status == 'UNASSIGNED' %}<i class="bi bi-clock me-1"></i> CHƯA ĐIỀU PHỐI
+            {% elif trip.status == 'ASSIGNED' %}<i class="bi bi-check2-circle me-1"></i> ĐÃ ĐIỀU PHỐI
+            {% else %}{{ trip.status }}{% endif %}
+        </span>
+    </div>
+
+    <!-- Main Architectural Typography -->
+    <div class="row align-items-center g-3">
+        <div class="col-lg-12">
+            <h1 class="display-6 fw-bold text-ink mb-2" style="letter-spacing: -0.02em; line-height: 1.15; text-transform: uppercase;">
                 {% if is_reassign %}
-                    Thay Đổi Phân Công: <span class="text-primary">{{ trip.reference_code }}</span>
+                    THAY ĐỔI PHÂN CÔNG: <span class="text-primary font-monospace">{{ trip.reference_code }}</span>
                 {% else %}
-                    Điều Phối Chuyến Hàng: <span class="text-primary">{{ trip.reference_code }}</span>
+                    ĐIỀU PHỐI CHUYẾN HÀNG: <span class="text-primary font-monospace">{{ trip.reference_code }}</span>
                 {% endif %}
-            </h2>
-            <p class="dashboard-hero-subtitle mb-0">
-                Gán phương tiện vận tải và tài xế đảm nhiệm, kiểm soát tự động điều kiện tải trọng và khóa chống trùng lịch.
+            </h1>
+            <p class="text-muted mb-0" style="font-weight: 300; font-size: 1.05rem; line-height: 1.65; max-width: 680px;">
+                Gán phương tiện vận tải và tài xế đảm nhiệm, kiểm soát tự động điều kiện tải trọng (BR-06) và khóa chống trùng lịch ACID (BR-07, BR-08).
             </p>
-        </div>
-        <div>
-            <span class="badge {% if trip.status == 'UNASSIGNED' %}bg-warning text-dark{% else %}bg-primary{% endif %} px-3 py-2 fs-6 shadow-sm">
-                {% if trip.status == 'UNASSIGNED' %}<i class="bi bi-clock me-1"></i> Chưa điều phối
-                {% elif trip.status == 'ASSIGNED' %}<i class="bi bi-check2-circle me-1"></i> Đã điều phối
-                {% else %}{{ trip.status }}{% endif %}
-            </span>
         </div>
     </div>
 </div>
 
-        <!-- Schedule Conflict Modal / Alert (HTTP 409) -->
-        {% if conflict_error %}
-        <div class="alert alert-danger border-danger shadow-sm mb-4" role="alert">
-            <h5 class="alert-heading fw-bold">
-                <i class="bi bi-exclamation-octagon-fill me-2"></i>Xung Đột Lịch Trình (HTTP 409)
-            </h5>
-            <p class="mb-2">{{ conflict_error.message }}</p>
-            {% if conflict_error.bookings %}
-            <div class="bg-white rounded p-3 border text-dark">
-                <h6 class="fw-bold small text-muted text-uppercase mb-2">Chi tiết các lịch trình bị chồng lấn:</h6>
-                <div class="table-responsive">
-                    <table class="table table-sm table-bordered align-middle mb-0">
-                        <thead class="table-light small">
-                            <tr>
-                                <th>Nguồn Lực</th>
-                                <th>Mã Đơn Trùng</th>
-                                <th>Dịch Vụ</th>
-                                <th>Thời Gian Bắt Đầu</th>
-                                <th>Thời Gian Kết Thúc</th>
-                                <th>Trạng Thái</th>
-                            </tr>
-                        </thead>
-                        <tbody class="small">
-                            {% for b in conflict_error.bookings %}
-                            <tr>
-                                <td><span class="badge bg-secondary">{{ b.resource_type }} #{{ b.resource_id }}</span></td>
-                                <td class="fw-bold">{{ b.reference_code }}</td>
-                                <td><span class="badge bg-light text-dark border">{{ b.service_type }}</span></td>
-                                <td>{{ b.start_time[:16] }}</td>
-                                <td>{{ b.end_time[:16] }}</td>
-                                <td><span class="badge bg-warning text-dark">{{ b.status }}</span></td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            {% endif %}
-            <div class="mt-2 text-muted small">
-                <i class="bi bi-info-circle me-1"></i> Vui lòng chọn xe/tài xế khác hoặc điều chỉnh lại khoảng thời gian bắt đầu và kết thúc dự kiến.
-            </div>
+<!-- Schedule Conflict Modal / Alert (HTTP 409) -->
+{% if conflict_error %}
+<div class="alert alert-danger border-danger shadow-sm mb-4" role="alert" style="border-radius: 0 !important; background: #fef2f2;">
+    <h5 class="alert-heading fw-bold text-uppercase" style="font-size: 0.95rem; letter-spacing: 0.5px;">
+        <i class="bi bi-exclamation-octagon-fill me-2"></i>Xung Đột Lịch Trình (HTTP 409)
+    </h5>
+    <p class="mb-2">{{ conflict_error.message }}</p>
+    {% if conflict_error.bookings %}
+    <div class="bg-white p-3 border text-dark mt-2" style="border-radius: 0 !important; border-color: #fecaca !important;">
+        <h6 class="fw-bold small text-muted text-uppercase mb-2">Chi tiết các lịch trình bị chồng lấn:</h6>
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered align-middle mb-0" style="border-radius: 0 !important;">
+                <thead class="table-light small">
+                    <tr>
+                        <th>Nguồn Lực</th>
+                        <th>Mã Đơn Trùng</th>
+                        <th>Dịch Vụ</th>
+                        <th>Thời Gian Bắt Đầu</th>
+                        <th>Thời Gian Kết Thúc</th>
+                        <th>Trạng Thái</th>
+                    </tr>
+                </thead>
+                <tbody class="small">
+                    {% for b in conflict_error.bookings %}
+                    <tr>
+                        <td><span class="badge bg-secondary font-monospace" style="border-radius: 0 !important;">{{ b.resource_type }} #{{ b.resource_id }}</span></td>
+                        <td class="fw-bold font-monospace text-primary">{{ b.reference_code }}</td>
+                        <td><span class="badge bg-light text-dark border" style="border-radius: 0 !important;">{{ b.service_type }}</span></td>
+                        <td class="font-monospace">{{ b.start_time[:16] }}</td>
+                        <td class="font-monospace">{{ b.end_time[:16] }}</td>
+                        <td><span class="badge bg-warning text-dark" style="border-radius: 0 !important;">{{ b.status }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-        {% endif %}
+    </div>
+    {% endif %}
+    <div class="mt-2 text-muted small">
+        <i class="bi bi-info-circle me-1"></i> Vui lòng chọn xe/tài xế khác hoặc điều chỉnh lại khoảng thời gian bắt đầu và kết thúc dự kiến.
+    </div>
+</div>
+{% endif %}
 
-        <!-- General Business Rule Error Alert -->
-        {% if error_message %}
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
-            <strong>Lỗi điều phối:</strong> {{ error_message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% endif %}
+<!-- General Business Rule Error Alert -->
+{% if error_message %}
+<div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4 border" role="alert" style="border-radius: 0 !important; border-color: #fecaca; background: #fef2f2;">
+    <i class="bi bi-exclamation-triangle-fill me-2 fs-5 text-danger"></i>
+    <strong>Lỗi điều phối:</strong> {{ error_message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endif %}
 
-        <div class="row g-4">
-            <!-- Left: Trip Overview Card -->
-            <div class="col-xl-4 col-lg-5">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-header bg-white py-3 border-bottom">
-                        <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-box-seam me-2 text-primary"></i>Thông Tin Chuyến Hàng</h6>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="mb-3">
-                            <span class="text-muted small text-uppercase fw-bold d-block">Mã Tham Chiếu</span>
-                            <span class="fs-5 fw-bold text-primary">{{ trip.reference_code }}</span>
-                        </div>
-                        <div class="mb-3">
-                            <span class="text-muted small text-uppercase fw-bold d-block">Người Gửi</span>
-                            <div class="fw-semibold">{{ trip.sender_name }}</div>
-                            <small class="text-muted"><i class="bi bi-telephone me-1"></i>{{ trip.sender_phone }}</small>
-                        </div>
-                        <div class="mb-3">
-                            <span class="text-muted small text-uppercase fw-bold d-block">Khối Lượng Hàng Hóa</span>
-                            <span class="badge bg-danger fs-6 px-3 py-2 mt-1" id="cargoWeightBadge" data-weight="{{ trip.cargo_weight_kg }}">
-                                <i class="bi bi-speedometer2 me-1"></i>{{ "{:,}".format(trip.cargo_weight_kg) }} kg
-                            </span>
-                        </div>
-                        <div class="mb-3">
-                            <span class="text-muted small text-uppercase fw-bold d-block">Loại Hàng Hóa</span>
-                            <div class="fw-semibold text-dark">{{ trip.cargo_type }}</div>
-                        </div>
-                        <div class="mb-3">
-                            <span class="text-muted small text-uppercase fw-bold d-block">Điểm Lấy Hàng</span>
-                            <div class="small text-secondary"><i class="bi bi-geo-alt-fill text-success me-1"></i>{{ trip.pickup_address }}</div>
-                        </div>
-                        <div class="mb-3">
-                            <span class="text-muted small text-uppercase fw-bold d-block">Điểm Giao Hàng</span>
-                            <div class="small text-secondary"><i class="bi bi-flag-fill text-danger me-1"></i>{{ trip.delivery_address }}</div>
-                        </div>
-                        {% if trip.notes %}
-                        <div class="mb-2">
-                            <span class="text-muted small text-uppercase fw-bold d-block">Ghi Chú Đơn Hàng</span>
-                            <div class="alert alert-light border small text-muted mb-0">{{ trip.notes }}</div>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
+<div class="row g-4 mb-4">
+    <!-- Left Column: Trip Overview Card -->
+    <div class="col-xl-4 col-lg-5">
+        <div class="card border shadow-sm h-100" id="tripInfoCard" style="border-radius: 0 !important; border-color: #e2e8f0; background: #ffffff;">
+            <div class="card-header bg-white p-3 border-bottom d-flex align-items-center" style="border-color: #e2e8f0 !important; background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);">
+                <span class="m-stripe-pill me-2"></span>
+                <h6 class="mb-0 fw-bold text-ink text-uppercase" style="letter-spacing: 0.5px;">THÔNG TIN CHUYẾN HÀNG</h6>
             </div>
-
-            <!-- Right: Dispatch Assignment Form Card -->
-            <div class="col-xl-8 col-lg-7">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-header bg-light py-3">
-                        <h6 class="mb-0 fw-bold text-dark">
-                            <i class="bi bi-sliders me-2 text-primary"></i>Phân Công Nguồn Lực & Thời Gian
-                        </h6>
-                    </div>
-                    <div class="card-body p-4">
-                        <form action="/trips/{{ trip.id }}/dispatch" method="POST" id="dispatchForm">
-                            <!-- Select Truck -->
-                            <div class="mb-3">
-                                <label for="truck_id" class="form-label fw-semibold">
-                                    Chọn Xe Vận Tải <span class="text-danger">*</span>
-                                </label>
-                                <select class="form-select" id="truck_id" name="truck_id" required onchange="validateTruckCapacity()">
-                                    <option value="">-- Vui lòng chọn xe tải sẵn sàng --</option>
-                                    {% for t in trucks %}
-                                    <option
-                                        value="{{ t.id }}"
-                                        data-capacity="{{ t.capacity_kg }}"
-                                        {% if trip.assigned_truck_id == t.id %}selected{% endif %}
-                                    >
-                                        {{ t.plate_number }} — {{ t.truck_type }} (Tải trọng: {{ "{:,}".format(t.capacity_kg) }} kg)
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                                <div id="truckCapacityFeedback" class="form-text mt-1"></div>
-                            </div>
-
-                            <!-- Select Driver -->
-                            <div class="mb-3">
-                                <label for="driver_id" class="form-label fw-semibold">
-                                    Chọn Tài Xế <span class="text-danger">*</span>
-                                </label>
-                                <select class="form-select" id="driver_id" name="driver_id" required>
-                                    <option value="">-- Vui lòng chọn tài xế sẵn sàng --</option>
-                                    {% for d in drivers %}
-                                    <option
-                                        value="{{ d.id }}"
-                                        {% if trip.assigned_driver_id == d.id %}selected{% endif %}
-                                    >
-                                        {{ d.driver_code }} — {{ d.full_name }} ({{ d.phone_number }})
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                                <div class="form-text text-muted">Chỉ hiển thị tài xế đang ở trạng thái ACTIVE</div>
-                            </div>
-
-                            <!-- Schedule Time Window -->
-                            <div class="row g-3 mb-4">
-                                <div class="col-md-6">
-                                    <label for="start_time" class="form-label fw-semibold">
-                                        Thời Điểm Bắt Đầu Dự Kiến <span class="text-danger">*</span>
-                                    </label>
-                                    <input
-                                        type="datetime-local"
-                                        class="form-control"
-                                        id="start_time"
-                                        name="start_time"
-                                        value="{{ trip.estimated_start_time.strftime('%Y-%m-%dT%H:%M') if trip.estimated_start_time else default_start }}"
-                                        required
-                                    >
-                                    <div class="form-text text-muted">Bắt đầu chiếm dụng nguồn lực</div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="end_time" class="form-label fw-semibold">
-                                        Thời Điểm Kết Thúc Dự Kiến <span class="text-danger">*</span>
-                                    </label>
-                                    <input
-                                        type="datetime-local"
-                                        class="form-control"
-                                        id="end_time"
-                                        name="end_time"
-                                        value="{{ trip.estimated_end_time.strftime('%Y-%m-%dT%H:%M') if trip.estimated_end_time else default_end }}"
-                                        required
-                                    >
-                                    <div class="form-text text-muted">Dự kiến hoàn tất & giải phóng xe</div>
-                                </div>
-                            </div>
-
-                            <!-- Form Actions -->
-                            <div class="d-flex justify-content-end gap-2 border-top pt-3 mt-4">
-                                <a href="/trips" class="btn btn-outline-secondary px-4">Hủy Bỏ</a>
-                                <button type="submit" class="btn btn-primary px-4 shadow-sm" id="submitBtn">
-                                    <i class="bi bi-check2-circle me-1"></i>
-                                    {% if is_reassign %}Lưu Thay Đổi Phân Công{% else %}Xác Nhận Điều Phối{% endif %}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+            <div class="card-body p-4">
+                <div class="mb-3">
+                    <span class="overline text-muted d-block" style="font-size: 0.7rem; letter-spacing: 1.2px;">MÃ THAM CHIẾU</span>
+                    <span class="fs-5 fw-bold text-primary font-monospace">{{ trip.reference_code }}</span>
                 </div>
+                <div class="mb-3">
+                    <span class="overline text-muted d-block" style="font-size: 0.7rem; letter-spacing: 1.2px;">NGƯỜI GỬI</span>
+                    <div class="fw-semibold text-ink">{{ trip.sender_name }}</div>
+                    <small class="text-muted"><i class="bi bi-telephone me-1"></i>{{ trip.sender_phone }}</small>
+                </div>
+                <div class="mb-3">
+                    <span class="overline text-muted d-block" style="font-size: 0.7rem; letter-spacing: 1.2px;">KHỐI LƯỢNG HÀNG HÓA</span>
+                    <span class="badge bg-danger fs-6 px-3 py-2 mt-1 font-monospace" id="cargoWeightBadge" data-weight="{{ trip.cargo_weight_kg }}" style="border-radius: 0 !important;">
+                        <i class="bi bi-speedometer2 me-1"></i>{{ "{:,}".format(trip.cargo_weight_kg) }} kg
+                    </span>
+                </div>
+                <div class="mb-3">
+                    <span class="overline text-muted d-block" style="font-size: 0.7rem; letter-spacing: 1.2px;">LOẠI HÀNG HÓA</span>
+                    <div class="fw-semibold text-dark">{{ trip.cargo_type }}</div>
+                </div>
+                <div class="mb-3">
+                    <span class="overline text-muted d-block" style="font-size: 0.7rem; letter-spacing: 1.2px;">ĐIỂM LẤY HÀNG</span>
+                    <div class="small text-secondary"><i class="bi bi-geo-alt-fill text-success me-1"></i>{{ trip.pickup_address }}</div>
+                </div>
+                <div class="mb-3">
+                    <span class="overline text-muted d-block" style="font-size: 0.7rem; letter-spacing: 1.2px;">ĐIỂM GIAO HÀNG</span>
+                    <div class="small text-secondary"><i class="bi bi-flag-fill text-danger me-1"></i>{{ trip.delivery_address }}</div>
+                </div>
+                {% if trip.notes %}
+                <div>
+                    <span class="overline text-muted d-block" style="font-size: 0.7rem; letter-spacing: 1.2px;">GHI CHÚ ĐƠN HÀNG</span>
+                    <div class="alert alert-light border small text-muted mb-0" style="border-radius: 0 !important; border-color: #e2e8f0 !important;">{{ trip.notes }}</div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
+
+    <!-- Right Column: Dispatch Assignment Form Card -->
+    <div class="col-xl-8 col-lg-7">
+        <div class="card border shadow-sm h-100" id="dispatchFormCard" style="border-radius: 0 !important; border-color: #e2e8f0; background: #ffffff;">
+            <div class="card-header bg-white p-3 border-bottom d-flex align-items-center" style="border-color: #e2e8f0 !important; background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);">
+                <i class="bi bi-sliders me-2 text-primary fs-5"></i>
+                <h6 class="mb-0 fw-bold text-ink text-uppercase" style="letter-spacing: 0.5px;">PHÂN CÔNG NGUỒN LỰC & KHUNG THỜI GIAN</h6>
+            </div>
+            <div class="card-body p-4">
+                <form action="/trips/{{ trip.id }}/dispatch" method="POST" id="dispatchForm">
+                    <!-- Select Truck -->
+                    <div class="mb-4">
+                        <label for="truck_id" class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                            CHỌN XE VẬN TẢI <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="truck_id" name="truck_id" required onchange="validateTruckCapacity()" style="height: 46px; border-radius: 0 !important; border-color: #e2e8f0; font-weight: 600;">
+                            <option value="">-- Vui lòng chọn xe tải sẵn sàng --</option>
+                            {% for t in trucks %}
+                            <option
+                                value="{{ t.id }}"
+                                data-capacity="{{ t.capacity_kg }}"
+                                {% if trip.assigned_truck_id == t.id %}selected{% endif %}
+                            >
+                                {{ t.plate_number }} — {{ t.truck_type }} (Tải trọng: {{ "{:,}".format(t.capacity_kg) }} kg)
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div id="truckCapacityFeedback" class="form-text mt-1" style="font-size: 0.78rem;"></div>
+                    </div>
+
+                    <!-- Select Driver -->
+                    <div class="mb-4">
+                        <label for="driver_id" class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                            CHỌN TÀI XẾ <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="driver_id" name="driver_id" required style="height: 46px; border-radius: 0 !important; border-color: #e2e8f0; font-weight: 600;">
+                            <option value="">-- Vui lòng chọn tài xế sẵn sàng --</option>
+                            {% for d in drivers %}
+                            <option
+                                value="{{ d.id }}"
+                                {% if trip.assigned_driver_id == d.id %}selected{% endif %}
+                            >
+                                {{ d.driver_code }} — {{ d.full_name }} ({{ d.phone_number }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text text-muted" style="font-size: 0.78rem;">Chỉ hiển thị các tài xế đang ở trạng thái ACTIVE (Sẵn sàng nhận lệnh).</div>
+                    </div>
+
+                    <!-- Schedule Time Window -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="start_time" class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                                THỜI ĐIỂM BẮT ĐẦU DỰ KIẾN <span class="text-danger">*</span>
+                            </label>
+                            <input
+                                type="datetime-local"
+                                class="form-control"
+                                id="start_time"
+                                name="start_time"
+                                value="{{ trip.estimated_start_time.strftime('%Y-%m-%dT%H:%M') if trip.estimated_start_time else default_start }}"
+                                required
+                                style="height: 46px; border-radius: 0 !important; border-color: #e2e8f0; font-family: monospace;"
+                            >
+                            <div class="form-text text-muted" style="font-size: 0.78rem;">Bắt đầu khóa nguồn lực (ACID lock).</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="end_time" class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                                THỜI ĐIỂM KẾT THÚC DỰ KIẾN <span class="text-danger">*</span>
+                            </label>
+                            <input
+                                type="datetime-local"
+                                class="form-control"
+                                id="end_time"
+                                name="end_time"
+                                value="{{ trip.estimated_end_time.strftime('%Y-%m-%dT%H:%M') if trip.estimated_end_time else default_end }}"
+                                required
+                                style="height: 46px; border-radius: 0 !important; border-color: #e2e8f0; font-family: monospace;"
+                            >
+                            <div class="form-text text-muted" style="font-size: 0.78rem;">Dự kiến hoàn tất và giải phóng xe/tài xế.</div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-end gap-2 border-top pt-4" style="border-color: #e2e8f0 !important;">
+                        <a href="/trips" class="btn btn-outline-secondary px-4" style="border-radius: 0 !important; font-weight: 600;">HỦY BỎ</a>
+                        <button type="submit" class="btn btn-primary px-4 shadow-sm" id="submitBtn" style="border-radius: 0 !important; font-weight: 600; letter-spacing: 0.5px;">
+                            <i class="bi bi-check2-circle me-1"></i>
+                            {% if is_reassign %}LƯU THAY ĐỔI PHÂN CÔNG{% else %}XÁC NHẬN ĐIỀU PHỐI{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -247,7 +248,7 @@ function validateTruckCapacity() {
 
     const truckCapacity = parseInt(selectedOption.getAttribute('data-capacity') || '0', 10);
     if (truckCapacity < cargoWeight) {
-        feedback.innerHTML = '<span class="text-danger fw-semibold"><i class="bi bi-x-circle-fill me-1"></i> CẢNH BÁO THIẾU TẢI: Xe này chỉ chở được ' + truckCapacity.toLocaleString() + ' kg, không đủ cho ' + cargoWeight.toLocaleString() + ' kg hàng hóa!</span>';
+        feedback.innerHTML = '<span class="text-danger fw-semibold"><i class="bi bi-x-circle-fill me-1"></i> CẢNH BÁO THIẾU TẢI (BR-06): Xe này chỉ chở được ' + truckCapacity.toLocaleString() + ' kg, không đủ cho ' + cargoWeight.toLocaleString() + ' kg hàng hóa!</span>';
         truckSelect.classList.add('is-invalid');
         truckSelect.classList.remove('is-valid');
     } else {
@@ -257,9 +258,14 @@ function validateTruckCapacity() {
     }
 }
 
-// Initial validation on page load
 document.addEventListener('DOMContentLoaded', function() {
     validateTruckCapacity();
+    if (typeof gsap !== "undefined") {
+        gsap.defaults({ duration: 0.45, ease: "power2.out" });
+        gsap.from("#dispatchHero", { y: -15, autoAlpha: 0, duration: 0.45 });
+        gsap.from("#tripInfoCard", { y: 15, autoAlpha: 0, duration: 0.4, delay: 0.1 });
+        gsap.from("#dispatchFormCard", { y: 20, autoAlpha: 0, duration: 0.45, delay: 0.15 });
+    }
 });
 </script>
 {% endblock %}

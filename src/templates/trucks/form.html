@@ -5,72 +5,104 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-8">
-        <div class="card p-4 shadow-sm">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="fw-bold mb-0">
-                    <i class="bi bi-truck text-primary me-2"></i>
-                    {{ 'Chỉnh Sửa Xe: ' ~ truck.plate_number if truck else 'Thêm Mới Phương Tiện' }}
-                </h4>
-                <a href="/admin/trucks" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-arrow-left me-1"></i> Quay lại
+        <div class="p-4 p-xl-5 border bg-white shadow-sm mb-4" id="truckFormCard" style="border-radius: 0 !important; border-color: #e2e8f0; background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);">
+            <!-- Header Bar -->
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom" style="border-color: #e2e8f0 !important;">
+                <div class="d-flex align-items-center">
+                    <span class="m-stripe-pill me-2"></span>
+                    <div>
+                        <span class="overline text-primary d-block" style="font-size: 0.72rem; letter-spacing: 1.8px;">THIẾT LẬP THÔNG SỐ XE</span>
+                        <h2 class="mb-0 fw-bold fs-5 text-ink text-uppercase" style="letter-spacing: 0.5px;">
+                            {{ 'CHỈNH SỬA XE: ' ~ truck.plate_number if truck else 'THÊM MỚI PHƯƠNG TIỆN' }}
+                        </h2>
+                    </div>
+                </div>
+                <a href="/admin/trucks" class="btn btn-outline-secondary btn-sm" style="border-radius: 0 !important; font-weight: 600; font-size: 0.78rem;">
+                    <i class="bi bi-arrow-left me-1"></i> QUAY LẠI
                 </a>
             </div>
-            <hr>
 
             {% if error_message %}
-            <div class="alert alert-danger" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error_message }}
+            <div class="alert alert-danger alert-dismissible fade show mb-4 border" role="alert" style="border-radius: 0 !important; border-color: #fecaca; background: #fef2f2;">
+                <i class="bi bi-exclamation-triangle-fill me-2 text-danger"></i><strong>Lỗi:</strong> {{ error_message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
             {% endif %}
 
             <form method="post" action="{{ '/admin/trucks/' ~ truck.id ~ '/edit' if truck else '/admin/trucks/create' }}">
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Biển Số Xe <span class="text-danger">*</span></label>
+                <div class="mb-4">
+                    <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                        BIỂN SỐ XE <span class="text-danger">*</span>
+                    </label>
                     <input type="text" name="plate_number" class="form-control" placeholder="Ví dụ: 29C-123.45" 
-                           value="{{ truck.plate_number if truck else '' }}" required>
-                    <div class="form-text">Hệ thống sẽ tự động loại bỏ khoảng trắng, dấu phân cách và viết hoa để kiểm tra trùng lặp.</div>
+                           value="{{ truck.plate_number if truck else '' }}" required
+                           style="height: 46px; border-radius: 0 !important; border-color: #e2e8f0; font-weight: 600;">
+                    <div class="form-text text-muted" style="font-size: 0.78rem;">Hệ thống sẽ tự động loại bỏ khoảng trắng, dấu phân cách và viết hoa để kiểm tra chống trùng lặp.</div>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Loại Xe / Quy Cách Thùng <span class="text-danger">*</span></label>
+                <div class="mb-4">
+                    <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                        LOẠI XE / QUY CÁCH THÙNG <span class="text-danger">*</span>
+                    </label>
                     <input type="text" name="truck_type" class="form-control" placeholder="Ví dụ: Xe tải thùng bạt 5 tấn, Container 40ft..." 
-                           value="{{ truck.truck_type if truck else '' }}" required>
+                           value="{{ truck.truck_type if truck else '' }}" required
+                           style="height: 46px; border-radius: 0 !important; border-color: #e2e8f0;">
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Tải Trọng Tối Đa (kg) <span class="text-danger">*</span></label>
-                    <input type="number" name="capacity_kg" class="form-control" min="1" placeholder="Ví dụ: 5000" 
-                           value="{{ truck.capacity_kg if truck else '' }}" required>
-                    <div class="form-text">Bắt buộc phải là số dương (&gt; 0 kg).</div>
+                <div class="mb-4">
+                    <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                        TẢI TRỌNG TỐI ĐA (KG) <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <input type="number" name="capacity_kg" class="form-control" min="1" placeholder="Ví dụ: 5000" 
+                               value="{{ truck.capacity_kg if truck else '' }}" required
+                               style="height: 46px; border-radius: 0 !important; border-color: #e2e8f0; font-weight: 600;">
+                        <span class="input-group-text bg-light border" style="border-radius: 0 !important; border-color: #e2e8f0; font-weight: 600;">KG</span>
+                    </div>
+                    <div class="form-text text-muted" style="font-size: 0.78rem;">Định mức tải trọng kỹ thuật bắt buộc phải là số dương (> 0 kg).</div>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Ghi Chú / Mô Tả</label>
-                    <textarea name="description" class="form-control" rows="3" placeholder="Mô tả thông tin xe, hạn đăng kiểm...">{{ truck.description if truck else '' }}</textarea>
+                <div class="mb-4">
+                    <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                        GHI CHÚ / THÔNG SỐ ĐĂNG KIỂM
+                    </label>
+                    <textarea name="description" class="form-control" rows="3" placeholder="Mô tả thông tin xe, hạn đăng kiểm, thiết bị định vị..." 
+                              style="border-radius: 0 !important; border-color: #e2e8f0;">{{ truck.description if truck else '' }}</textarea>
                 </div>
 
                 {% if truck %}
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Trạng Thái Phương Tiện</label>
-                    <select name="status" class="form-select">
+                <div class="mb-4 p-3 border bg-light" style="border-radius: 0 !important; border-color: #e2e8f0;">
+                    <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                        TRẠNG THÁI PHƯƠNG TIỆN
+                    </label>
+                    <select name="status" class="form-select" style="height: 46px; border-radius: 0 !important; border-color: #e2e8f0; font-weight: 600;">
                         <option value="ACTIVE" {% if truck.status == 'ACTIVE' %}selected{% endif %}>ACTIVE (Sẵn sàng)</option>
                         <option value="MAINTENANCE" {% if truck.status == 'MAINTENANCE' %}selected{% endif %}>MAINTENANCE (Bảo dưỡng)</option>
                         <option value="INACTIVE" {% if truck.status == 'INACTIVE' %}selected{% endif %}>INACTIVE (Ngừng hoạt động)</option>
                     </select>
-                    <div class="form-text text-warning">
-                        <i class="bi bi-info-circle"></i> Chuyển sang MAINTENANCE/INACTIVE sẽ bị chặn nếu xe còn lịch phân công trong tương lai.
+                    <div class="form-text text-warning mt-2" style="font-size: 0.78rem;">
+                        <i class="bi bi-shield-exclamation me-1"></i><strong>Quy tắc chống xung đột:</strong> Chuyển sang MAINTENANCE/INACTIVE sẽ bị từ chối nếu xe còn lịch phân công trong tương lai.
                     </div>
                 </div>
                 {% endif %}
 
-                <div class="d-flex justify-content-end gap-2 mt-4">
-                    <a href="/admin/trucks" class="btn btn-secondary">Hủy</a>
-                    <button type="submit" class="btn btn-primary px-4">
-                        <i class="bi bi-check-circle me-1"></i> {{ 'Lưu Thay Đổi' if truck else 'Tạo Xe Mới' }}
+                <div class="d-flex justify-content-end gap-2 pt-3 border-top" style="border-color: #e2e8f0 !important;">
+                    <a href="/admin/trucks" class="btn btn-outline-secondary px-4" style="border-radius: 0 !important; font-weight: 600;">HỦY BỎ</a>
+                    <button type="submit" class="btn btn-primary px-4" style="border-radius: 0 !important; font-weight: 600; letter-spacing: 0.5px;">
+                        <i class="bi bi-check-circle me-1"></i> {{ 'LƯU THAY ĐỔI' if truck else 'TẠO XE MỚI' }}
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    if (typeof gsap === "undefined") return;
+    gsap.from("#truckFormCard", { y: -15, autoAlpha: 0, duration: 0.45, ease: "power2.out" });
+});
+</script>
 {% endblock %}

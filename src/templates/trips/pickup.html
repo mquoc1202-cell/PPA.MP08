@@ -3,218 +3,226 @@
 {% block title %}Ghi Nhận Nhận Hàng {{ trip.reference_code }} - Freight ERP{% endblock %}
 
 {% block content %}
-<!-- Modern Page Hero Banner (Light Theme Edition) -->
-<div class="dashboard-hero mb-4 animate-fade-in-up">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div>
-            <div class="d-flex align-items-center gap-2 mb-2">
-                <a href="/trips" class="btn btn-sm btn-outline-secondary py-1 px-2">
-                    <i class="bi bi-arrow-left me-1"></i> Danh sách chuyến hàng
-                </a>
-                <span class="m-stripe-pill mx-1"></span>
-                <span class="text-uppercase small fw-bold text-success" style="letter-spacing: 1.5px;">GHI NHẬN NHẬN HÀNG THỰC TẾ</span>
-            </div>
-            <h2 class="dashboard-hero-title mb-1">
-                <i class="bi bi-box-arrow-in-down text-success me-2"></i>
-                Ghi Nhận Nhận Hàng: <span class="text-primary">{{ trip.reference_code }}</span>
-            </h2>
-            <p class="dashboard-hero-subtitle mb-0">
+<!-- Architectural Header & Telemetry Status Bar (Precision Engineering + BMW Design DNA) -->
+<div class="p-4 p-xl-5 mb-4 border bg-white" id="pickupHero" style="border-radius: 0 !important; border-color: #e2e8f0; background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);">
+    <!-- System Status Bar -->
+    <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+        <a href="/trips" class="btn btn-sm btn-outline-secondary py-1 px-3" style="border-radius: 0 !important; font-weight: 600; font-size: 0.75rem;">
+            <i class="bi bi-arrow-left me-1"></i> DANH SÁCH CHUYẾN
+        </a>
+        <span class="m-stripe-pill mx-1"></span>
+        <span class="overline text-success" style="font-size: 0.76rem; letter-spacing: 2px;">XÁC NHẬN NHẬN HÀNG THỰC TẾ & ĐỐI SOÁT TẢI TRỌNG</span>
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 ms-auto" style="font-size: 0.72rem; letter-spacing: 0.5px; border-radius: 0;">
+            {% if trip.status == 'ASSIGNED' %}<i class="bi bi-check2-circle me-1"></i> ĐÃ ĐIỀU PHỐI
+            {% elif trip.status == 'PICKED_UP' %}<i class="bi bi-box-arrow-in-down me-1"></i> ĐÃ LẤY HÀNG
+            {% else %}{{ trip.status }}{% endif %}
+        </span>
+    </div>
+
+    <!-- Main Architectural Typography -->
+    <div class="row align-items-center g-3">
+        <div class="col-lg-12">
+            <h1 class="display-6 fw-bold text-ink mb-2" style="letter-spacing: -0.02em; line-height: 1.15; text-transform: uppercase;">
+                GHI NHẬN NHẬN HÀNG: <span class="text-primary font-monospace">{{ trip.reference_code }}</span>
+            </h1>
+            <p class="text-muted mb-0" style="font-weight: 300; font-size: 1.05rem; line-height: 1.65; max-width: 680px;">
                 Xác nhận thời điểm nhận hàng, đối soát tải trọng thực tế (BR-06) và chuyển trạng thái chuyến sang Đã lấy hàng.
             </p>
-        </div>
-        <div>
-            <span class="badge bg-primary px-3 py-2 fs-6 shadow-sm">
-                {% if trip.status == 'ASSIGNED' %}<i class="bi bi-check2-circle me-1"></i> Đã điều phối
-                {% elif trip.status == 'PICKED_UP' %}<i class="bi bi-box-arrow-in-down me-1"></i> Đã lấy hàng
-                {% else %}{{ trip.status }}{% endif %}
-            </span>
         </div>
     </div>
 </div>
 
-        <!-- Business Rule Error Alert -->
-        {% if error_message %}
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
-            <strong>Lỗi xác nhận:</strong> {{ error_message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% endif %}
+<!-- Business Rule Error Alert -->
+{% if error_message %}
+<div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4 border" role="alert" style="border-radius: 0 !important; border-color: #fecaca; background: #fef2f2;">
+    <i class="bi bi-exclamation-triangle-fill me-2 fs-5 text-danger"></i>
+    <strong>Lỗi xác nhận:</strong> {{ error_message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endif %}
 
-        <div class="row g-4">
-            <!-- Left Column: Order & Assigned Resource Info -->
-            <div class="col-xl-4 col-lg-5">
-                <div class="card shadow-sm border-0 mb-3">
-                    <div class="card-header bg-white py-3 border-bottom">
-                        <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-info-circle me-2 text-primary"></i>Thông Tin Chuyến Hàng</h6>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="mb-3">
-                            <span class="text-muted small text-uppercase fw-bold d-block">Mã Đơn</span>
-                            <span class="fs-5 fw-bold text-primary">{{ trip.reference_code }}</span>
-                        </div>
-                        <div class="mb-3">
-                            <span class="text-muted small text-uppercase fw-bold d-block">Người Gửi</span>
-                            <div class="fw-semibold">{{ trip.sender_name }}</div>
-                            <small class="text-muted"><i class="bi bi-telephone me-1"></i>{{ trip.sender_phone }}</small>
-                        </div>
-                        <div class="mb-3">
-                            <span class="text-muted small text-uppercase fw-bold d-block">Điểm Lấy Hàng</span>
-                            <div class="small text-secondary"><i class="bi bi-geo-alt-fill text-success me-1"></i>{{ trip.pickup_address }}</div>
-                        </div>
-                        <div class="mb-3">
-                            <span class="text-muted small text-uppercase fw-bold d-block">Khối Lượng Dự Kiến</span>
-                            <span class="badge bg-light text-dark border fs-6 px-3 py-2 mt-1">
-                                {{ "{:,}".format(trip.cargo_weight_kg) }} kg
-                            </span>
-                        </div>
-                        <div>
-                            <span class="text-muted small text-uppercase fw-bold d-block">Loại Hàng Hóa</span>
-                            <span class="small text-dark">{{ trip.cargo_type }}</span>
-                        </div>
-                    </div>
+<div class="row g-4 mb-4">
+    <!-- Left Column: Order & Assigned Resource Info -->
+    <div class="col-xl-4 col-lg-5">
+        <div class="card border shadow-sm mb-4" id="tripInfoCard" style="border-radius: 0 !important; border-color: #e2e8f0; background: #ffffff;">
+            <div class="card-header bg-white p-3 border-bottom d-flex align-items-center" style="border-color: #e2e8f0 !important; background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);">
+                <span class="m-stripe-pill me-2"></span>
+                <h6 class="mb-0 fw-bold text-ink text-uppercase" style="letter-spacing: 0.5px;">THÔNG TIN CHUYẾN HÀNG</h6>
+            </div>
+            <div class="card-body p-4">
+                <div class="mb-3">
+                    <span class="overline text-muted d-block" style="font-size: 0.7rem; letter-spacing: 1.2px;">MÃ ĐƠN</span>
+                    <span class="fs-5 fw-bold text-primary font-monospace">{{ trip.reference_code }}</span>
                 </div>
-
-                <!-- Assigned Truck & Driver Card -->
-                <div class="card shadow-sm border-0 bg-light">
-                    <div class="card-body p-4">
-                        <h6 class="fw-bold text-uppercase small text-muted mb-3"><i class="bi bi-shield-check text-primary me-2"></i>Nguồn Lực Đã Phân Công</h6>
-                        {% if trip.truck %}
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div>
-                                <i class="bi bi-truck text-primary fs-5 me-2"></i>
-                                <strong>{{ trip.truck.plate_number }}</strong>
-                                <span class="small text-muted ms-1">({{ trip.truck.truck_type }})</span>
-                            </div>
-                            <span class="badge bg-dark" id="truckCapacityBadge" data-capacity="{{ trip.truck.capacity_kg }}">
-                                Tối đa: {{ "{:,}".format(trip.truck.capacity_kg) }} kg
-                            </span>
-                        </div>
-                        {% endif %}
-                        {% if trip.driver %}
-                        <div class="d-flex align-items-center mt-3 pt-2 border-top">
-                            <i class="bi bi-person-badge text-primary fs-5 me-2"></i>
-                            <div>
-                                <strong>{{ trip.driver.full_name }}</strong>
-                                <span class="badge bg-secondary ms-1">{{ trip.driver.driver_code }}</span>
-                                <div class="small text-muted"><i class="bi bi-telephone me-1"></i>{{ trip.driver.phone_number }}</div>
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div>
+                <div class="mb-3">
+                    <span class="overline text-muted d-block" style="font-size: 0.7rem; letter-spacing: 1.2px;">NGƯỜI GỬI</span>
+                    <div class="fw-semibold text-ink">{{ trip.sender_name }}</div>
+                    <small class="text-muted"><i class="bi bi-telephone me-1"></i>{{ trip.sender_phone }}</small>
+                </div>
+                <div class="mb-3">
+                    <span class="overline text-muted d-block" style="font-size: 0.7rem; letter-spacing: 1.2px;">ĐIỂM LẤY HÀNG</span>
+                    <div class="small text-secondary"><i class="bi bi-geo-alt-fill text-success me-1"></i>{{ trip.pickup_address }}</div>
+                </div>
+                <div class="mb-3">
+                    <span class="overline text-muted d-block" style="font-size: 0.7rem; letter-spacing: 1.2px;">KHỐI LƯỢNG DỰ KIẾN</span>
+                    <span class="badge bg-light text-dark border fs-6 px-3 py-2 mt-1 font-monospace" style="border-radius: 0 !important;">
+                        {{ "{:,}".format(trip.cargo_weight_kg) }} kg
+                    </span>
+                </div>
+                <div>
+                    <span class="overline text-muted d-block" style="font-size: 0.7rem; letter-spacing: 1.2px;">LOẠI HÀNG HÓA</span>
+                    <span class="small text-dark">{{ trip.cargo_type }}</span>
                 </div>
             </div>
+        </div>
 
-            <!-- Right Column: Actual Pickup Confirmation Form -->
-            <div class="col-xl-8 col-lg-7">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-header bg-white py-3 border-bottom">
-                        <h5 class="mb-0 fw-bold text-dark">
-                            <i class="bi bi-clipboard-check text-success me-2"></i>Biên Bản Nhận Hàng Thực Tế
-                        </h5>
+        <!-- Assigned Truck & Driver Card -->
+        <div class="card border shadow-sm" id="resourceCard" style="border-radius: 0 !important; border-color: #e2e8f0; background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);">
+            <div class="card-body p-4">
+                <h6 class="overline text-muted mb-3" style="font-size: 0.72rem; letter-spacing: 1.5px;">
+                    <i class="bi bi-shield-check text-primary me-2"></i>NGUỒN LỰC ĐÃ PHÂN CÔNG
+                </h6>
+                {% if trip.truck %}
+                <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom" style="border-color: #e2e8f0 !important;">
+                    <div>
+                        <i class="bi bi-truck text-primary fs-5 me-2"></i>
+                        <strong class="font-monospace">{{ trip.truck.plate_number }}</strong>
+                        <span class="small text-muted ms-1">({{ trip.truck.truck_type }})</span>
                     </div>
-                    <div class="card-body p-4">
-                        <form method="POST" action="/trips/{{ trip.id }}/pickup" id="pickupForm">
-                            <!-- Actual Pickup Time -->
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">
-                                    Thời Điểm Nhận Hàng Thực Tế <span class="text-danger">*</span>
-                                </label>
-                                <input
-                                    type="datetime-local"
-                                    class="form-control"
-                                    name="actual_pickup_time"
-                                    id="actualPickupTime"
-                                    value="{{ default_pickup_time }}"
-                                    required
-                                >
-                                <div class="form-text text-muted small">Thời điểm tài xế hoàn tất nhận hàng và ký biên bản tại kho gửi.</div>
-                            </div>
-
-                            <!-- Handover Person -->
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">
-                                    Người Bàn Giao Hàng (Kho Gửi) <span class="text-danger">*</span>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        name="handover_person"
-                                        placeholder="Ví dụ: Nguyễn Văn Kho (Thủ kho A)"
-                                        value="{{ handover_person or '' }}"
-                                        required
-                                    >
-                                </div>
-                            </div>
-
-                            <!-- Actual Weight with Real-Time Capacity Guard (US2) -->
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">
-                                    Khối Lượng Hàng Thực Tế (kg) <span class="text-danger">*</span>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-speedometer2"></i></span>
-                                    <input
-                                        type="number"
-                                        class="form-control"
-                                        name="actual_cargo_weight_kg"
-                                        id="actualCargoWeight"
-                                        value="{{ actual_weight or trip.cargo_weight_kg }}"
-                                        min="1"
-                                        required
-                                    >
-                                    <span class="input-group-text">kg</span>
-                                </div>
-                                <div id="weightFeedback" class="mt-2"></div>
-                            </div>
-
-                            <!-- Cargo Condition -->
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">
-                                    Quy Cách & Tình Trạng Hàng Hóa <span class="text-danger">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    name="cargo_condition"
-                                    placeholder="Ví dụ: Nguyên đai nguyên kiện, niêm phong kẹp chì đầy đủ"
-                                    value="{{ cargo_condition or 'Nguyên đai nguyên kiện' }}"
-                                    required
-                                >
-                            </div>
-
-                            <!-- Discrepancy Notes -->
-                            <div class="mb-4">
-                                <label class="form-label fw-semibold">Ghi Chú Sai Lệch (Nếu có)</label>
-                                <textarea
-                                    class="form-control"
-                                    name="discrepancy_notes"
-                                    rows="2"
-                                    placeholder="Ghi nhận nếu khối lượng thực tế sai lệch so với đơn ban đầu hoặc có lưu ý đặc biệt..."
-                                >{{ discrepancy_notes or '' }}</textarea>
-                            </div>
-
-                            <!-- Notice / Alert -->
-                            <div class="alert alert-light border small text-muted mb-4">
-                                <i class="bi bi-info-circle text-primary me-1"></i>
-                                Khi xác nhận nhận hàng, trạng thái chuyến chuyển sang <strong>PICKED_UP</strong> và lịch trình của xe/tài xế sẽ tự động chuyển sang <strong>IN_PROGRESS</strong>.
-                            </div>
-
-                            <!-- Action Buttons -->
-                            <div class="d-flex justify-content-end gap-2">
-                                <a href="/trips" class="btn btn-outline-secondary px-3">Hủy Bỏ</a>
-                                <button type="submit" class="btn btn-success px-4" id="submitPickupBtn">
-                                    <i class="bi bi-check-circle me-1"></i> Xác Nhận Đã Nhận Hàng
-                                </button>
-                            </div>
-                        </form>
+                    <span class="badge bg-dark font-monospace px-2 py-1" id="truckCapacityBadge" data-capacity="{{ trip.truck.capacity_kg }}" style="border-radius: 0 !important;">
+                        TỐI ĐA: {{ "{:,}".format(trip.truck.capacity_kg) }} KG
+                    </span>
+                </div>
+                {% endif %}
+                {% if trip.driver %}
+                <div class="d-flex align-items-center mt-2">
+                    <i class="bi bi-person-badge text-primary fs-5 me-2"></i>
+                    <div>
+                        <strong class="text-ink">{{ trip.driver.full_name }}</strong>
+                        <span class="badge bg-secondary ms-1 font-monospace" style="border-radius: 0 !important;">{{ trip.driver.driver_code }}</span>
+                        <div class="small text-muted"><i class="bi bi-telephone me-1"></i>{{ trip.driver.phone_number }}</div>
                     </div>
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>
+
+    <!-- Right Column: Actual Pickup Confirmation Form -->
+    <div class="col-xl-8 col-lg-7">
+        <div class="card border shadow-sm h-100" id="pickupFormCard" style="border-radius: 0 !important; border-color: #e2e8f0; background: #ffffff;">
+            <div class="card-header bg-white p-3 border-bottom d-flex align-items-center" style="border-color: #e2e8f0 !important; background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);">
+                <i class="bi bi-clipboard-check text-success me-2 fs-5"></i>
+                <h6 class="mb-0 fw-bold text-ink text-uppercase" style="letter-spacing: 0.5px;">BIÊN BẢN NHẬN HÀNG THỰC TẾ</h6>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="/trips/{{ trip.id }}/pickup" id="pickupForm">
+                    <!-- Actual Pickup Time -->
+                    <div class="mb-4">
+                        <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                            THỜI ĐIỂM NHẬN HÀNG THỰC TẾ <span class="text-danger">*</span>
+                        </label>
+                        <input
+                            type="datetime-local"
+                            class="form-control"
+                            name="actual_pickup_time"
+                            id="actualPickupTime"
+                            value="{{ default_pickup_time }}"
+                            required
+                            style="height: 46px; border-radius: 0 !important; border-color: #e2e8f0; font-family: monospace;"
+                        >
+                        <div class="form-text text-muted" style="font-size: 0.78rem;">Thời điểm tài xế hoàn tất nhận hàng và ký biên bản tại kho gửi.</div>
+                    </div>
+
+                    <!-- Handover Person -->
+                    <div class="mb-4">
+                        <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                            NGƯỜI BÀN GIAO HÀNG (KHO GỬI) <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border" style="border-radius: 0 !important; border-color: #e2e8f0;"><i class="bi bi-person"></i></span>
+                            <input
+                                type="text"
+                                class="form-control"
+                                name="handover_person"
+                                placeholder="Ví dụ: Nguyễn Văn Kho (Thủ kho A)"
+                                value="{{ handover_person or '' }}"
+                                required
+                                style="height: 46px; border-radius: 0 !important; border-color: #e2e8f0; font-weight: 600;"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Actual Weight with Real-Time Capacity Guard (US2) -->
+                    <div class="mb-4">
+                        <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                            KHỐI LƯỢNG HÀNG THỰC TẾ (KG) <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border" style="border-radius: 0 !important; border-color: #e2e8f0;"><i class="bi bi-speedometer2"></i></span>
+                            <input
+                                type="number"
+                                class="form-control"
+                                name="actual_cargo_weight_kg"
+                                id="actualCargoWeight"
+                                value="{{ actual_weight or trip.cargo_weight_kg }}"
+                                min="1"
+                                required
+                                style="height: 46px; border-radius: 0 !important; border-color: #e2e8f0; font-weight: 600;"
+                            >
+                            <span class="input-group-text bg-light border" style="border-radius: 0 !important; border-color: #e2e8f0; font-weight: 600;">KG</span>
+                        </div>
+                        <div id="weightFeedback" class="mt-2"></div>
+                    </div>
+
+                    <!-- Cargo Condition -->
+                    <div class="mb-4">
+                        <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                            QUY CÁCH & TÌNH TRẠNG HÀNG HÓA <span class="text-danger">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="cargo_condition"
+                            placeholder="Ví dụ: Nguyên đai nguyên kiện, niêm phong kẹp chì đầy đủ"
+                            value="{{ cargo_condition or 'Nguyên đai nguyên kiện' }}"
+                            required
+                            style="height: 46px; border-radius: 0 !important; border-color: #e2e8f0;"
+                        >
+                    </div>
+
+                    <!-- Discrepancy Notes -->
+                    <div class="mb-4">
+                        <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                            GHI CHÚ SAI LỆCH (NẾU CÓ)
+                        </label>
+                        <textarea
+                            class="form-control"
+                            name="discrepancy_notes"
+                            rows="2"
+                            placeholder="Ghi nhận nếu khối lượng thực tế sai lệch so với đơn ban đầu hoặc có lưu ý đặc biệt..."
+                            style="border-radius: 0 !important; border-color: #e2e8f0;"
+                        >{{ discrepancy_notes or '' }}</textarea>
+                    </div>
+
+                    <!-- Notice / Alert -->
+                    <div class="alert alert-info border small text-muted mb-4" style="border-radius: 0 !important; border-color: #bae6fd !important; background: #f0f9ff;">
+                        <i class="bi bi-info-circle text-primary me-1"></i>
+                        Khi xác nhận nhận hàng, trạng thái chuyến chuyển sang <strong>PICKED_UP</strong> và lịch trình của xe/tài xế sẽ tự động chuyển sang <strong>IN_PROGRESS</strong>.
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-end gap-2 border-top pt-4" style="border-color: #e2e8f0 !important;">
+                        <a href="/trips" class="btn btn-outline-secondary px-4" style="border-radius: 0 !important; font-weight: 600;">HỦY BỎ</a>
+                        <button type="submit" class="btn btn-success px-4" id="submitPickupBtn" style="border-radius: 0 !important; font-weight: 600; letter-spacing: 0.5px;">
+                            <i class="bi bi-check-circle me-1"></i> XÁC NHẬN ĐÃ NHẬN HÀNG
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -239,7 +247,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         if (truckCapacity > 0 && currentWeight > truckCapacity) {
             const excess = currentWeight - truckCapacity;
-            feedbackDiv.innerHTML = `<div class="alert alert-danger py-2 px-3 small mb-0">
+            feedbackDiv.innerHTML = `<div class="alert alert-danger py-2 px-3 small mb-0 border" style="border-radius: 0 !important;">
                 <i class="bi bi-exclamation-octagon-fill me-1"></i>
                 <strong>CẢNH BÁO QUÁ TẢI (BR-06):</strong> Khối lượng thực tế (${currentWeight.toLocaleString()} kg) vượt quá tải trọng xe (${truckCapacity.toLocaleString()} kg) là <strong>${excess.toLocaleString()} kg</strong>. Hệ thống sẽ từ chối nhận hàng.
             </div>`;
@@ -260,6 +268,14 @@ document.addEventListener("DOMContentLoaded", function() {
 
     weightInput.addEventListener("input", validateCapacity);
     validateCapacity();
+
+    if (typeof gsap !== "undefined") {
+        gsap.defaults({ duration: 0.45, ease: "power2.out" });
+        gsap.from("#pickupHero", { y: -15, autoAlpha: 0, duration: 0.45 });
+        gsap.from("#tripInfoCard", { y: 15, autoAlpha: 0, duration: 0.4, delay: 0.1 });
+        gsap.from("#resourceCard", { y: 15, autoAlpha: 0, duration: 0.4, delay: 0.15 });
+        gsap.from("#pickupFormCard", { y: 20, autoAlpha: 0, duration: 0.45, delay: 0.2 });
+    }
 });
 </script>
 {% endblock %}
