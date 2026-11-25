@@ -56,18 +56,18 @@
     --m-blue-dark: #1c69d4;
     --m-red: #e22718;
 
-    /* 7. Dimensions, Radii & Shadows */
-    --radius-xs: 4px;
-    --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 14px;
-    --radius-xl: 18px;
-    --radius-pill: 9999px;
+    /* 7. Dimensions, Radii & Shadows (Pure Square Precision: 0px Border-Radius Everywhere) */
+    --radius-xs: 0px;
+    --radius-sm: 0px;
+    --radius-md: 0px;
+    --radius-lg: 0px;
+    --radius-xl: 0px;
+    --radius-pill: 0px;
 
     --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-    --shadow-card: 0 3px 10px -1px rgba(0, 0, 0, 0.05), 0 1px 4px -1px rgba(0, 0, 0, 0.03);
-    --shadow-elevated: 0 12px 28px -6px rgba(28, 105, 212, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
-    --shadow-card-hover: 0 14px 30px -8px rgba(15, 23, 42, 0.12), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+    --shadow-elevated: 0 8px 24px -4px rgba(0, 0, 0, 0.12);
+    --shadow-card-hover: 0 12px 28px -6px rgba(0, 0, 0, 0.15);
     --shadow-glow-primary: 0 0 20px rgba(28, 105, 212, 0.25);
 
     /* 8. Timing & Motion Curves */
@@ -79,17 +79,64 @@
 }
 
 /* ==========================================================================
-   Base resets & typography
+   BMW ARCHITECTURAL PRECISION - ZERO BORDER-RADIUS EVERYWHERE
+   ========================================================================== */
+*, *::before, *::after,
+.btn, .btn-sm, .btn-lg, .card, .card-header, .card-footer, .card-body,
+.form-control, .input-group-text, .form-select,
+.badge, .alert, .modal-content, .dropdown-menu,
+.stat-card-modern, .stat-icon-wrapper, .stat-progress, .stat-progress-bar,
+.role-select-card, .dashboard-hero, .table-card-wrapper,
+.table, .table-action-toolbar, .badge-status, .filter-tab,
+.rounded, .rounded-circle, .rounded-pill, .rounded-1, .rounded-2, .rounded-3, .rounded-4, .rounded-5,
+.m-stripe-pill {
+    border-radius: 0 !important;
+}
+
+/* ==========================================================================
+   BMW Corporate Typography (BMW Type Next Latin / Inter)
    ========================================================================== */
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'BMW Type Next Latin', 'BMW Type Next', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-color: var(--canvas-bg);
     color: var(--text-ink);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    letter-spacing: -0.011em;
+    letter-spacing: -0.01em;
     -webkit-font-smoothing: antialiased;
+    font-weight: 300; /* BMW Light body copy standard */
+}
+
+/* BMW Typography Hierarchy (Headings & Titles) */
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+    font-family: 'BMW Type Next Latin', 'BMW Type Next', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-ink);
+}
+
+.dashboard-hero-title {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 1.55rem;
+    color: var(--text-ink);
+}
+
+.dashboard-hero-subtitle {
+    font-weight: 300;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+
+/* Overlines & Labels (tracked all-caps like 'DỊCH VỤ DIGITAL VÀ ỨNG DỤNG') */
+.overline, .m-stripe-label, .text-tracked-uppercase, .form-label {
+    text-transform: uppercase;
+    letter-spacing: 1.8px;
+    font-weight: 700;
+    font-size: 0.75rem;
 }
 
 /* ==========================================================================
@@ -397,24 +444,26 @@ body {
 }
 
 /* ==========================================================================
-   BUTTONS & MICRO-INTERACTIONS
+   BMW PRECISION SQUARE BUTTONS (Matching BMW Vietnam Style)
    ========================================================================== */
 .btn {
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    padding: 0.55rem 1.15rem;
-    font-size: 0.88rem;
-    letter-spacing: 0.01em;
+    border-radius: 0 !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding: 0.65rem 1.4rem;
+    font-size: 0.82rem;
     transition: all var(--transition-normal);
     position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    border: 1.5px solid transparent;
 }
 
 .btn:hover {
-    transform: translateY(-1.5px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
 .btn:active {
@@ -431,12 +480,14 @@ body {
 .btn-primary:focus {
     background-color: var(--brand-primary-hover);
     border-color: var(--brand-primary-hover);
-    box-shadow: 0 4px 16px rgba(28, 105, 212, 0.35);
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(28, 105, 212, 0.35);
 }
 
+/* Iconic BMW Outline Button ('Tìm hiểu thêm' as shown in the screenshot) */
 .btn-outline-primary {
     color: var(--brand-primary);
-    border-color: var(--brand-primary-border);
+    border: 1.5px solid var(--brand-primary);
     background-color: transparent;
 }
 
@@ -444,13 +495,26 @@ body {
     background-color: var(--brand-primary);
     border-color: var(--brand-primary);
     color: #ffffff;
-    box-shadow: 0 4px 14px rgba(28, 105, 212, 0.28);
+    box-shadow: 0 4px 16px rgba(28, 105, 212, 0.28);
+}
+
+.btn-outline-secondary {
+    color: #334155;
+    border: 1.5px solid #cbd5e1;
+    background-color: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #f8fafc;
+    border-color: #94a3b8;
+    color: #0f172a;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .btn-sm {
-    padding: 0.35rem 0.75rem;
-    font-size: 0.8rem;
-    border-radius: var(--radius-xs);
+    padding: 0.4rem 0.85rem;
+    font-size: 0.75rem;
+    border-radius: 0 !important;
 }
 
 /* ==========================================================================

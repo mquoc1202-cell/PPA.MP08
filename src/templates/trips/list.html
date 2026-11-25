@@ -3,91 +3,90 @@
 {% block title %}Quản lý Chuyến Hàng & Điều Phối - Freight ERP{% endblock %}
 
 {% block content %}
-<!-- Modern Page Hero Banner (Light Theme Edition) -->
-<div class="dashboard-hero mb-4 animate-fade-in-up">
-    <div class="row align-items-center">
+<!-- Architectural Header & Telemetry Status Bar (Precision Engineering + BMW Design DNA) -->
+<div class="p-4 p-xl-5 mb-4 border bg-white" id="tripsHero" style="border-radius: 0 !important; border-color: #e2e8f0; background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);">
+    <!-- System Status Bar -->
+    <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+        <span class="m-stripe-pill me-1"></span>
+        <span class="overline text-primary" style="font-size: 0.76rem; letter-spacing: 2px;">ĐIỀU PHỐI VẬN CHUYỂN & GIÁM SÁT HÀNH TRÌNH</span>
+        <span class="badge bg-light text-dark border px-2 py-1 ms-auto" style="font-size: 0.72rem; letter-spacing: 0.5px; border-radius: 0;">
+            <i class="bi bi-box-seam me-1 text-primary"></i> TỔNG: {{ total }} ĐƠN HÀNG
+        </span>
+        {% if current_user %}
+        <span class="badge {% if current_user.role == 'DSP' %}bg-success{% elif current_user.role == 'SAL' %}bg-warning text-dark{% else %}bg-dark text-white{% endif %} px-2 py-1" style="font-size: 0.72rem; border-radius: 0;">
+            <i class="bi bi-shield-check me-1"></i>{{ current_user.role }} • {{ current_user.full_name or current_user.username }}
+        </span>
+        {% endif %}
+    </div>
+
+    <!-- Main Architectural Typography & Action Bar -->
+    <div class="row align-items-center g-3">
         <div class="col-lg-8">
-            <div class="d-flex align-items-center gap-2 mb-2">
-                <span class="m-stripe-pill me-1"></span>
-                <span class="text-uppercase small fw-bold text-primary" style="letter-spacing: 1.5px;">ĐIỀU PHỐI VẬN
-                    CHUYỂN HÀNG HÓA</span>
-                <span class="badge bg-light text-dark border px-2 py-1 ms-2">
-                    Tổng: {{ total }} đơn hàng
-                </span>
-            </div>
-            <h2 class="dashboard-hero-title">Danh Mục Chuyến Hàng & Điều Phối</h2>
-            <p class="dashboard-hero-subtitle mb-0">
-                Theo dõi tiến độ đơn vận chuyển, phân công xe, tài xế và kiểm soát xung đột lịch trình toàn hệ thống.
+            <h1 class="display-6 fw-bold text-ink mb-2" style="letter-spacing: -0.02em; line-height: 1.15; text-transform: uppercase;">
+                DANH MỤC CHUYẾN HÀNG & ĐIỀU PHỐI
+            </h1>
+            <p class="text-muted mb-0" style="font-weight: 300; font-size: 1.05rem; line-height: 1.65; max-width: 680px;">
+                Theo dõi tiến độ đơn vận chuyển, phân công xe và tài xế, kiểm soát xung đột lịch trình toàn hệ thống.
             </p>
         </div>
-        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-            <a href="/schedule" class="btn btn-outline-primary shadow-sm">
-                <i class="bi bi-calendar3 me-1"></i> Tra Cứu Lịch Trình
+        <div class="col-lg-4 text-lg-end">
+            <a href="/schedule" class="btn btn-outline-primary shadow-sm btn-hero-action" style="border-radius: 0 !important; font-weight: 600; letter-spacing: 0.5px; padding: 10px 18px;">
+                <i class="bi bi-calendar3 me-1"></i> TRA CỨU LỊCH TRÌNH
             </a>
         </div>
     </div>
 </div>
 
-<!-- Alert messages -->
+<!-- Alert Messages -->
 {% if request.query_params.get("success") == "dispatched" %}
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-    <i class="bi bi-check-circle-fill me-2"></i>Điều phối phân công xe và tài xế thành công!
+<div class="alert alert-success alert-dismissible fade show mb-4 border" role="alert" style="border-radius: 0 !important; border-color: #bbf7d0; background: #f0fdf4;">
+    <i class="bi bi-check-circle-fill me-2 text-success"></i>Điều phối phân công xe và tài xế thành công!
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 {% elif request.query_params.get("success") == "unassigned" %}
-<div class="alert alert-info alert-dismissible fade show" role="alert">
-    <i class="bi bi-info-circle-fill me-2"></i>Đã hủy phân công chuyến hàng và giải phóng toàn bộ lịch chiếm dụng.
+<div class="alert alert-info alert-dismissible fade show mb-4 border" role="alert" style="border-radius: 0 !important; border-color: #bae6fd; background: #f0f9ff;">
+    <i class="bi bi-info-circle-fill me-2 text-info"></i>Đã hủy phân công chuyến hàng và giải phóng toàn bộ lịch chiếm dụng.
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 {% elif request.query_params.get("error") %}
-<div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ request.query_params.get("error") }}
+<div class="alert alert-danger alert-dismissible fade show mb-4 border" role="alert" style="border-radius: 0 !important; border-color: #fecaca; background: #fef2f2;">
+    <i class="bi bi-exclamation-triangle-fill me-2 text-danger"></i>{{ request.query_params.get("error") }}
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 {% endif %}
 
-<!-- Filters & Tabs -->
-<div class="card p-3 mb-4 shadow-sm border-0 animate-fade-in-up">
+<!-- Filters & Tabs Card (Precision Styling) -->
+<div class="card p-4 mb-4 border shadow-sm" id="tripsFilterCard" style="border-radius: 0 !important; border-color: #e2e8f0; background: #ffffff;">
     <div class="row g-3 align-items-center">
-        <!-- Modern Status Tabs -->
-        <div class="col-12 border-bottom pb-3">
-            <div class="filter-tabs-container">
-                <a class="filter-tab {% if not status and not filter_mode %}active{% endif %}" href="/trips">
-                    Tất cả <span class="badge bg-light text-dark">{{ total }}</span>
+        <!-- Modern Status Filter Tabs -->
+        <div class="col-12 border-bottom pb-3" style="border-color: #e2e8f0 !important;">
+            <div class="filter-tabs-container d-flex flex-wrap gap-2">
+                <a class="btn btn-sm {% if not status and not filter_mode %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="/trips" style="border-radius: 0 !important; font-weight: 600; font-size: 0.78rem;">
+                    TẤT CẢ <span class="badge bg-light text-dark ms-1">{{ total }}</span>
                 </a>
-                <a class="filter-tab {% if status == 'UNASSIGNED' %}active{% endif %}" href="/trips?status=UNASSIGNED">
-                    <i class="bi bi-clock me-1"></i> Chưa điều phối
-                    <span class="badge bg-warning text-dark">{{ unassigned_count }}</span>
+                <a class="btn btn-sm {% if status == 'UNASSIGNED' %}btn-warning text-dark{% else %}btn-outline-secondary{% endif %}" href="/trips?status=UNASSIGNED" style="border-radius: 0 !important; font-weight: 600; font-size: 0.78rem;">
+                    <i class="bi bi-clock me-1"></i> CHƯA ĐIỀU PHỐI <span class="badge bg-light text-dark ms-1">{{ unassigned_count }}</span>
                 </a>
-                <a class="filter-tab {% if status == 'ASSIGNED' %}active{% endif %}" href="/trips?status=ASSIGNED">
-                    <i class="bi bi-check2-circle me-1"></i> Đã điều phối
-                    <span class="badge bg-primary text-white">{{ assigned_count }}</span>
+                <a class="btn btn-sm {% if status == 'ASSIGNED' %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="/trips?status=ASSIGNED" style="border-radius: 0 !important; font-weight: 600; font-size: 0.78rem;">
+                    <i class="bi bi-check2-circle me-1"></i> ĐÃ ĐIỀU PHỐI <span class="badge bg-light text-dark ms-1">{{ assigned_count }}</span>
                 </a>
-                <a class="filter-tab {% if status == 'PICKED_UP' %}active{% endif %}" href="/trips?status=PICKED_UP">
-                    <i class="bi bi-box-arrow-in-down me-1"></i> Đã lấy hàng
-                    <span class="badge bg-info text-dark">{{ picked_up_count }}</span>
+                <a class="btn btn-sm {% if status == 'PICKED_UP' %}btn-info text-dark{% else %}btn-outline-secondary{% endif %}" href="/trips?status=PICKED_UP" style="border-radius: 0 !important; font-weight: 600; font-size: 0.78rem;">
+                    <i class="bi bi-box-arrow-in-down me-1"></i> ĐÃ LẤY HÀNG <span class="badge bg-light text-dark ms-1">{{ picked_up_count }}</span>
                 </a>
-                <a class="filter-tab {% if status == 'IN_TRANSIT' %}active{% endif %}" href="/trips?status=IN_TRANSIT">
-                    <i class="bi bi-truck me-1"></i> Đang vận chuyển
-                    <span class="badge bg-primary text-white">{{ in_transit_count }}</span>
+                <a class="btn btn-sm {% if status == 'IN_TRANSIT' %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="/trips?status=IN_TRANSIT" style="border-radius: 0 !important; font-weight: 600; font-size: 0.78rem;">
+                    <i class="bi bi-truck me-1"></i> ĐANG VẬN CHUYỂN <span class="badge bg-light text-dark ms-1">{{ in_transit_count }}</span>
                 </a>
-                <a class="filter-tab {% if status == 'DELIVERED' %}active{% endif %}" href="/trips?status=DELIVERED">
-                    <i class="bi bi-box-seam me-1"></i> Đã giao hàng
-                    <span class="badge bg-info text-dark">{{ delivered_count }}</span>
+                <a class="btn btn-sm {% if status == 'DELIVERED' %}btn-info text-dark{% else %}btn-outline-secondary{% endif %}" href="/trips?status=DELIVERED" style="border-radius: 0 !important; font-weight: 600; font-size: 0.78rem;">
+                    <i class="bi bi-box-seam me-1"></i> ĐÃ GIAO HÀNG <span class="badge bg-light text-dark ms-1">{{ delivered_count }}</span>
                 </a>
-                <a class="filter-tab {% if status == 'COMPLETED' %}active{% endif %}" href="/trips?status=COMPLETED">
-                    <i class="bi bi-check2-all me-1"></i> Hoàn tất
-                    <span class="badge bg-success text-white">{{ completed_count }}</span>
+                <a class="btn btn-sm {% if status == 'COMPLETED' %}btn-success{% else %}btn-outline-secondary{% endif %}" href="/trips?status=COMPLETED" style="border-radius: 0 !important; font-weight: 600; font-size: 0.78rem;">
+                    <i class="bi bi-check2-all me-1"></i> HOÀN TẤT <span class="badge bg-light text-dark ms-1">{{ completed_count }}</span>
                 </a>
-                <a class="filter-tab {% if filter_mode == 'delayed' %}active-delayed{% endif %}"
-                    href="/trips?filter_mode=delayed">
-                    <i class="bi bi-alarm-fill me-1 text-danger"></i> Quá hạn
-                    <span class="badge bg-danger text-white">{{ delayed_count }}</span>
+                <a class="btn btn-sm {% if filter_mode == 'delayed' %}btn-danger{% else %}btn-outline-danger{% endif %}" href="/trips?filter_mode=delayed" style="border-radius: 0 !important; font-weight: 600; font-size: 0.78rem;">
+                    <i class="bi bi-alarm-fill me-1"></i> QUÁ HẠN <span class="badge bg-light text-dark ms-1">{{ delayed_count }}</span>
                 </a>
-                <a class="filter-tab {% if filter_mode == 'issues' %}active-issues{% endif %}"
-                    href="/trips?filter_mode=issues">
-                    <i class="bi bi-exclamation-triangle-fill me-1 text-warning"></i> Có sự cố
-                    <span class="badge bg-warning text-dark">{{ issues_count }}</span>
+                <a class="btn btn-sm {% if filter_mode == 'issues' %}btn-warning text-dark{% else %}btn-outline-warning text-dark{% endif %}" href="/trips?filter_mode=issues" style="border-radius: 0 !important; font-weight: 600; font-size: 0.78rem;">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i> CÓ SỰ CỐ <span class="badge bg-light text-dark ms-1">{{ issues_count }}</span>
                 </a>
             </div>
         </div>
@@ -100,21 +99,17 @@
                 {% endif %}
                 <div class="col-md-9">
                     <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0"><i
-                                class="bi bi-search text-muted"></i></span>
-                        <input type="text" name="search" class="form-control border-start-0 ps-0"
-                            placeholder="Tìm kiếm theo mã chuyến, người gửi, địa chỉ nhận/giao, loại hàng hóa..."
-                            value="{{ search or '' }}" style="height: 44px;">
+                        <span class="input-group-text bg-light border-end-0" style="border-radius: 0 !important; border-color: #e2e8f0;"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Tìm theo mã chuyến, người gửi, địa chỉ nhận/giao, loại hàng hóa..." value="{{ search or '' }}" style="height: 44px; border-radius: 0 !important; border-color: #e2e8f0;">
                     </div>
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100" style="height: 44px;">
-                        <i class="bi bi-funnel me-1"></i> Tìm Kiếm
+                    <button type="submit" class="btn btn-primary w-100" style="height: 44px; border-radius: 0 !important; font-weight: 600; letter-spacing: 0.5px;">
+                        <i class="bi bi-funnel me-1"></i> TÌM KIẾM
                     </button>
                 </div>
                 <div class="col-md-1">
-                    <a href="/trips" class="btn btn-outline-secondary w-100" title="Đặt lại bộ lọc"
-                        style="height: 44px; display: flex; align-items: center; justify-content: center;">
+                    <a href="/trips" class="btn btn-outline-secondary w-100" title="Đặt lại bộ lọc" style="height: 44px; border-radius: 0 !important; display: flex; align-items: center; justify-content: center;">
                         <i class="bi bi-arrow-counterclockwise"></i>
                     </a>
                 </div>
@@ -123,40 +118,39 @@
     </div>
 </div>
 
-<!-- Trips Data Table -->
-<div class="card shadow-sm border-0 card-hover animate-fade-in-up delay-1">
+<!-- Trips Data Table (Precision Engineering Data Grid) -->
+<div class="card border shadow-sm mb-4" id="tripsTableCard" style="border-radius: 0 !important; border-color: #e2e8f0; background: #ffffff;">
     <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
+        <table class="table table-hover align-middle mb-0" style="border-collapse: separate; border-spacing: 0;">
+            <thead class="table-light" style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;">
                 <tr>
-                    <th class="ps-3">Mã Chuyến</th>
-                    <th>Người Gửi</th>
-                    <th>Lộ Trình (Nhận ➔ Giao)</th>
-                    <th>Khối Lượng</th>
-                    <th>Loại Hàng</th>
-                    <th>Trạng Thái</th>
-                    <th>Nguồn Lực Được Gán</th>
-                    <th class="text-end pe-3">Thao Tác</th>
+                    <th class="ps-3 py-3 overline text-muted" style="font-size: 0.7rem; letter-spacing: 1.2px;">MÃ CHUYẾN</th>
+                    <th class="py-3 overline text-muted" style="font-size: 0.7rem; letter-spacing: 1.2px;">NGƯỜI GỬI</th>
+                    <th class="py-3 overline text-muted" style="font-size: 0.7rem; letter-spacing: 1.2px;">LỘ TRÌNH (NHẬN ➔ GIAO)</th>
+                    <th class="py-3 overline text-muted" style="font-size: 0.7rem; letter-spacing: 1.2px;">KHỐI LƯỢNG</th>
+                    <th class="py-3 overline text-muted" style="font-size: 0.7rem; letter-spacing: 1.2px;">LOẠI HÀNG</th>
+                    <th class="py-3 overline text-muted" style="font-size: 0.7rem; letter-spacing: 1.2px;">TRẠNG THÁI</th>
+                    <th class="py-3 overline text-muted" style="font-size: 0.7rem; letter-spacing: 1.2px;">NGUỒN LỰC GÁN</th>
+                    <th class="text-end pe-3 py-3 overline text-muted" style="font-size: 0.7rem; letter-spacing: 1.2px;">THAO TÁC</th>
                 </tr>
             </thead>
             <tbody>
                 {% if trips %}
                 {% for trip in trips %}
-                <tr>
-                    <td class="ps-3">
-                        <a href="/trips/{{ trip.id }}" class="fw-bold text-primary text-decoration-none"
-                            title="Xem chi tiết & Dòng thời gian">
+                <tr class="table-row-reveal" style="border-bottom: 1px solid #f1f5f9; transition: background-color 0.15s;">
+                    <td class="ps-3 py-3">
+                        <a href="/trips/{{ trip.id }}" class="fw-bold text-primary font-monospace text-decoration-none" style="letter-spacing: 0.5px;" title="Xem chi tiết & Dòng thời gian">
                             {{ trip.reference_code }}
                         </a>
-                        <div class="text-muted small">
+                        <div class="text-muted small" style="font-size: 0.72rem;">
                             {{ trip.created_at.strftime('%d/%m/%Y %H:%M') if trip.created_at else '' }}
                         </div>
                     </td>
-                    <td>
-                        <div class="fw-semibold">{{ trip.sender_name }}</div>
+                    <td class="py-3">
+                        <div class="fw-semibold text-ink">{{ trip.sender_name }}</div>
                         <small class="text-muted"><i class="bi bi-telephone me-1"></i>{{ trip.sender_phone }}</small>
                     </td>
-                    <td style="max-width: 260px;">
+                    <td class="py-3" style="max-width: 260px;">
                         <div class="text-truncate text-secondary small" title="{{ trip.pickup_address }}">
                             <i class="bi bi-geo-alt text-success me-1"></i>{{ trip.pickup_address }}
                         </div>
@@ -164,56 +158,61 @@
                             <i class="bi bi-flag text-danger me-1"></i>{{ trip.delivery_address }}
                         </div>
                     </td>
-                    <td>
-                        <span class="badge bg-light text-dark border">
+                    <td class="py-3">
+                        <span class="badge bg-light text-dark border font-monospace px-2 py-1" style="border-radius: 0 !important; font-size: 0.78rem;">
                             {{ "{:,}".format(trip.cargo_weight_kg) }} kg
                         </span>
                     </td>
-                    <td><span class="small">{{ trip.cargo_type }}</span></td>
-                    <td>
+                    <td class="py-3"><span class="small text-muted">{{ trip.cargo_type }}</span></td>
+                    <td class="py-3">
                         {% if trip.status == 'UNASSIGNED' %}
-                        <span class="badge-status badge-status-unassigned">
-                            <i class="bi bi-clock"></i> Chưa điều phối
+                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1" style="font-size: 0.72rem; border-radius: 0 !important;">
+                            <i class="bi bi-clock me-1"></i> CHƯA ĐIỀU PHỐI
                         </span>
                         {% elif trip.status == 'ASSIGNED' %}
-                        <span class="badge-status badge-status-assigned">
-                            <i class="bi bi-check2-circle"></i> Đã điều phối
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1" style="font-size: 0.72rem; border-radius: 0 !important;">
+                            <i class="bi bi-check2-circle me-1"></i> ĐÃ ĐIỀU PHỐI
                         </span>
                         {% elif trip.status == 'PICKED_UP' %}
-                        <span class="badge-status badge-status-picked-up">
-                            <i class="bi bi-box-arrow-in-down"></i> Đã lấy hàng
+                        <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1" style="font-size: 0.72rem; border-radius: 0 !important;">
+                            <i class="bi bi-box-arrow-in-down me-1"></i> ĐÃ LẤY HÀNG
                         </span>
                         {% elif trip.status == 'IN_TRANSIT' %}
-                        <span class="badge-status badge-status-in-transit">
-                            <span class="status-dot status-dot-pulse-blue"></span> Đang vận chuyển
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1" style="font-size: 0.72rem; border-radius: 0 !important;">
+                            <span class="status-dot status-dot-pulse-blue me-1"></span> ĐANG VẬN CHUYỂN
                         </span>
                         {% elif trip.status == 'DELIVERED' %}
-                        <span class="badge-status badge-status-confirmed">
-                            <i class="bi bi-box-seam"></i> Đã giao hàng
+                        <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1" style="font-size: 0.72rem; border-radius: 0 !important;">
+                            <i class="bi bi-box-seam me-1"></i> ĐÃ GIAO HÀNG
                         </span>
                         {% elif trip.status == 'COMPLETED' %}
-                        <span class="badge-status badge-status-completed">
-                            <i class="bi bi-check2-all"></i> Hoàn tất
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 0.72rem; border-radius: 0 !important;">
+                            <i class="bi bi-check2-all me-1"></i> HOÀN TẤT
                         </span>
                         {% elif trip.status == 'CANCELLED' %}
-                        <span class="badge-status badge-status-inactive">
-                            <i class="bi bi-x-circle"></i> Đã hủy
+                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1" style="font-size: 0.72rem; border-radius: 0 !important;">
+                            <i class="bi bi-x-circle me-1"></i> ĐÃ HỦY
                         </span>
                         {% else %}
-                        <span class="badge-status badge-status-inactive">{{ trip.status }}</span>
+                        <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.72rem; border-radius: 0 !important;">{{ trip.status }}</span>
                         {% endif %}
+
                         {% if trip.is_delayed %}
-                        <span class="badge-status badge-status-delayed mt-1" title="Quá hạn cam kết vận hành">
-                            <span class="status-dot status-dot-pulse-red"></span> Quá hạn
-                        </span>
+                        <div class="mt-1">
+                            <span class="badge bg-danger text-white px-2 py-1" style="font-size: 0.68rem; border-radius: 0 !important;" title="Quá hạn cam kết vận hành">
+                                <span class="status-dot status-dot-pulse-red me-1"></span> QUÁ HẠN
+                            </span>
+                        </div>
                         {% endif %}
                         {% if trip.has_open_issues %}
-                        <span class="badge-status badge-status-danger mt-1" title="Đang có sự cố chưa giải quyết">
-                            <i class="bi bi-exclamation-triangle-fill"></i> Sự cố
-                        </span>
+                        <div class="mt-1">
+                            <span class="badge bg-warning text-dark px-2 py-1" style="font-size: 0.68rem; border-radius: 0 !important;" title="Đang có sự cố chưa giải quyết">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i> SỰ CỐ
+                            </span>
+                        </div>
                         {% endif %}
                     </td>
-                    <td>
+                    <td class="py-3">
                         {% if trip.status == 'ASSIGNED' and trip.truck and trip.driver %}
                         <div class="small">
                             <i class="bi bi-truck text-primary me-1"></i><strong>{{ trip.truck.plate_number }}</strong>
@@ -222,9 +221,8 @@
                             <i class="bi bi-person me-1"></i>{{ trip.driver.full_name }} ({{ trip.driver.driver_code }})
                         </div>
                         {% if trip.estimated_start_time and trip.estimated_end_time %}
-                        <div class="text-muted" style="font-size: 0.72rem;">
-                            {{ trip.estimated_start_time.strftime('%d/%m %H:%M') }} - {{
-                            trip.estimated_end_time.strftime('%d/%m %H:%M') }}
+                        <div class="text-muted font-monospace" style="font-size: 0.7rem;">
+                            {{ trip.estimated_start_time.strftime('%d/%m %H:%M') }} - {{ trip.estimated_end_time.strftime('%d/%m %H:%M') }}
                         </div>
                         {% endif %}
                         {% elif trip.status in ['PICKED_UP', 'IN_TRANSIT'] and trip.truck and trip.driver %}
@@ -238,58 +236,48 @@
                         <span class="text-muted small fst-italic">Chưa có nguồn lực</span>
                         {% endif %}
                     </td>
-                    <td class="text-end pe-3">
-                        <div class="table-action-toolbar">
-                            <a href="/trips/{{ trip.id }}" class="btn-action-icon" title="Xem chi tiết & Dòng thời gian"
-                                data-bs-toggle="tooltip">
+                    <td class="text-end pe-3 py-3">
+                        <div class="d-inline-flex gap-1">
+                            <a href="/trips/{{ trip.id }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 0 !important; font-size: 0.75rem; padding: 4px 8px;" title="Xem chi tiết & Dòng thời gian">
                                 <i class="bi bi-eye"></i>
                             </a>
                             {% if current_user and current_user.role == 'DSP' %}
-                            {% if trip.status == 'UNASSIGNED' %}
-                            <a href="/trips/{{ trip.id }}/dispatch" class="btn-action-main btn-primary"
-                                title="Điều phối xe & tài xế">
-                                <i class="bi bi-send-check"></i> Điều Phối
-                            </a>
-                            {% elif trip.status == 'ASSIGNED' %}
-                            <a href="/trips/{{ trip.id }}/pickup" class="btn-action-main btn-success"
-                                title="Ghi nhận nhận hàng thực tế">
-                                <i class="bi bi-box-arrow-in-down"></i> Nhận Hàng
-                            </a>
-                            <a href="/trips/{{ trip.id }}/dispatch" class="btn-action-icon btn-action-swap"
-                                title="Đổi xe hoặc tài xế" data-bs-toggle="tooltip">
-                                <i class="bi bi-arrow-repeat"></i>
-                            </a>
-                            <button type="button" class="btn-action-icon btn-action-cancel"
-                                onclick="confirmUnassign({{ trip.id }}, '{{ trip.reference_code }}')"
-                                title="Hủy gán nguồn lực" data-bs-toggle="tooltip">
-                                <i class="bi bi-x-circle"></i>
-                            </button>
-                            {% elif trip.status == 'PICKED_UP' %}
-                            <button type="button" class="btn-action-main btn-primary"
-                                onclick="openQuickDepartModal({{ trip.id }}, '{{ trip.reference_code }}')"
-                                title="Ghi nhận xe xuất phát khởi hành">
-                                <i class="bi bi-truck-flatbed"></i> Khởi Hành
-                            </button>
-                            {% elif trip.status == 'IN_TRANSIT' %}
-                            <a href="/trips/{{ trip.id }}/deliver" class="btn-action-main btn-success"
-                                title="Xác nhận giao hàng & Tải biên bản POD">
-                                <i class="bi bi-box-seam"></i> Giao Hàng
-                            </a>
-                            {% elif trip.status == 'DELIVERED' %}
-                            <a href="/trips/{{ trip.id }}" class="btn-action-main btn-primary"
-                                title="Chốt hoàn tất chuyến hàng & giải phóng nguồn lực">
-                                <i class="bi bi-check2-all"></i> Hoàn Tất
-                            </a>
-                            {% elif trip.status == 'COMPLETED' %}
-                            <span class="badge-action-done">
-                                <i class="bi bi-check2-circle"></i> Hoàn tất
-                            </span>
+                                {% if trip.status == 'UNASSIGNED' %}
+                                <a href="/trips/{{ trip.id }}/dispatch" class="btn btn-sm btn-primary" style="border-radius: 0 !important; font-size: 0.75rem; padding: 4px 10px; font-weight: 600;" title="Điều phối xe & tài xế">
+                                    <i class="bi bi-send-check me-1"></i> Điều Phối
+                                </a>
+                                {% elif trip.status == 'ASSIGNED' %}
+                                <a href="/trips/{{ trip.id }}/pickup" class="btn btn-sm btn-success" style="border-radius: 0 !important; font-size: 0.75rem; padding: 4px 10px; font-weight: 600;" title="Ghi nhận nhận hàng thực tế">
+                                    <i class="bi bi-box-arrow-in-down me-1"></i> Nhận Hàng
+                                </a>
+                                <a href="/trips/{{ trip.id }}/dispatch" class="btn btn-sm btn-outline-primary" style="border-radius: 0 !important; font-size: 0.75rem; padding: 4px 8px;" title="Đổi xe hoặc tài xế">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-danger" style="border-radius: 0 !important; font-size: 0.75rem; padding: 4px 8px;" onclick="confirmUnassign({{ trip.id }}, '{{ trip.reference_code }}')" title="Hủy gán nguồn lực">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                                {% elif trip.status == 'PICKED_UP' %}
+                                <button type="button" class="btn btn-sm btn-primary" style="border-radius: 0 !important; font-size: 0.75rem; padding: 4px 10px; font-weight: 600;" onclick="openQuickDepartModal({{ trip.id }}, '{{ trip.reference_code }}')" title="Ghi nhận xe xuất phát khởi hành">
+                                    <i class="bi bi-truck-flatbed me-1"></i> Khởi Hành
+                                </button>
+                                {% elif trip.status == 'IN_TRANSIT' %}
+                                <a href="/trips/{{ trip.id }}/deliver" class="btn btn-sm btn-success" style="border-radius: 0 !important; font-size: 0.75rem; padding: 4px 10px; font-weight: 600;" title="Xác nhận giao hàng & Tải biên bản POD">
+                                    <i class="bi bi-box-seam me-1"></i> Giao Hàng
+                                </a>
+                                {% elif trip.status == 'DELIVERED' %}
+                                <a href="/trips/{{ trip.id }}" class="btn btn-sm btn-primary" style="border-radius: 0 !important; font-size: 0.75rem; padding: 4px 10px; font-weight: 600;" title="Chốt hoàn tất chuyến hàng & giải phóng nguồn lực">
+                                    <i class="bi bi-check2-all me-1"></i> Hoàn Tất
+                                </a>
+                                {% elif trip.status == 'COMPLETED' %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 0.72rem; border-radius: 0 !important;">
+                                    <i class="bi bi-check2-circle me-1"></i> Hoàn tất
+                                </span>
+                                {% else %}
+                                <span class="badge bg-light text-muted border px-2 py-1" style="font-size: 0.72rem; border-radius: 0 !important;">Đang vận hành</span>
+                                {% endif %}
                             {% else %}
-                            <span class="badge bg-light text-muted border">Đang vận hành</span>
-                            {% endif %}
-                            {% else %}
-                            <span class="badge-action-readonly">
-                                <i class="bi bi-lock"></i> Chỉ xem
+                            <span class="badge bg-light text-muted border px-2 py-1" style="font-size: 0.72rem; border-radius: 0 !important;">
+                                <i class="bi bi-lock me-1"></i> Chỉ xem
                             </span>
                             {% endif %}
                         </div>
@@ -299,8 +287,8 @@
                 {% else %}
                 <tr>
                     <td colspan="8" class="text-center py-5 text-muted">
-                        <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
-                        Chưa có chuyến hàng nào hoặc không khớp với bộ lọc tìm kiếm.
+                        <i class="bi bi-inbox fs-2 d-block mb-2 text-muted opacity-50"></i>
+                        <span class="fw-medium">Chưa có chuyến hàng nào hoặc không khớp với bộ lọc tìm kiếm.</span>
                     </td>
                 </tr>
                 {% endif %}
@@ -312,64 +300,58 @@
 <!-- Modal Xác nhận Hủy Phân Công (Unassign) -->
 <div class="modal fade" id="unassignModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-light">
-                <h5 class="modal-title fw-bold text-danger">
+        <div class="modal-content border" style="border-radius: 0 !important; border-color: #e2e8f0;">
+            <div class="modal-header border-bottom" style="border-color: #e2e8f0 !important;">
+                <h5 class="modal-title fw-bold text-danger text-uppercase" style="font-size: 0.95rem; letter-spacing: 0.5px;">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i>Xác Nhận Hủy Phân Công
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <p>Bạn có chắc chắn muốn hủy phân công nguồn lực cho chuyến hàng <strong id="unassignRefCode"></strong>?
-                </p>
-                <div class="alert alert-warning small mb-0">
-                    <i class="bi bi-info-circle me-1"></i> Toàn bộ lịch chiếm dụng của Xe tải và Tài xế sẽ được giải
-                    phóng lập tức và chuyến sẽ chuyển về trạng thái <strong>Chưa điều phối</strong>.
+            <div class="modal-body p-4">
+                <p>Bạn có chắc chắn muốn hủy phân công nguồn lực cho chuyến hàng <strong id="unassignRefCode" class="text-primary font-monospace"></strong>?</p>
+                <div class="alert alert-warning small mb-0 border" style="border-radius: 0 !important; border-color: #fde68a; background: #fffbeb;">
+                    <i class="bi bi-info-circle me-1"></i> Toàn bộ lịch chiếm dụng của Xe tải và Tài xế sẽ được giải phóng lập tức và chuyến sẽ chuyển về trạng thái <strong>Chưa điều phối</strong>.
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            <div class="modal-footer border-top" style="border-color: #e2e8f0 !important;">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 0 !important; font-weight: 600;">HỦY BỎ</button>
                 <form id="unassignForm" method="POST" action="">
-                    <button type="submit" class="btn btn-danger">Xác Nhận Hủy Phân Công</button>
+                    <button type="submit" class="btn btn-danger" style="border-radius: 0 !important; font-weight: 600;">XÁC NHẬN HỦY PHÂN CÔNG</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
 <!-- Modal Xác nhận Khởi Hành Nhanh (Quick Depart Modal) -->
 <div class="modal fade" id="quickDepartModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold">
+        <div class="modal-content border" style="border-radius: 0 !important; border-color: #e2e8f0;">
+            <div class="modal-header bg-primary text-white" style="border-radius: 0 !important;">
+                <h5 class="modal-title fw-bold text-uppercase" style="font-size: 0.95rem; letter-spacing: 0.5px;">
                     <i class="bi bi-truck-flatbed me-2"></i>Ghi Nhận Xe Xuất Bến
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form id="quickDepartForm" method="POST" action="">
-                <div class="modal-body">
-                    <p>Xác nhận xe đã rời điểm lấy hàng cho chuyến <strong id="quickDepartRefCode"
-                            class="text-primary"></strong> và bắt đầu hành trình?</p>
+                <div class="modal-body p-4">
+                    <p>Xác nhận xe đã rời điểm lấy hàng cho chuyến <strong id="quickDepartRefCode" class="text-primary font-monospace"></strong> và bắt đầu hành trình?</p>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Thời điểm xuất phát thực tế <span
-                                class="text-danger">*</span></label>
-                        <input type="datetime-local" name="actual_depart_time" id="quickDepartInputTime"
-                            class="form-control" required>
+                        <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">THỜI ĐIỂM XUẤT PHÁT THỰC TẾ <span class="text-danger">*</span></label>
+                        <input type="datetime-local" name="actual_depart_time" id="quickDepartInputTime" class="form-control" required style="height: 44px; border-radius: 0 !important; border-color: #e2e8f0;">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Ghi chú hành trình (nếu có)</label>
-                        <textarea name="notes" class="form-control" rows="2"
-                            placeholder="Tình hình giao thông, thời tiết hoặc lưu ý đặc biệt..."></textarea>
+                        <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">GHI CHÚ HÀNH TRÌNH</label>
+                        <textarea name="notes" class="form-control" rows="2" placeholder="Tình hình giao thông, thời tiết hoặc lưu ý đặc biệt..." style="border-radius: 0 !important; border-color: #e2e8f0;"></textarea>
                     </div>
-                    <div class="alert alert-info small mb-0">
-                        <i class="bi bi-info-circle me-1"></i> Chuyến hàng sẽ được chuyển trạng thái sang <strong>Đang
-                            vận chuyển</strong> và ghi nhận sự kiện vào dòng thời gian.
+                    <div class="alert alert-info small mb-0 border" style="border-radius: 0 !important; border-color: #bae6fd; background: #f0f9ff;">
+                        <i class="bi bi-info-circle me-1"></i> Chuyến hàng sẽ được chuyển trạng thái sang <strong>Đang vận chuyển</strong> và ghi nhận sự kiện vào dòng thời gian.
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-primary fw-bold">
-                        <i class="bi bi-check2-circle me-1"></i> Xác Nhận Khởi Hành
+                <div class="modal-footer border-top" style="border-color: #e2e8f0 !important;">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 0 !important; font-weight: 600;">HỦY BỎ</button>
+                    <button type="submit" class="btn btn-primary" style="border-radius: 0 !important; font-weight: 600; letter-spacing: 0.5px;">
+                        <i class="bi bi-check2-circle me-1"></i> XÁC NHẬN KHỞI HÀNH
                     </button>
                 </div>
             </form>
@@ -380,24 +362,34 @@
 
 {% block extra_scripts %}
 <script>
-    function confirmUnassign(tripId, refCode) {
-        document.getElementById('unassignRefCode').textContent = refCode;
-        document.getElementById('unassignForm').action = '/trips/' + tripId + '/unassign';
-        const modal = new bootstrap.Modal(document.getElementById('unassignModal'));
-        modal.show();
-    }
+function confirmUnassign(tripId, refCode) {
+    document.getElementById('unassignRefCode').textContent = refCode;
+    document.getElementById('unassignForm').action = '/trips/' + tripId + '/unassign';
+    const modal = new bootstrap.Modal(document.getElementById('unassignModal'));
+    modal.show();
+}
 
-    function openQuickDepartModal(tripId, refCode) {
-        document.getElementById('quickDepartRefCode').textContent = refCode;
-        document.getElementById('quickDepartForm').action = '/trips/' + tripId + '/depart';
+function openQuickDepartModal(tripId, refCode) {
+    document.getElementById('quickDepartRefCode').textContent = refCode;
+    document.getElementById('quickDepartForm').action = '/trips/' + tripId + '/depart';
 
-        // Set current local time
-        const now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        document.getElementById('quickDepartInputTime').value = now.toISOString().slice(0, 16);
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('quickDepartInputTime').value = now.toISOString().slice(0, 16);
 
-        const modal = new bootstrap.Modal(document.getElementById('quickDepartModal'));
-        modal.show();
-    }
+    const modal = new bootstrap.Modal(document.getElementById('quickDepartModal'));
+    modal.show();
+}
+
+// GSAP entrance choreographies
+document.addEventListener("DOMContentLoaded", function () {
+    if (typeof gsap === "undefined") return;
+    gsap.defaults({ duration: 0.45, ease: "power2.out" });
+
+    gsap.from("#tripsHero", { y: -15, autoAlpha: 0, duration: 0.45 });
+    gsap.from("#tripsFilterCard", { y: 15, autoAlpha: 0, duration: 0.4, delay: 0.1 });
+    gsap.from("#tripsTableCard", { y: 20, autoAlpha: 0, duration: 0.45, delay: 0.2 });
+    gsap.from(".table-row-reveal", { y: 10, autoAlpha: 0, duration: 0.25, stagger: 0.03, delay: 0.3 });
+});
 </script>
 {% endblock %}

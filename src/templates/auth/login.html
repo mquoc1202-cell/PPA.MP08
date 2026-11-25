@@ -3,154 +3,340 @@
 {% block title %}Đăng Nhập Hệ Thống - Freight ERP{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center my-4 py-2 animate-fade-in-up">
-  <div class="col-md-7 col-lg-5">
-    <!-- Brand Header -->
-    <div class="text-center mb-4">
-      <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-circle p-3 mb-3 shadow-sm border" style="width: 72px; height: 72px;">
-        <i class="bi bi-truck-front-fill fs-1 text-primary"></i>
-      </div>
-      <div class="d-flex justify-content-center mb-2">
-        <span class="m-stripe-pill"></span>
-      </div>
-      <h3 class="fw-bold text-ink">Hệ Thống Quản Lý Vận Tải</h3>
-      <p class="text-muted small">Cổng thông tin điều phối phương tiện & giám sát vận tải tiêu chuẩn cao</p>
-    </div>
-
-    <!-- Modern Login Card -->
-    <div class="card login-card shadow-lg border-0">
-      <!-- Luxury M-Stripe Accent Header -->
-      <div class="m-stripe-divider"></div>
-
-      <div class="card-body p-4 p-md-5">
-        {% if logged_out %}
-        <div class="alert alert-success d-flex align-items-center mb-4 border-0 shadow-sm" role="alert" style="background-color: var(--status-success-soft); color: #15803d;">
-          <i class="bi bi-check-circle-fill me-2 fs-5"></i>
-          <div>Bạn đã đăng xuất khỏi hệ thống thành công.</div>
+<div class="container-fluid px-lg-5 py-4" id="loginTerminalContainer">
+  <div class="row g-4 align-items-center justify-content-center min-vh-75">
+    
+    <!-- Left Column: Precision Telemetry & Architectural Showcase (Light Luminous Tone) -->
+    <div class="col-lg-6 col-xl-7 pe-lg-4" id="telemetryPanel">
+      <div class="p-4 p-xl-5 bg-white border shadow-sm" style="border-radius: 0 !important; border-color: #e2e8f0; background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);">
+        
+        <!-- System Status Bar -->
+        <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+          <span class="m-stripe-pill me-1"></span>
+          <span class="overline text-primary" style="font-size: 0.76rem; letter-spacing: 2px;">DỊCH VỤ DIGITAL VÀ ĐIỀU HÀNH VẬN TẢI</span>
+          <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 ms-auto" style="font-size: 0.72rem; letter-spacing: 0.5px; border-radius: 0;">
+            <span class="status-dot status-dot-active me-1"></span> TRỰC TUYẾN • CHUẨN ISO 27001
+          </span>
         </div>
-        {% endif %}
 
-        {% if error_message %}
-        <div class="alert alert-danger d-flex align-items-center mb-4 border-0 shadow-sm" role="alert" style="background-color: var(--status-danger-soft); color: #b91c1c;">
-          <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
-          <div>{{ error_message }}</div>
-        </div>
-        {% endif %}
+        <!-- Main Architectural Typography -->
+        <h1 class="display-6 fw-bold text-ink mb-2" style="letter-spacing: -0.02em; line-height: 1.15; text-transform: uppercase;">
+          HỆ THỐNG ĐIỀU PHỐI & GIÁM SÁT VẬN TẢI
+        </h1>
+        <p class="text-muted mb-4" style="font-weight: 300; font-size: 1.05rem; line-height: 1.65; max-width: 600px;">
+          Nền tảng kiểm soát nguồn lực đội xe, nhân sự lái xe và giám sát luồng hàng hóa theo tiêu chuẩn công nghiệp chính xác của BMW.
+        </p>
 
-        <form action="/login" method="POST" autocomplete="off" id="loginForm">
-          <input type="hidden" name="next_url" value="{{ next_url or '/dashboard' }}">
+        <!-- Technical Flow Diagram Card (Light Tone Node Architecture) -->
+        <div class="p-3 mb-4 border bg-white" style="border-radius: 0 !important; border-color: #e2e8f0; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);">
+          <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+            <span class="overline text-muted" style="font-size: 0.72rem; letter-spacing: 1.5px;">SƠ ĐỒ VẬN HÀNH THỜI GIAN THỰC</span>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.7rem; border-radius: 0;">TERMINAL: VN-HQ-01</span>
+          </div>
 
-          <div class="mb-3">
-            <label for="username" class="form-label fw-semibold small text-uppercase" style="letter-spacing: 0.5px;">
-              Tên đăng nhập <span class="text-danger">*</span>
-            </label>
-            <div class="input-group">
-              <span class="input-group-text bg-light text-muted border-end-0">
-                <i class="bi bi-person"></i>
-              </span>
-              <input
-                type="text"
-                class="form-control border-start-0 ps-0"
-                id="username"
-                name="username"
-                placeholder="Nhập tên tài khoản..."
-                value="{{ username or '' }}"
-                required
-                autofocus
-                style="height: 48px;"
-              >
+          <!-- Interactive Node-Link Flow Cards -->
+          <div class="py-2">
+            <div class="row g-2 text-center align-items-center">
+              <div class="col-3">
+                <div class="p-2 border bg-white" style="border-radius: 0; border-color: #e2e8f0;">
+                  <div class="stat-icon-wrapper icon-soft-primary mx-auto mb-1" style="width: 38px; height: 38px; font-size: 1.1rem; border-radius: 0;">
+                    <i class="bi bi-building-gear"></i>
+                  </div>
+                  <span class="d-block fw-bold text-ink" style="font-size: 0.75rem;">TRUNG TÂM</span>
+                  <span class="text-muted" style="font-size: 0.65rem;">Điều vận tổng</span>
+                </div>
+              </div>
+              <div class="col-1 text-center">
+                <i class="bi bi-arrow-right text-primary opacity-50 fs-5"></i>
+              </div>
+              <div class="col-3">
+                <div class="p-2 border bg-white" style="border-radius: 0; border-color: #e2e8f0;">
+                  <div class="stat-icon-wrapper icon-soft-success mx-auto mb-1" style="width: 38px; height: 38px; font-size: 1.1rem; border-radius: 0;">
+                    <i class="bi bi-truck-front-fill"></i>
+                  </div>
+                  <span class="d-block fw-bold text-ink" style="font-size: 0.75rem;">ĐỘI XE</span>
+                  <span class="text-muted" style="font-size: 0.65rem;">Định vị GPS</span>
+                </div>
+              </div>
+              <div class="col-1 text-center">
+                <i class="bi bi-arrow-right text-primary opacity-50 fs-5"></i>
+              </div>
+              <div class="col-4">
+                <div class="p-2 border bg-white" style="border-radius: 0; border-color: #e2e8f0;">
+                  <div class="stat-icon-wrapper icon-soft-info mx-auto mb-1" style="width: 38px; height: 38px; font-size: 1.1rem; border-radius: 0;">
+                    <i class="bi bi-geo-alt-fill"></i>
+                  </div>
+                  <span class="d-block fw-bold text-ink" style="font-size: 0.75rem;">ĐIỂM GIAO HÀNG</span>
+                  <span class="text-muted" style="font-size: 0.65rem;">Ký nhận POD</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="mb-4">
-            <div class="d-flex justify-content-between align-items-center">
-              <label for="password" class="form-label fw-semibold small text-uppercase mb-1" style="letter-spacing: 0.5px;">
-                Mật khẩu <span class="text-danger">*</span>
+          <!-- Telemetry Footer Badges -->
+          <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top text-muted small" style="font-size: 0.72rem;">
+            <span><i class="bi bi-shield-check me-1 text-primary"></i> MÃ HÓA: TLS 1.3 / AES-256</span>
+            <span><i class="bi bi-lightning-charge me-1 text-success"></i> ĐỘ TRỄ: &lt; 15ms</span>
+            <span><i class="bi bi-check2-circle me-1 text-info"></i> ACID TRANSACTION</span>
+          </div>
+        </div>
+
+        <!-- Left Bottom Spec Note -->
+        <div class="d-flex justify-content-between align-items-center text-muted small pt-2">
+          <span>Quy chuẩn thiết kế đồng bộ theo <strong>frontend/DESIGN.md</strong></span>
+          <span class="badge bg-light text-secondary border" style="border-radius: 0;">VERSION 2.5 STABLE</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Right Column: Luminous Precision Authorization Card -->
+    <div class="col-lg-6 col-xl-5" id="authTerminalCardWrapper">
+      <div class="card border bg-white shadow" id="loginCard" style="border-radius: 0 !important; border-color: #cbd5e1; box-shadow: 0 20px 45px -12px rgba(28, 105, 212, 0.12), 0 4px 16px rgba(0, 0, 0, 0.03) !important;">
+        
+        <!-- Header Signature Accent Line -->
+        <div class="m-stripe-divider"></div>
+
+        <div class="card-body p-4 p-md-5">
+          <!-- Card Header Info -->
+          <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+            <div>
+              <span class="overline text-primary d-block" style="font-size: 0.72rem; letter-spacing: 1.5px;">CỔNG XÁC THỰC BẢO MẬT</span>
+              <h4 class="fw-bold text-ink mb-0 text-uppercase" style="letter-spacing: 0.5px;">ĐĂNG NHẬP HỆ THỐNG</h4>
+            </div>
+            <div class="stat-icon-wrapper icon-soft-primary" style="width: 44px; height: 44px; font-size: 1.25rem; border-radius: 0;">
+              <i class="bi bi-person-lock"></i>
+            </div>
+          </div>
+
+          <!-- Logged Out Alert -->
+          {% if logged_out %}
+          <div class="alert alert-success d-flex align-items-center mb-4 border" role="alert" style="border-radius: 0 !important; background-color: var(--status-success-soft); color: #15803d; border-color: var(--status-success-border);">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+            <div class="small fw-semibold">Bạn đã đăng xuất an toàn khỏi phiên làm việc.</div>
+          </div>
+          {% endif %}
+
+          <!-- Error Alert -->
+          {% if error_message %}
+          <div class="alert alert-danger d-flex align-items-center mb-4 border" id="loginErrorAlert" role="alert" style="border-radius: 0 !important; background-color: var(--status-danger-soft); color: #b91c1c; border-color: var(--status-danger-border);">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+            <div class="small fw-semibold">{{ error_message }}</div>
+          </div>
+          {% endif %}
+
+          <!-- Login Form -->
+          <form action="/login" method="POST" autocomplete="off" id="loginForm">
+            <input type="hidden" name="next_url" value="{{ next_url or '/dashboard' }}">
+
+            <!-- Username Field -->
+            <div class="mb-3 stagger-item">
+              <label for="username" class="form-label fw-bold text-uppercase" style="font-size: 0.76rem; letter-spacing: 1px;">
+                Tên tài khoản điều hành <span class="text-danger">*</span>
               </label>
-              <small class="text-muted" style="font-size: 0.75rem;">Mặc định: <code>password123</code></small>
+              <div class="input-group">
+                <span class="input-group-text bg-light text-muted border-end-0" style="border-radius: 0 !important; border-color: #cbd5e1;">
+                  <i class="bi bi-person"></i>
+                </span>
+                <input
+                  type="text"
+                  class="form-control border-start-0 ps-0"
+                  id="username"
+                  name="username"
+                  placeholder="Nhập tên tài khoản..."
+                  value="{{ username or '' }}"
+                  required
+                  autofocus
+                  style="height: 48px; border-radius: 0 !important; border-color: #cbd5e1; font-size: 0.92rem;"
+                >
+              </div>
             </div>
-            <div class="input-group">
-              <span class="input-group-text bg-light text-muted border-end-0">
-                <i class="bi bi-lock"></i>
+
+            <!-- Password Field -->
+            <div class="mb-4 stagger-item">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <label for="password" class="form-label fw-bold text-uppercase mb-0" style="font-size: 0.76rem; letter-spacing: 1px;">
+                  Mật khẩu bảo mật <span class="text-danger">*</span>
+                </label>
+                <span class="text-muted" style="font-size: 0.72rem;">Mặc định: <code>password123</code></span>
+              </div>
+              <div class="input-group">
+                <span class="input-group-text bg-light text-muted border-end-0" style="border-radius: 0 !important; border-color: #cbd5e1;">
+                  <i class="bi bi-lock"></i>
+                </span>
+                <input
+                  type="password"
+                  class="form-control border-start-0 ps-0"
+                  id="password"
+                  name="password"
+                  placeholder="Nhập mật khẩu..."
+                  required
+                  style="height: 48px; border-radius: 0 !important; border-color: #cbd5e1; font-size: 0.92rem;"
+                >
+              </div>
+            </div>
+
+            <!-- Precision Action Button (Vibrant BMW Blue) -->
+            <div class="stagger-item mb-4">
+              <button type="submit" id="btnLoginSubmit" class="btn btn-primary w-100 py-3 fw-bold shadow-sm" style="border-radius: 0 !important; letter-spacing: 1.5px; font-size: 0.88rem;">
+                <i class="bi bi-box-arrow-in-right me-2" id="btnLoginIcon"></i> ĐĂNG NHẬP HỆ THỐNG
+              </button>
+            </div>
+          </form>
+
+          <!-- Quick Role Selection Grid (Luminous Pastel Tone Cards) -->
+          <div class="border-top pt-4 stagger-item">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <span class="overline text-muted" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                <i class="bi bi-lightning-charge-fill text-warning me-1"></i> CHỌN NHANH VAI TRÒ THỬ NGHIỆM:
               </span>
-              <input
-                type="password"
-                class="form-control border-start-0 ps-0"
-                id="password"
-                name="password"
-                placeholder="Nhập mật khẩu..."
-                required
-                style="height: 48px;"
-              >
             </div>
-          </div>
 
-          <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow mb-3" style="font-size: 0.95rem; letter-spacing: 0.5px;">
-            <i class="bi bi-box-arrow-in-right me-2"></i> ĐĂNG NHẬP HỆ THỐNG
-          </button>
-        </form>
-
-        <!-- Modern 1-Click Interactive Role Cards -->
-        <div class="border-top pt-4 mt-4">
-          <div class="d-flex align-items-center justify-content-between mb-3">
-            <span class="text-muted small fw-bold text-uppercase" style="letter-spacing: 0.5px;">
-              <i class="bi bi-lightning-charge-fill text-warning me-1"></i> Chọn nhanh vai trò thử nghiệm:
-            </span>
-          </div>
-
-          <div class="row g-2">
-            <!-- DSP Card -->
-            <div class="col-4">
-              <div 
-                class="role-select-card h-100" 
-                id="roleCardDsp"
-                onclick="selectRole('dsp_user', 'password123', 'roleCardDsp')"
-                title="Điều phối viên: Toàn quyền thêm/sửa/điều phối"
-              >
-                <div class="role-title text-primary"><i class="bi bi-shield-check me-1"></i>DSP</div>
-                <div class="badge bg-primary-subtle text-primary border border-primary-subtle px-1 mb-1" style="font-size: 0.65rem;">Toàn Quyền</div>
-                <div class="role-desc">Điều phối & xử lý</div>
+            <div class="row g-2">
+              <!-- DSP Role Card -->
+              <div class="col-4">
+                <div 
+                  class="p-2 border role-select-card h-100 text-center bg-white" 
+                  id="roleCardDsp"
+                  onclick="selectRole('dsp_user', 'password123', 'roleCardDsp')"
+                  style="cursor: pointer; border-radius: 0 !important; border-color: #e2e8f0; transition: all 0.2s;"
+                  title="Điều phối viên: Toàn quyền gán xe, tài xế, xử lý sự cố"
+                >
+                  <span class="badge bg-primary-subtle text-primary border border-primary-subtle d-block mb-1" style="border-radius: 0; font-size: 0.7rem;">DSP</span>
+                  <div class="fw-bold text-dark small" style="font-size: 0.72rem;">ĐIỀU PHỐI</div>
+                  <div class="text-muted" style="font-size: 0.65rem;">Toàn quyền</div>
+                </div>
               </div>
-            </div>
 
-            <!-- SAL Card -->
-            <div class="col-4">
-              <div 
-                class="role-select-card h-100" 
-                id="roleCardSal"
-                onclick="selectRole('sal_user', 'password123', 'roleCardSal')"
-                title="Kinh doanh: Xem thông tin & cước phí"
-              >
-                <div class="role-title text-warning"><i class="bi bi-graph-up me-1"></i>SAL</div>
-                <div class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-1 mb-1" style="font-size: 0.65rem;">Chỉ Xem</div>
-                <div class="role-desc">Kinh doanh & giá</div>
+              <!-- SAL Role Card -->
+              <div class="col-4">
+                <div 
+                  class="p-2 border role-select-card h-100 text-center bg-white" 
+                  id="roleCardSal"
+                  onclick="selectRole('sal_user', 'password123', 'roleCardSal')"
+                  style="cursor: pointer; border-radius: 0 !important; border-color: #e2e8f0; transition: all 0.2s;"
+                  title="Kinh doanh: Xem danh sách, tra cứu cước phí"
+                >
+                  <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle d-block mb-1" style="border-radius: 0; font-size: 0.7rem;">SAL</span>
+                  <div class="fw-bold text-dark small" style="font-size: 0.72rem;">KINH DOANH</div>
+                  <div class="text-muted" style="font-size: 0.65rem;">Chỉ xem giá</div>
+                </div>
               </div>
-            </div>
 
-            <!-- MGR Card -->
-            <div class="col-4">
-              <div 
-                class="role-select-card h-100" 
-                id="roleCardMgr"
-                onclick="selectRole('mgr_user', 'password123', 'roleCardMgr')"
-                title="Quản lý: Báo cáo & giám sát tổng thể"
-              >
-                <div class="role-title text-info"><i class="bi bi-person-workspace me-1"></i>MGR</div>
-                <div class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-1 mb-1" style="font-size: 0.65rem;">Giám Sát</div>
-                <div class="role-desc">Quản lý & báo cáo</div>
+              <!-- MGR Role Card -->
+              <div class="col-4">
+                <div 
+                  class="p-2 border role-select-card h-100 text-center bg-white" 
+                  id="roleCardMgr"
+                  onclick="selectRole('mgr_user', 'password123', 'roleCardMgr')"
+                  style="cursor: pointer; border-radius: 0 !important; border-color: #e2e8f0; transition: all 0.2s;"
+                  title="Quản lý: Báo cáo tổng thể, giám sát nguồn lực"
+                >
+                  <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle d-block mb-1" style="border-radius: 0; font-size: 0.7rem;">MGR</span>
+                  <div class="fw-bold text-dark small" style="font-size: 0.72rem;">QUẢN LÝ</div>
+                  <div class="text-muted" style="font-size: 0.65rem;">Giám sát chung</div>
+                </div>
               </div>
             </div>
           </div>
+
         </div>
-
       </div>
     </div>
+
   </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
+document.addEventListener("DOMContentLoaded", function () {
+  if (typeof gsap === "undefined") return;
+
+  const mm = gsap.matchMedia();
+
+  mm.add({
+    reduceMotion: "(prefers-reduced-motion: reduce)",
+    normalMotion: "(prefers-reduced-motion: no-preference)"
+  }, (context) => {
+    const { reduceMotion } = context.conditions;
+    if (reduceMotion) return;
+
+    // 1. Entrance Choreography via GSAP Timeline
+    const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
+
+    // Left Telemetry Panel Entrance (smooth glide)
+    tl.from("#telemetryPanel", {
+      x: -20,
+      autoAlpha: 0,
+      duration: 0.55
+    })
+    // Right Card Entrance (luminous rise)
+    .from("#authTerminalCardWrapper", {
+      x: 20,
+      autoAlpha: 0,
+      duration: 0.55
+    }, "-=0.35")
+    // Stagger inner inputs and role buttons
+    .from(".stagger-item", {
+      y: 12,
+      autoAlpha: 0,
+      duration: 0.35,
+      stagger: 0.08
+    }, "-=0.25");
+
+    // 2. Error Shake Animation (macOS/iOS precision shake on failed auth)
+    {% if error_message %}
+    gsap.fromTo("#loginCard", 
+      { x: -10 }, 
+      { 
+        x: 10, 
+        duration: 0.07, 
+        repeat: 5, 
+        yoyo: true, 
+        ease: "power1.inOut",
+        onComplete: function() {
+          gsap.set("#loginCard", { x: 0 });
+        }
+      }
+    );
+    {% endif %}
+
+    // 3. Precision Button Micro-interactions
+    const submitBtn = document.getElementById("btnLoginSubmit");
+    const submitIcon = document.getElementById("btnLoginIcon");
+    if (submitBtn) {
+      submitBtn.addEventListener("mouseenter", function () {
+        gsap.to(submitBtn, { y: -2, boxShadow: "0 8px 24px rgba(28, 105, 212, 0.35)", duration: 0.18 });
+        if (submitIcon) gsap.to(submitIcon, { x: 3, duration: 0.18 });
+      });
+      submitBtn.addEventListener("mouseleave", function () {
+        gsap.to(submitBtn, { y: 0, boxShadow: "0 2px 6px rgba(0, 0, 0, 0.05)", duration: 0.18 });
+        if (submitIcon) gsap.to(submitIcon, { x: 0, duration: 0.18 });
+      });
+      submitBtn.addEventListener("mousedown", function () {
+        gsap.to(submitBtn, { scale: 0.98, duration: 0.08 });
+      });
+      submitBtn.addEventListener("mouseup", function () {
+        gsap.to(submitBtn, { scale: 1, duration: 0.12, ease: "back.out(2)" });
+      });
+    }
+
+    // 4. Role cards hover interaction
+    document.querySelectorAll(".role-select-card").forEach(card => {
+      card.addEventListener("mouseenter", function () {
+        gsap.to(card, { y: -3, borderColor: "#1c69d4", boxShadow: "0 6px 18px rgba(28, 105, 212, 0.12)", duration: 0.18 });
+      });
+      card.addEventListener("mouseleave", function () {
+        if (!card.classList.contains("border-primary")) {
+          gsap.to(card, { y: 0, borderColor: "#e2e8f0", boxShadow: "none", duration: 0.18 });
+        }
+      });
+    });
+  });
+});
+
+// Interactive 1-click role selection with GSAP pulse feedback
 function selectRole(username, password, cardId) {
   const uInput = document.getElementById('username');
   const pInput = document.getElementById('password');
@@ -159,16 +345,37 @@ function selectRole(username, password, cardId) {
     pInput.value = password;
     uInput.classList.add('is-valid');
     pInput.classList.add('is-valid');
+
+    // Laser highlight pulse on inputs (Precision Engineering feel)
+    if (typeof gsap !== "undefined") {
+      gsap.fromTo([uInput, pInput], 
+        { backgroundColor: "rgba(28, 105, 212, 0.1)", borderColor: "#1c69d4" }, 
+        { backgroundColor: "#ffffff", borderColor: "#22c55e", duration: 0.45, ease: "power2.out" }
+      );
+    }
   }
 
-  // Visual active toggle
+  // Active border toggle
   ['roleCardDsp', 'roleCardSal', 'roleCardMgr'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.classList.remove('active');
+    if (el) {
+      el.classList.remove('border-primary', 'bg-light');
+      el.style.borderColor = '#e2e8f0';
+      el.style.borderWidth = '1px';
+    }
   });
+
   const activeEl = document.getElementById(cardId);
   if (activeEl) {
-    activeEl.classList.add('active');
+    activeEl.classList.add('border-primary');
+    activeEl.style.borderColor = '#1c69d4';
+    activeEl.style.borderWidth = '1.5px';
+    if (typeof gsap !== "undefined") {
+      gsap.fromTo(activeEl, 
+        { scale: 0.95 }, 
+        { scale: 1, duration: 0.28, ease: "back.out(2)" }
+      );
+    }
   }
 }
 </script>

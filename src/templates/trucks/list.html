@@ -3,26 +3,36 @@
 {% block title %}Quản lý Đội Xe - Freight ERP{% endblock %}
 
 {% block content %}
-<!-- Modern Page Hero Banner (Light Theme Edition) -->
-<div class="dashboard-hero mb-4 animate-fade-in-up">
-    <div class="row align-items-center">
+<!-- Architectural Header & Telemetry Status Bar (Precision Engineering + BMW Design DNA) -->
+<div class="p-4 p-xl-5 mb-4 border bg-white" id="trucksHero" style="border-radius: 0 !important; border-color: #e2e8f0; background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);">
+    <!-- System Status Bar -->
+    <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+        <span class="m-stripe-pill me-1"></span>
+        <span class="overline text-primary" style="font-size: 0.76rem; letter-spacing: 2px;">QUẢN LÝ PHƯƠNG TIỆN VẬN TẢI & ĐỘI XE</span>
+        <span class="badge bg-light text-dark border px-2 py-1 ms-auto" style="font-size: 0.72rem; letter-spacing: 0.5px; border-radius: 0;">
+            <i class="bi bi-truck me-1 text-primary"></i> TỔNG: {{ total }} PHƯƠNG TIỆN
+        </span>
+        {% if current_user %}
+        <span class="badge {% if current_user.role == 'DSP' %}bg-success{% elif current_user.role == 'SAL' %}bg-warning text-dark{% else %}bg-dark text-white{% endif %} px-2 py-1" style="font-size: 0.72rem; border-radius: 0;">
+            <i class="bi bi-shield-check me-1"></i>{{ current_user.role }} • {{ current_user.full_name or current_user.username }}
+        </span>
+        {% endif %}
+    </div>
+
+    <!-- Main Architectural Typography & Action Bar -->
+    <div class="row align-items-center g-3">
         <div class="col-lg-8">
-            <div class="d-flex align-items-center gap-2 mb-2">
-                <span class="m-stripe-pill me-1"></span>
-                <span class="text-uppercase small fw-bold text-primary" style="letter-spacing: 1.5px;">QUẢN LÝ PHƯƠNG TIỆN VẬN TẢI</span>
-                <span class="badge bg-light text-dark border px-2 py-1 ms-2">
-                    Tổng: {{ total }} phương tiện
-                </span>
-            </div>
-            <h2 class="dashboard-hero-title">Danh Mục Xe Vận Tải</h2>
-            <p class="dashboard-hero-subtitle mb-0">
-                Quản lý phương tiện, kiểm tra chuẩn hóa biển số, định mức tải trọng và trạng thái sẵn sàng điều phối.
+            <h1 class="display-6 fw-bold text-ink mb-2" style="letter-spacing: -0.02em; line-height: 1.15; text-transform: uppercase;">
+                DANH MỤC XE VẬN TẢI
+            </h1>
+            <p class="text-muted mb-0" style="font-weight: 300; font-size: 1.05rem; line-height: 1.65; max-width: 680px;">
+                Quản lý hồ sơ phương tiện, kiểm soát chuẩn hóa biển số, định mức tải trọng và trạng thái sẵn sàng điều phối.
             </p>
         </div>
-        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+        <div class="col-lg-4 text-lg-end">
             {% if current_user and current_user.role == 'DSP' %}
-            <a href="/admin/trucks/create" class="btn btn-primary shadow-sm">
-                <i class="bi bi-plus-circle me-1"></i> Thêm Xe Mới
+            <a href="/admin/trucks/create" class="btn btn-primary shadow-sm btn-hero-action" style="border-radius: 0 !important; font-weight: 600; letter-spacing: 0.5px; padding: 10px 18px;">
+                <i class="bi bi-plus-circle me-1"></i> THÊM XE MỚI
             </a>
             {% endif %}
         </div>
@@ -32,95 +42,105 @@
 <div id="alertContainer"></div>
 
 {% if error_message %}
-<div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Lỗi:</strong> {{ error_message }}
+<div class="alert alert-danger alert-dismissible fade show mb-4 border" role="alert" style="border-radius: 0 !important; border-color: #fecaca; background: #fef2f2;">
+    <i class="bi bi-exclamation-triangle-fill me-2 text-danger"></i><strong>Lỗi nghiệp vụ:</strong> {{ error_message }}
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 {% endif %}
 
 {% if success_message %}
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-    <i class="bi bi-check-circle-fill me-2"></i>{{ success_message }}
+<div class="alert alert-success alert-dismissible fade show mb-4 border" role="alert" style="border-radius: 0 !important; border-color: #bbf7d0; background: #f0fdf4;">
+    <i class="bi bi-check-circle-fill me-2 text-success"></i>{{ success_message }}
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 {% endif %}
 
-<!-- Filters -->
-<div class="card p-3 mb-4 shadow-sm border-0 animate-fade-in-up">
+<!-- Filters Card (Precision Styling) -->
+<div class="card p-4 mb-4 border shadow-sm" id="trucksFilterCard" style="border-radius: 0 !important; border-color: #e2e8f0; background: #ffffff;">
     <form method="get" action="/admin/trucks" class="row g-3 align-items-center">
-        <div class="col-md-4">
+        <div class="col-md-5">
+            <label class="overline text-muted d-block mb-1" style="font-size: 0.7rem; letter-spacing: 1.2px;">TÌM KIẾM PHƯƠNG TIỆN</label>
             <div class="input-group">
-                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
-                <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Tìm theo biển số, loại xe..." value="{{ search or '' }}" style="height: 44px;">
+                <span class="input-group-text bg-light border-end-0" style="border-radius: 0 !important; border-color: #e2e8f0;"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Biển số xe, chủng loại thùng..." value="{{ search or '' }}" style="height: 44px; border-radius: 0 !important; border-color: #e2e8f0;">
             </div>
         </div>
         <div class="col-md-3">
-            <select name="status" class="form-select" style="height: 44px;">
+            <label class="overline text-muted d-block mb-1" style="font-size: 0.7rem; letter-spacing: 1.2px;">TRẠNG THÁI HOẠT ĐỘNG</label>
+            <select name="status" class="form-select" style="height: 44px; border-radius: 0 !important; border-color: #e2e8f0;">
                 <option value="">-- Tất cả trạng thái --</option>
                 <option value="ACTIVE" {% if status == 'ACTIVE' %}selected{% endif %}>ACTIVE (Sẵn sàng)</option>
                 <option value="MAINTENANCE" {% if status == 'MAINTENANCE' %}selected{% endif %}>MAINTENANCE (Bảo dưỡng)</option>
                 <option value="INACTIVE" {% if status == 'INACTIVE' %}selected{% endif %}>INACTIVE (Ngừng hoạt động)</option>
             </select>
         </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100" style="height: 44px;"><i class="bi bi-funnel me-1"></i> Lọc</button>
+        <div class="col-md-2 mt-auto">
+            <button type="submit" class="btn btn-primary w-100" style="height: 44px; border-radius: 0 !important; font-weight: 600; letter-spacing: 0.5px;">
+                <i class="bi bi-funnel me-1"></i> LỌC
+            </button>
         </div>
-        <div class="col-md-2">
-            <a href="/admin/trucks" class="btn btn-outline-secondary w-100" style="height: 44px; display: flex; align-items: center; justify-content: center;">Đặt lại</a>
+        <div class="col-md-2 mt-auto">
+            <a href="/admin/trucks" class="btn btn-outline-secondary w-100" style="height: 44px; border-radius: 0 !important; font-weight: 600; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> ĐẶT LẠI
+            </a>
         </div>
     </form>
 </div>
 
-<!-- Trucks Table -->
-<div class="card shadow-sm border-0 card-hover animate-fade-in-up delay-1">
+<!-- Trucks Table (Precision Engineering Data Grid) -->
+<div class="card border shadow-sm mb-4" id="trucksTableCard" style="border-radius: 0 !important; border-color: #e2e8f0; background: #ffffff;">
     <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
+        <table class="table table-hover align-middle mb-0" style="border-collapse: separate; border-spacing: 0;">
+            <thead class="table-light" style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;">
                 <tr>
-                    <th class="ps-3">ID</th>
-                    <th>Biển Số Xe</th>
-                    <th>Biển Chuẩn Hóa</th>
-                    <th>Loại Xe</th>
-                    <th>Tải Trọng (kg)</th>
-                    <th>Trạng Thái</th>
-                    <th>Ghi Chú</th>
-                    <th class="text-end pe-3">Thao Tác</th>
+                    <th class="ps-3 py-3 overline text-muted" style="font-size: 0.7rem; letter-spacing: 1.2px;">ID</th>
+                    <th class="py-3 overline text-muted" style="font-size: 0.7rem; letter-spacing: 1.2px;">BIỂN SỐ XE</th>
+                    <th class="py-3 overline text-muted" style="font-size: 0.7rem; letter-spacing: 1.2px;">BIỂN CHUẨN HÓA</th>
+                    <th class="py-3 overline text-muted" style="font-size: 0.7rem; letter-spacing: 1.2px;">LOẠI XE</th>
+                    <th class="py-3 overline text-muted" style="font-size: 0.7rem; letter-spacing: 1.2px;">TẢI TRỌNG</th>
+                    <th class="py-3 overline text-muted" style="font-size: 0.7rem; letter-spacing: 1.2px;">TRẠNG THÁI</th>
+                    <th class="py-3 overline text-muted" style="font-size: 0.7rem; letter-spacing: 1.2px;">GHI CHÚ</th>
+                    <th class="text-end pe-3 py-3 overline text-muted" style="font-size: 0.7rem; letter-spacing: 1.2px;">THAO TÁC</th>
                 </tr>
             </thead>
             <tbody>
                 {% if trucks %}
                     {% for truck in trucks %}
-                    <tr id="truck-row-{{ truck.id }}">
-                        <td class="ps-3 fw-bold text-muted">#{{ truck.id }}</td>
-                        <td class="fw-bold text-primary">{{ truck.plate_number }}</td>
-                        <td><code class="text-dark bg-light px-2 py-1 rounded">{{ truck.normalized_plate }}</code></td>
-                        <td>{{ truck.truck_type }}</td>
-                        <td><span class="badge bg-light text-dark border">{{ "{:,}".format(truck.capacity_kg) }} kg</span></td>
-                        <td>
+                    <tr id="truck-row-{{ truck.id }}" class="table-row-reveal" style="border-bottom: 1px solid #f1f5f9; transition: background-color 0.15s;">
+                        <td class="ps-3 py-3 fw-bold text-muted" style="font-size: 0.8rem;">#{{ truck.id }}</td>
+                        <td class="py-3 fw-bold text-primary" style="letter-spacing: 0.5px;">{{ truck.plate_number }}</td>
+                        <td class="py-3"><code class="text-dark bg-light px-2 py-1 border" style="border-radius: 0 !important; font-family: monospace;">{{ truck.normalized_plate }}</code></td>
+                        <td class="py-3"><span class="fw-medium text-ink">{{ truck.truck_type }}</span></td>
+                        <td class="py-3"><span class="badge bg-light text-dark border font-monospace px-2 py-1" style="border-radius: 0 !important; font-size: 0.78rem;">{{ "{:,}".format(truck.capacity_kg) }} kg</span></td>
+                        <td class="py-3">
                             {% if truck.status == 'ACTIVE' %}
-                                <span class="badge-status badge-status-active">
-                                    <span class="status-dot status-dot-active"></span> Sẵn sàng
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 0.72rem; border-radius: 0 !important;">
+                                    <span class="status-dot status-dot-active me-1"></span> SẴN SÀNG
                                 </span>
                             {% elif truck.status == 'MAINTENANCE' %}
-                                <span class="badge-status badge-status-maintenance">
-                                    <i class="bi bi-tools" style="font-size: 0.65rem;"></i> Bảo dưỡng
+                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1" style="font-size: 0.72rem; border-radius: 0 !important;">
+                                    <i class="bi bi-tools me-1" style="font-size: 0.65rem;"></i> BẢO DƯỠNG
                                 </span>
                             {% else %}
-                                <span class="badge-status badge-status-inactive">Ngừng hoạt động</span>
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1" style="font-size: 0.72rem; border-radius: 0 !important;">
+                                    NGỪNG HOẠT ĐỘNG
+                                </span>
                             {% endif %}
                         </td>
-                        <td class="text-muted small">{{ truck.description or '—' }}</td>
-                        <td class="text-end pe-3">
-                            <div class="table-action-toolbar">
+                        <td class="py-3 text-muted small">{{ truck.description or '—' }}</td>
+                        <td class="text-end pe-3 py-3">
+                            <div class="d-inline-flex gap-1">
                                 {% if current_user and current_user.role == 'DSP' %}
-                                <a href="/admin/trucks/{{ truck.id }}/edit" class="btn-action-main btn-primary" title="Chỉnh sửa xe">
-                                    <i class="bi bi-pencil"></i> Sửa
+                                <a href="/admin/trucks/{{ truck.id }}/edit" class="btn btn-sm btn-outline-primary" style="border-radius: 0 !important; font-size: 0.75rem; padding: 4px 10px;" title="Chỉnh sửa xe">
+                                    <i class="bi bi-pencil me-1"></i> Sửa
                                 </a>
-                                <button type="button" class="btn-action-icon btn-action-delete" onclick="confirmDeleteTruck({{ truck.id }}, '{{ truck.plate_number }}')" title="Xóa xe">
+                                <button type="button" class="btn btn-sm btn-outline-danger" style="border-radius: 0 !important; font-size: 0.75rem; padding: 4px 8px;" onclick="confirmDeleteTruck({{ truck.id }}, '{{ truck.plate_number }}')" title="Xóa xe">
                                     <i class="bi bi-trash"></i>
                                 </button>
                                 {% else %}
-                                <span class="badge-action-readonly"><i class="bi bi-lock"></i> Chỉ xem</span>
+                                <span class="badge bg-light text-muted border px-2 py-1" style="border-radius: 0 !important; font-size: 0.72rem;">
+                                    <i class="bi bi-lock me-1"></i> Chỉ xem
+                                </span>
                                 {% endif %}
                             </div>
                         </td>
@@ -129,8 +149,8 @@
                 {% else %}
                     <tr>
                         <td colspan="8" class="text-center py-5 text-muted">
-                            <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
-                            Chưa có xe nào trong danh mục hoặc không khớp bộ lọc tìm kiếm.
+                            <i class="bi bi-inbox fs-2 d-block mb-2 text-muted opacity-50"></i>
+                            <span class="fw-medium">Chưa có phương tiện nào trong danh mục hoặc không khớp bộ lọc tìm kiếm.</span>
                         </td>
                     </tr>
                 {% endif %}
@@ -142,17 +162,19 @@
 <!-- Modal Thông báo Lỗi Nghiệp vụ / Xung Đột (Soft-Delete Guard & Schedule Conflict) -->
 <div class="modal fade" id="businessRuleModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title"><i class="bi bi-shield-x me-2"></i>Quy Tắc Nghiệp Vụ Chặn Thao Tác</h5>
+        <div class="modal-content border" style="border-radius: 0 !important; border-color: #e2e8f0;">
+            <div class="modal-header bg-danger text-white" style="border-radius: 0 !important;">
+                <h5 class="modal-title fw-bold text-uppercase" style="font-size: 0.95rem; letter-spacing: 0.5px;">
+                    <i class="bi bi-shield-x me-2"></i>Quy Tắc Nghiệp Vụ Chặn Thao Tác
+                </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-4">
                 <p id="businessRuleMessage" class="fw-bold text-danger mb-2"></p>
                 <div id="conflictsDetail" class="small text-muted"></div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đã hiểu</button>
+            <div class="modal-footer border-top" style="border-color: #e2e8f0 !important;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 0 !important; font-weight: 600;">ĐÃ HIỂU</button>
             </div>
         </div>
     </div>
@@ -161,25 +183,26 @@
 <!-- Modal Xác Nhận Xóa Xe -->
 <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Xác Nhận Xóa Phương Tiện</h5>
+        <div class="modal-content border" style="border-radius: 0 !important; border-color: #e2e8f0;">
+            <div class="modal-header border-bottom" style="border-color: #e2e8f0 !important;">
+                <h5 class="modal-title fw-bold text-danger text-uppercase" style="font-size: 0.95rem; letter-spacing: 0.5px;">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Xác Nhận Xóa Phương Tiện
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <p>Bạn có chắc chắn muốn xóa xe biển số <strong id="deletePlateName"></strong>?</p>
-                <div class="alert alert-warning small mb-0">
+            <div class="modal-body p-4">
+                <p>Bạn có chắc chắn muốn xóa xe biển số <strong id="deletePlateName" class="text-primary"></strong>?</p>
+                <div class="alert alert-warning small mb-0 border" style="border-radius: 0 !important; border-color: #fde68a; background: #fffbeb;">
                     <i class="bi bi-info-circle me-1"></i><strong>Quy tắc bảo toàn lịch sử:</strong> Nếu xe đã từng có đơn hàng hoặc chuyến đi trong quá khứ, hệ thống sẽ <strong>từ chối xóa cứng</strong> để bảo vệ tính toàn vẹn kiểm toán.
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
-                <button type="button" class="btn btn-danger" id="executeDeleteBtn">Xác nhận xóa</button>
+            <div class="modal-footer border-top" style="border-color: #e2e8f0 !important;">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 0 !important; font-weight: 600;">HỦY BỎ</button>
+                <button type="button" class="btn btn-danger" id="executeDeleteBtn" style="border-radius: 0 !important; font-weight: 600;">XÁC NHẬN XÓA</button>
             </div>
         </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block extra_scripts %}
@@ -206,12 +229,17 @@ document.getElementById('executeDeleteBtn').addEventListener('click', async func
         const resData = await response.json();
 
         if (response.ok && resData.success) {
-            // Success: remove row
             const row = document.getElementById('truck-row-' + targetTruckId);
-            if (row) row.remove();
+            if (row) {
+                gsap.to(row, {
+                    opacity: 0,
+                    y: -10,
+                    duration: 0.3,
+                    onComplete: () => row.remove()
+                });
+            }
             showAlert('success', 'Xóa phương tiện thành công.');
         } else {
-            // Blocked by Business Rule (e.g. Soft-Delete Guard)
             document.getElementById('businessRuleMessage').innerText = resData.error || 'Thao tác không được phép.';
             document.getElementById('conflictsDetail').innerText = 'Xe này đã tham gia vận chuyển trong lịch sử. Vui lòng chuyển trạng thái sang INACTIVE.';
             ruleModal.show();
@@ -224,11 +252,22 @@ document.getElementById('executeDeleteBtn').addEventListener('click', async func
 function showAlert(type, msg) {
     const container = document.getElementById('alertContainer');
     container.innerHTML = `
-        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+        <div class="alert alert-${type} alert-dismissible fade show mb-4 border" role="alert" style="border-radius: 0 !important;">
             <i class="bi bi-info-circle-fill me-2"></i>${msg}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     `;
 }
+
+// GSAP entrance choreographies
+document.addEventListener("DOMContentLoaded", function () {
+    if (typeof gsap === "undefined") return;
+    gsap.defaults({ duration: 0.45, ease: "power2.out" });
+
+    gsap.from("#trucksHero", { y: -15, autoAlpha: 0, duration: 0.45 });
+    gsap.from("#trucksFilterCard", { y: 15, autoAlpha: 0, duration: 0.4, delay: 0.1 });
+    gsap.from("#trucksTableCard", { y: 20, autoAlpha: 0, duration: 0.45, delay: 0.2 });
+    gsap.from(".table-row-reveal", { y: 10, autoAlpha: 0, duration: 0.25, stagger: 0.03, delay: 0.3 });
+});
 </script>
 {% endblock %}
