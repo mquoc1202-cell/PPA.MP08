@@ -12,14 +12,16 @@
                     <i class="bi bi-arrow-left me-1"></i> Danh sách chuyến hàng
                 </a>
                 <span class="m-stripe-pill mx-1"></span>
-                <span class="text-uppercase small fw-bold text-primary" style="letter-spacing: 1.5px;">GIÁM SÁT HÀNH TRÌNH CHUYẾN HÀNG</span>
+                <span class="text-uppercase small fw-bold text-primary" style="letter-spacing: 1.5px;">GIÁM SÁT HÀNH
+                    TRÌNH CHUYẾN HÀNG</span>
             </div>
             <h2 class="dashboard-hero-title mb-1">
                 <i class="bi bi-box-seam text-primary me-2"></i>
                 Chi Tiết Chuyến Hàng: <span class="text-primary">{{ trip.reference_code }}</span>
             </h2>
             <p class="dashboard-hero-subtitle mb-0">
-                Theo dõi chi tiết tiến độ giao hàng, nguồn lực phụ trách, chứng từ giao nhận (POD) và dòng thời gian sự kiện.
+                Theo dõi chi tiết tiến độ giao hàng, nguồn lực phụ trách, chứng từ giao nhận (POD) và dòng thời gian sự
+                kiện.
             </p>
         </div>
         <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -63,86 +65,140 @@
                 <i class="bi bi-check2-all me-1"></i> Hoàn Tất Chuyến Hàng
             </button>
             {% elif trip.status == 'COMPLETED' %}
-            <span class="badge bg-success py-2 px-3 shadow-sm"><i class="bi bi-check-circle me-1"></i> Đã Hoàn Tất</span>
+            <span class="badge bg-success py-2 px-3 shadow-sm"><i class="bi bi-check-circle me-1"></i> Đã Hoàn
+                Tất</span>
             {% endif %}
             {% endif %}
         </div>
     </div>
 </div>
 
-        <!-- Overdue Alert Banner (TRN-05) -->
-        {% if trip.is_delayed %}
-        <div class="alert alert-danger shadow-sm mb-4 border-danger" role="alert">
-            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                <div>
-                    <i class="bi bi-alarm-fill fs-4 me-2 align-middle text-danger"></i>
-                    <strong>CẢNH BÁO QUÁ HẠN VẬN HÀNH:</strong> Chuyến hàng đã vượt quá thời gian cam kết dự kiến ({{
-                    trip.estimated_end_time.strftime('%d/%m/%Y %H:%M') if trip.estimated_end_time else '' }}). Vui lòng
-                    kiểm tra tiến độ với tài xế hoặc gia hạn lịch trình nếu cần thiết.
+<!-- Overdue Alert Banner (TRN-05) -->
+{% if trip.is_delayed %}
+<div class="alert alert-danger shadow-sm mb-4 border-danger" role="alert">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div>
+            <i class="bi bi-alarm-fill fs-4 me-2 align-middle text-danger"></i>
+            <strong>CẢNH BÁO QUÁ HẠN VẬN HÀNH:</strong> Chuyến hàng đã vượt quá thời gian cam kết dự kiến ({{
+            trip.estimated_end_time.strftime('%d/%m/%Y %H:%M') if trip.estimated_end_time else '' }}). Vui lòng
+            kiểm tra tiến độ với tài xế hoặc gia hạn lịch trình nếu cần thiết.
+        </div>
+        {% if current_user and current_user.role == 'DSP' %}
+        <button type="button" class="btn btn-danger btn-sm fw-bold ms-3" onclick="showRescheduleModal()">
+            <i class="bi bi-clock-history me-1"></i> Gia Hạn Lịch Trình
+        </button>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Flash messages -->
+{% if success %}
+<div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i>
+    {% if success == 'picked_up' %}
+    Đã ghi nhận nhận hàng thực tế thành công! Chuyến hàng chuyển sang <strong>Đã lấy hàng</strong>.
+    {% elif success == 'in_transit' %}
+    Đã ghi nhận xe xuất phát thành công! Chuyến hàng chuyển sang <strong>Đang vận chuyển</strong>.
+    {% elif success == 'delivered' %}
+    Đã xác nhận giao hàng thực tế thành công! Chuyến hàng chuyển sang <strong>Đã giao hàng</strong>.
+    {% elif success == 'delivery_failed' %}
+    Đã ghi nhận biên bản sự cố giao hàng thất bại! Chuyến hàng giữ nguyên <strong>Đang vận chuyển</strong>.
+    {% elif success == 'completed' %}
+    Chuyến hàng đã được chốt hoàn tất thành công! Nguồn lực Xe tải và Tài xế đã được giải phóng.
+    {% elif success == 'evidence_uploaded' %}
+    Đã tải lên tệp chứng từ bổ sung thành công!
+    {% elif success == 'issue_logged' %}
+    Biên bản sự cố đã được lập thành công và ghi nhận vào dòng thời gian!
+    {% elif success == 'issue_resolved' %}
+    Sự cố chuyến hàng đã được giải quyết thành công!
+    {% elif success == 'rescheduled' %}
+    Đã cập nhật gia hạn thời gian kết thúc dự kiến thành công!
+    {% elif success == 'rescheduled_with_conflict' %}
+    Đã gia hạn thời gian kết thúc chuyến hàng. <strong>CẢNH BÁO XUNG ĐỘT:</strong> Phát hiện {{ conflict_count
+    or 'các' }} lịch trình kế tiếp của xe/tài xế bị chồng lấn! Vui lòng kiểm tra và dời hoặc gán lại xe/tài xế
+    cho các đơn bị ảnh hưởng.
+    {% else %}
+    Thao tác thực hiện thành công.
+    {% endif %}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endif %}
+
+{% if error %}
+<div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ error }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endif %}
+
+<div class="row g-4">
+    <!-- Left Column: Details -->
+    <div class="col-lg-7">
+        <!-- Overview Card with M-Stripe & Modern Stepper -->
+        <div class="card shadow-sm border-0 mb-4 card-hover animate-fade-in-up">
+            <div class="m-stripe-divider"></div>
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <span class="m-stripe-pill me-2"></span>
+                    <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-card-checklist me-2 text-primary"></i>Thông Tin
+                        Chuyến Hàng</h6>
                 </div>
-                {% if current_user and current_user.role == 'DSP' %}
-                <button type="button" class="btn btn-danger btn-sm fw-bold ms-3" onclick="showRescheduleModal()">
-                    <i class="bi bi-clock-history me-1"></i> Gia Hạn Lịch Trình
-                </button>
-                {% endif %}
+                <span class="badge bg-primary px-3 py-1">
+                    {% if trip.status == 'UNASSIGNED' %}Chưa điều phối
+                    {% elif trip.status == 'ASSIGNED' %}Đã điều phối
+                    {% elif trip.status == 'PICKED_UP' %}Đã lấy hàng
+                    {% elif trip.status == 'IN_TRANSIT' %}Đang vận chuyển
+                    {% elif trip.status == 'DELIVERED' %}Đã giao hàng
+                    {% elif trip.status == 'COMPLETED' %}Hoàn tất
+                    {% else %}{{ trip.status }}{% endif %}
+                </span>
             </div>
-        </div>
-        {% endif %}
 
-        <!-- Flash messages -->
-        {% if success %}
-        <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            {% if success == 'picked_up' %}
-            Đã ghi nhận nhận hàng thực tế thành công! Chuyến hàng chuyển sang <strong>Đã lấy hàng</strong>.
-            {% elif success == 'in_transit' %}
-            Đã ghi nhận xe xuất phát thành công! Chuyến hàng chuyển sang <strong>Đang vận chuyển</strong>.
-            {% elif success == 'delivered' %}
-            Đã xác nhận giao hàng thực tế thành công! Chuyến hàng chuyển sang <strong>Đã giao hàng</strong>.
-            {% elif success == 'delivery_failed' %}
-            Đã ghi nhận biên bản sự cố giao hàng thất bại! Chuyến hàng giữ nguyên <strong>Đang vận chuyển</strong>.
-            {% elif success == 'completed' %}
-            Chuyến hàng đã được chốt hoàn tất thành công! Nguồn lực Xe tải và Tài xế đã được giải phóng.
-            {% elif success == 'evidence_uploaded' %}
-            Đã tải lên tệp chứng từ bổ sung thành công!
-            {% elif success == 'issue_logged' %}
-            Biên bản sự cố đã được lập thành công và ghi nhận vào dòng thời gian!
-            {% elif success == 'issue_resolved' %}
-            Sự cố chuyến hàng đã được giải quyết thành công!
-            {% elif success == 'rescheduled' %}
-            Đã cập nhật gia hạn thời gian kết thúc dự kiến thành công!
-            {% elif success == 'rescheduled_with_conflict' %}
-            Đã gia hạn thời gian kết thúc chuyến hàng. <strong>CẢNH BÁO XUNG ĐỘT:</strong> Phát hiện {{ conflict_count
-            or 'các' }} lịch trình kế tiếp của xe/tài xế bị chồng lấn! Vui lòng kiểm tra và dời hoặc gán lại xe/tài xế
-            cho các đơn bị ảnh hưởng.
-            {% else %}
-            Thao tác thực hiện thành công.
-            {% endif %}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% endif %}
-
-        {% if error %}
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ error }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% endif %}
-
-        <div class="row g-4">
-            <!-- Left Column: Details -->
-            <div class="col-lg-7">
-                <!-- Overview Card with M-Stripe & Modern Stepper -->
-                <div class="card shadow-sm border-0 mb-4 card-hover animate-fade-in-up">
-                    <div class="m-stripe-divider"></div>
+            <!-- Visual Delivery Journey Stepper -->
+            <div class="px-4 pt-3 bg-light border-bottom">
+                <div class="journey-stepper mb-3">
                     <div
-                        class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
-                            <span class="m-stripe-pill me-2"></span>
-                            <h6 class="mb-0 fw-bold text-dark"><i
-                                    class="bi bi-card-checklist me-2 text-primary"></i>Thông Tin Chuyến Hàng</h6>
-                        </div>
-                        <span class="badge bg-primary px-3 py-1">
+                        class="journey-step {% if trip.status in ['ASSIGNED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED', 'COMPLETED'] %}completed{% elif trip.status == 'UNASSIGNED' %}active{% endif %}">
+                        <div class="journey-step-circle"><i class="bi bi-file-earmark-text"></i></div>
+                        <div class="journey-step-label">Khởi tạo</div>
+                    </div>
+                    <div
+                        class="journey-step {% if trip.status in ['PICKED_UP', 'IN_TRANSIT', 'DELIVERED', 'COMPLETED'] %}completed{% elif trip.status == 'ASSIGNED' %}active{% endif %}">
+                        <div class="journey-step-circle"><i class="bi bi-person-check"></i></div>
+                        <div class="journey-step-label">Điều phối</div>
+                    </div>
+                    <div
+                        class="journey-step {% if trip.status in ['IN_TRANSIT', 'DELIVERED', 'COMPLETED'] %}completed{% elif trip.status == 'PICKED_UP' %}active{% endif %}">
+                        <div class="journey-step-circle"><i class="bi bi-box-arrow-in-down"></i></div>
+                        <div class="journey-step-label">Đã lấy hàng</div>
+                    </div>
+                    <div
+                        class="journey-step {% if trip.status in ['DELIVERED', 'COMPLETED'] %}completed{% elif trip.status == 'IN_TRANSIT' %}active{% endif %}">
+                        <div class="journey-step-circle"><i class="bi bi-truck"></i></div>
+                        <div class="journey-step-label">Vận chuyển</div>
+                    </div>
+                    <div
+                        class="journey-step {% if trip.status in ['COMPLETED'] %}completed{% elif trip.status == 'DELIVERED' %}active{% endif %}">
+                        <div class="journey-step-circle"><i class="bi bi-box-seam"></i></div>
+                        <div class="journey-step-label">Đã giao</div>
+                    </div>
+                    <div class="journey-step {% if trip.status == 'COMPLETED' %}completed{% endif %}">
+                        <div class="journey-step-circle"><i class="bi bi-check2-all"></i></div>
+                        <div class="journey-step-label">Hoàn tất</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <span class="text-muted small text-uppercase fw-bold d-block">Mã Tham Chiếu</span>
+                        <span class="fs-5 fw-bold text-primary">{{ trip.reference_code }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="text-muted small text-uppercase fw-bold d-block">Trạng Thái Vận Hành</span>
+                        <span class="badge bg-light text-dark border fs-6 px-3 py-1 mt-1">
                             {% if trip.status == 'UNASSIGNED' %}Chưa điều phối
                             {% elif trip.status == 'ASSIGNED' %}Đã điều phối
                             {% elif trip.status == 'PICKED_UP' %}Đã lấy hàng
@@ -153,456 +209,397 @@
                         </span>
                     </div>
 
-                    <!-- Visual Delivery Journey Stepper -->
-                    <div class="px-4 pt-3 bg-light border-bottom">
-                        <div class="journey-stepper mb-3">
-                            <div
-                                class="journey-step {% if trip.status in ['ASSIGNED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED', 'COMPLETED'] %}completed{% elif trip.status == 'UNASSIGNED' %}active{% endif %}">
-                                <div class="journey-step-circle"><i class="bi bi-file-earmark-text"></i></div>
-                                <div class="journey-step-label">Khởi tạo</div>
-                            </div>
-                            <div
-                                class="journey-step {% if trip.status in ['PICKED_UP', 'IN_TRANSIT', 'DELIVERED', 'COMPLETED'] %}completed{% elif trip.status == 'ASSIGNED' %}active{% endif %}">
-                                <div class="journey-step-circle"><i class="bi bi-person-check"></i></div>
-                                <div class="journey-step-label">Điều phối</div>
-                            </div>
-                            <div
-                                class="journey-step {% if trip.status in ['IN_TRANSIT', 'DELIVERED', 'COMPLETED'] %}completed{% elif trip.status == 'PICKED_UP' %}active{% endif %}">
-                                <div class="journey-step-circle"><i class="bi bi-box-arrow-in-down"></i></div>
-                                <div class="journey-step-label">Đã lấy hàng</div>
-                            </div>
-                            <div
-                                class="journey-step {% if trip.status in ['DELIVERED', 'COMPLETED'] %}completed{% elif trip.status == 'IN_TRANSIT' %}active{% endif %}">
-                                <div class="journey-step-circle"><i class="bi bi-truck"></i></div>
-                                <div class="journey-step-label">Vận chuyển</div>
-                            </div>
-                            <div
-                                class="journey-step {% if trip.status in ['COMPLETED'] %}completed{% elif trip.status == 'DELIVERED' %}active{% endif %}">
-                                <div class="journey-step-circle"><i class="bi bi-box-seam"></i></div>
-                                <div class="journey-step-label">Đã giao</div>
-                            </div>
-                            <div class="journey-step {% if trip.status == 'COMPLETED' %}completed{% endif %}">
-                                <div class="journey-step-circle"><i class="bi bi-check2-all"></i></div>
-                                <div class="journey-step-label">Hoàn tất</div>
-                            </div>
-                        </div>
+                    <div class="col-md-6">
+                        <span class="text-muted small text-uppercase fw-bold d-block">Người Gửi</span>
+                        <div class="fw-semibold">{{ trip.sender_name }}</div>
+                        <small class="text-muted"><i class="bi bi-telephone me-1"></i>{{ trip.sender_phone
+                            }}</small>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="text-muted small text-uppercase fw-bold d-block">Loại Hàng & Khối Lượng
+                            Đơn</span>
+                        <div class="fw-semibold">{{ trip.cargo_type }}</div>
+                        <span class="badge bg-secondary">{{ "{:,}".format(trip.cargo_weight_kg) }} kg</span>
                     </div>
 
-                    <div class="card-body p-4">
-                        <div class="row g-3">
+                    <div class="col-12 pt-2 border-top">
+                        <span class="text-muted small text-uppercase fw-bold d-block">Điểm Lấy Hàng</span>
+                        <div class="small text-secondary"><i class="bi bi-geo-alt-fill text-success me-1"></i>{{
+                            trip.pickup_address }}</div>
+                    </div>
+                    <div class="col-12">
+                        <span class="text-muted small text-uppercase fw-bold d-block">Điểm Giao Hàng</span>
+                        <div class="small text-secondary"><i class="bi bi-flag-fill text-danger me-1"></i>{{
+                            trip.delivery_address }}</div>
+                    </div>
+
+                    <!-- Actual pickup information if recorded -->
+                    {% if trip.actual_pickup_time %}
+                    <div class="col-12 pt-3 border-top bg-light rounded p-3 mt-3">
+                        <h6 class="fw-bold text-success mb-2"><i class="bi bi-check2-circle me-1"></i>Thông Tin
+                            Nhận Hàng Thực Tế</h6>
+                        <div class="row g-2 small">
                             <div class="col-md-6">
-                                <span class="text-muted small text-uppercase fw-bold d-block">Mã Tham Chiếu</span>
-                                <span class="fs-5 fw-bold text-primary">{{ trip.reference_code }}</span>
+                                <strong>Thời điểm nhận:</strong> {{ trip.actual_pickup_time.strftime('%d/%m/%Y
+                                %H:%M') }}
+                                <div class="text-muted" style="font-size: 0.75rem;">(Hệ thống ghi: {{
+                                    trip.pickup_recorded_at.strftime('%d/%m/%Y %H:%M') if
+                                    trip.pickup_recorded_at else '' }})</div>
                             </div>
                             <div class="col-md-6">
-                                <span class="text-muted small text-uppercase fw-bold d-block">Trạng Thái Vận Hành</span>
-                                <span class="badge bg-light text-dark border fs-6 px-3 py-1 mt-1">
-                                    {% if trip.status == 'UNASSIGNED' %}Chưa điều phối
-                                    {% elif trip.status == 'ASSIGNED' %}Đã điều phối
-                                    {% elif trip.status == 'PICKED_UP' %}Đã lấy hàng
-                                    {% elif trip.status == 'IN_TRANSIT' %}Đang vận chuyển
-                                    {% elif trip.status == 'DELIVERED' %}Đã giao hàng
-                                    {% elif trip.status == 'COMPLETED' %}Hoàn tất
-                                    {% else %}{{ trip.status }}{% endif %}
-                                </span>
-                            </div>
-
-                            <div class="col-md-6">
-                                <span class="text-muted small text-uppercase fw-bold d-block">Người Gửi</span>
-                                <div class="fw-semibold">{{ trip.sender_name }}</div>
-                                <small class="text-muted"><i class="bi bi-telephone me-1"></i>{{ trip.sender_phone
-                                    }}</small>
+                                <strong>Người bàn giao:</strong> {{ trip.handover_person or 'Chưa ghi nhận' }}
                             </div>
                             <div class="col-md-6">
-                                <span class="text-muted small text-uppercase fw-bold d-block">Loại Hàng & Khối Lượng
-                                    Đơn</span>
-                                <div class="fw-semibold">{{ trip.cargo_type }}</div>
-                                <span class="badge bg-secondary">{{ "{:,}".format(trip.cargo_weight_kg) }} kg</span>
-                            </div>
-
-                            <div class="col-12 pt-2 border-top">
-                                <span class="text-muted small text-uppercase fw-bold d-block">Điểm Lấy Hàng</span>
-                                <div class="small text-secondary"><i class="bi bi-geo-alt-fill text-success me-1"></i>{{
-                                    trip.pickup_address }}</div>
-                            </div>
-                            <div class="col-12">
-                                <span class="text-muted small text-uppercase fw-bold d-block">Điểm Giao Hàng</span>
-                                <div class="small text-secondary"><i class="bi bi-flag-fill text-danger me-1"></i>{{
-                                    trip.delivery_address }}</div>
-                            </div>
-
-                            <!-- Actual pickup information if recorded -->
-                            {% if trip.actual_pickup_time %}
-                            <div class="col-12 pt-3 border-top bg-light rounded p-3 mt-3">
-                                <h6 class="fw-bold text-success mb-2"><i class="bi bi-check2-circle me-1"></i>Thông Tin
-                                    Nhận Hàng Thực Tế</h6>
-                                <div class="row g-2 small">
-                                    <div class="col-md-6">
-                                        <strong>Thời điểm nhận:</strong> {{ trip.actual_pickup_time.strftime('%d/%m/%Y
-                                        %H:%M') }}
-                                        <div class="text-muted" style="font-size: 0.75rem;">(Hệ thống ghi: {{
-                                            trip.pickup_recorded_at.strftime('%d/%m/%Y %H:%M') if
-                                            trip.pickup_recorded_at else '' }})</div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <strong>Người bàn giao:</strong> {{ trip.handover_person or 'Chưa ghi nhận' }}
-                                    </div>
-                                    <div class="col-md-6">
-                                        <strong>Khối lượng thực tế:</strong>
-                                        <span class="badge bg-success">{{ "{:,}".format(trip.actual_cargo_weight_kg) if
-                                            trip.actual_cargo_weight_kg is not none else '0' }} kg</span>
-                                        {% if trip.actual_cargo_weight_kg is not none and trip.actual_cargo_weight_kg !=
-                                        trip.cargo_weight_kg %}
-                                        <span class="text-warning small ms-1">(Lệch {{
-                                            "{:+,}".format(trip.actual_cargo_weight_kg - trip.cargo_weight_kg) }}
-                                            kg)</span>
-                                        {% endif %}
-                                    </div>
-                                    <div class="col-md-6">
-                                        <strong>Tình trạng hàng:</strong> {{ trip.cargo_condition or 'Nguyên vẹn' }}
-                                    </div>
-                                    {% if trip.discrepancy_notes %}
-                                    <div class="col-12 mt-1">
-                                        <strong>Ghi chú sai lệch:</strong> <span class="fst-italic text-secondary">{{
-                                            trip.discrepancy_notes }}</span>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            {% endif %}
-
-                            <!-- Actual departure information if recorded -->
-                            {% if trip.actual_depart_time %}
-                            <div class="col-12 bg-light rounded p-3 mt-2">
-                                <h6 class="fw-bold text-primary mb-1"><i class="bi bi-truck me-1"></i>Thông Tin Khởi
-                                    Hành (Đang Vận Chuyển)</h6>
-                                <div class="small">
-                                    <strong>Thời điểm xuất phát:</strong> {{ trip.actual_depart_time.strftime('%d/%m/%Y
-                                    %H:%M') }}
-                                    <div class="text-muted" style="font-size: 0.75rem;">(Hệ thống ghi: {{
-                                        trip.depart_recorded_at.strftime('%d/%m/%Y %H:%M') if trip.depart_recorded_at
-                                        else '' }})</div>
-                                </div>
-                            </div>
-                            {% endif %}
-
-                            <!-- Actual delivery information if recorded -->
-                            {% if trip.actual_delivery_time %}
-                            <div class="col-12 pt-3 border-top bg-light rounded p-3 mt-2">
-                                <h6 class="fw-bold text-info mb-2"><i class="bi bi-box-seam me-1"></i>Thông Tin Giao
-                                    Hàng Thực Tế (Đã Giao Hàng)</h6>
-                                <div class="row g-2 small">
-                                    <div class="col-md-6">
-                                        <strong>Thời điểm giao:</strong> {{ trip.actual_delivery_time.strftime('%d/%m/%Y
-                                        %H:%M') }}
-                                        <div class="text-muted" style="font-size: 0.75rem;">(Hệ thống ghi: {{
-                                            trip.delivery_recorded_at.strftime('%d/%m/%Y %H:%M') if
-                                            trip.delivery_recorded_at else '' }})</div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <strong>Người nhận hàng:</strong> {{ trip.recipient_name or 'Chưa ghi nhận' }}
-                                    </div>
-                                    {% if trip.delivery_notes %}
-                                    <div class="col-12 mt-1">
-                                        <strong>Ghi chú giao hàng:</strong> <span class="fst-italic text-secondary">{{
-                                            trip.delivery_notes }}</span>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            {% endif %}
-
-                            <!-- Actual completion information if recorded -->
-                            {% if trip.actual_completed_time %}
-                            <div class="col-12 bg-light rounded p-3 mt-2 border border-success">
-                                <h6 class="fw-bold text-success mb-1"><i class="bi bi-check2-all me-1"></i>Thông Tin
-                                    Hoàn Tất Chuyến Hàng (Hoàn Tất)</h6>
-                                <div class="small">
-                                    <strong>Thời điểm chốt hoàn tất:</strong> {{
-                                    trip.actual_completed_time.strftime('%d/%m/%Y %H:%M') }}
-                                    <div class="text-muted" style="font-size: 0.75rem;">(Hệ thống ghi: {{
-                                        trip.completed_recorded_at.strftime('%d/%m/%Y %H:%M') if
-                                        trip.completed_recorded_at else '' }})</div>
-                                    <div class="text-success mt-1"><i class="bi bi-shield-check me-1"></i>Toàn bộ nguồn
-                                        lực Xe & Tài xế đã được giải phóng thành công.</div>
-                                </div>
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Assigned Resource Card -->
-                <div class="card shadow-sm border-0 card-hover mb-4">
-                    <div class="card-header bg-white py-3 border-bottom">
-                        <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-shield-check text-primary me-2"></i>Nguồn Lực
-                            Đảm Nhiệm</h6>
-                    </div>
-                    <div class="card-body p-4">
-                        {% if trip.truck and trip.driver %}
-                        <div class="row g-3 align-items-center">
-                            <div class="col-md-6">
-                                <div class="d-flex align-items-center">
-                                    <i class="bi bi-truck text-primary fs-3 me-3"></i>
-                                    <div>
-                                        <div class="fw-bold fs-5">{{ trip.truck.plate_number }}</div>
-                                        <div class="text-muted small">{{ trip.truck.truck_type }} • Tối đa {{
-                                            "{:,}".format(trip.truck.capacity_kg) }} kg</div>
-                                        <span
-                                            class="badge {% if trip.truck.status == 'ACTIVE' %}bg-success{% elif trip.truck.status == 'MAINTENANCE' %}bg-warning text-dark{% else %}bg-secondary{% endif %} mt-1">
-                                            {% if trip.truck.status == 'ACTIVE' %}Sẵn sàng{% elif trip.truck.status ==
-                                            'MAINTENANCE' %}Bảo dưỡng{% else %}Ngừng hoạt động{% endif %}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="d-flex align-items-center">
-                                    <i class="bi bi-person-circle text-primary fs-3 me-3"></i>
-                                    <div>
-                                        <div class="fw-bold fs-5">{{ trip.driver.full_name }}</div>
-                                        <div class="text-muted small">Mã: {{ trip.driver.driver_code }} • SĐT: {{
-                                            trip.driver.phone_number }}</div>
-                                        <span
-                                            class="badge {% if trip.driver.status == 'ACTIVE' %}bg-success{% else %}bg-secondary{% endif %} mt-1">
-                                            {% if trip.driver.status == 'ACTIVE' %}Đang làm việc{% else %}Nghỉ việc{%
-                                            endif %}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {% else %}
-                        <div class="text-center py-3 text-muted">
-                            <i class="bi bi-exclamation-circle fs-3 d-block mb-1 text-secondary"></i>
-                            Chưa phân công xe và tài xế cho chuyến hàng này.
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- POD Evidence Card (US4) -->
-                <div class="card shadow-sm border-0 mb-4 card-hover">
-                    <div
-                        class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0 fw-bold text-dark">
-                            <i class="bi bi-file-earmark-check text-primary me-2"></i>Chứng Từ & Bằng Chứng Bàn Giao
-                            (POD)
-                        </h6>
-                        {% if current_user and current_user.role == 'DSP' and trip.status in ['IN_TRANSIT', 'DELIVERED']
-                        %}
-                        <button type="button" class="btn btn-outline-primary btn-sm"
-                            onclick="showUploadEvidenceModal()">
-                            <i class="bi bi-upload me-1"></i> Tải Thêm Chứng Từ
-                        </button>
-                        {% endif %}
-                    </div>
-                    <div class="card-body p-4">
-                        {% if evidences %}
-                        <div class="list-group list-group-flush">
-                            {% for ev in evidences %}
-                            <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
-                                <div class="d-flex align-items-center">
-                                    {% if 'pdf' in ev.mime_type %}
-                                    <i class="bi bi-file-earmark-pdf-fill text-danger fs-3 me-3"></i>
-                                    {% else %}
-                                    <i class="bi bi-file-earmark-image-fill text-primary fs-3 me-3"></i>
-                                    {% endif %}
-                                    <div>
-                                        <div class="fw-bold text-truncate" style="max-width: 280px;"
-                                            title="{{ ev.file_name }}">{{ ev.file_name }}</div>
-                                        <div class="small text-muted">
-                                            <span class="badge bg-light text-dark border">{{ ev.evidence_type }}</span>
-                                            • {{ (ev.file_size_bytes / 1024)|round(1) }} KB
-                                            • {{ ev.uploaded_at.strftime('%d/%m/%Y %H:%M') if ev.uploaded_at else '' }}
-                                        </div>
-                                        {% if ev.notes %}
-                                        <div class="text-muted small fst-italic">{{ ev.notes }}</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <a href="/trips/{{ trip.id }}/evidence/{{ ev.id }}/download"
-                                    class="btn btn-outline-secondary btn-sm" title="Tải về chứng từ" target="_blank">
-                                    <i class="bi bi-download me-1"></i> Tải Về
-                                </a>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        {% else %}
-                        <div class="text-center py-4 text-muted">
-                            <i class="bi bi-file-earmark-x fs-2 d-block mb-1 text-secondary"></i>
-                            Chưa có tệp chứng từ POD nào được tải lên cho chuyến hàng này.
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Incidents Log Card (TRN-05) -->
-                <div
-                    class="card shadow-sm border-0 mb-4 card-hover {% if trip.has_open_issues %}border-danger{% endif %}">
-                    <div
-                        class="card-header {% if trip.has_open_issues %}bg-danger text-white{% else %}bg-white text-dark{% endif %} py-3 d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0 fw-bold">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i>Nhật Ký Sự Cố Chuyến Hàng ({{
-                            issues|length }})
-                        </h6>
-                        {% if current_user and current_user.role == 'DSP' %}
-                        <button type="button"
-                            class="btn {% if trip.has_open_issues %}btn-light text-danger{% else %}btn-outline-danger{% endif %} btn-sm"
-                            onclick="showCreateIssueModal()">
-                            <i class="bi bi-plus-circle me-1"></i> Báo Cáo Sự Cố
-                        </button>
-                        {% endif %}
-                    </div>
-                    <div class="card-body p-4">
-                        {% if issues %}
-                        <div class="list-group list-group-flush">
-                            {% for issue in issues %}
-                            <div class="list-group-item px-0 py-3 border-bottom">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="fw-bold text-danger"><i class="bi bi-exclamation-octagon me-1"></i>{{
-                                        issue.issue_type }}</span>
-                                    <span
-                                        class="badge {% if issue.status == 'OPEN' %}bg-danger{% elif issue.status == 'RESOLVED' %}bg-success{% else %}bg-secondary{% endif %}">
-                                        {% if issue.status == 'OPEN' %}Chờ xử lý{% elif issue.status == 'RESOLVED' %}Đã
-                                        giải quyết{% else %}{{ issue.status }}{% endif %}
-                                    </span>
-                                </div>
-                                <div class="small text-dark mb-2">{{ issue.description }}</div>
-                                <div class="row g-2 small text-muted bg-light p-2 rounded">
-                                    <div class="col-md-6">
-                                        <strong>Phát sinh lúc:</strong> {{ issue.occurred_at.strftime('%d/%m/%Y %H:%M')
-                                        if issue.occurred_at else (issue.created_at.strftime('%d/%m/%Y %H:%M') if
-                                        issue.created_at else '') }}
-                                    </div>
-                                    <div class="col-md-6">
-                                        <strong>Người xử lý:</strong> {{ issue.handled_by or 'Chưa phân công' }}
-                                    </div>
-                                    {% if issue.estimated_resolution_time %}
-                                    <div class="col-md-12">
-                                        <strong>Dự kiến khắc phục:</strong> {{
-                                        issue.estimated_resolution_time.strftime('%d/%m/%Y %H:%M') }}
-                                    </div>
-                                    {% endif %}
-                                    {% if issue.status == 'RESOLVED' and issue.resolution_notes %}
-                                    <div class="col-12 mt-1 pt-1 border-top text-success">
-                                        <strong><i class="bi bi-check2-circle me-1"></i>Kết quả xử lý:</strong> {{
-                                        issue.resolution_notes }}
-                                        <span class="text-muted ms-1">({{ issue.resolved_at.strftime('%d/%m/%Y %H:%M')
-                                            if issue.resolved_at else '' }})</span>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                {% if issue.status == 'OPEN' and current_user and current_user.role == 'DSP' %}
-                                <div class="mt-2 text-end">
-                                    <button type="button" class="btn btn-outline-success btn-sm"
-                                        onclick="openResolveModal({{ issue.id }}, '{{ issue.issue_type }}')">
-                                        <i class="bi bi-check2-circle me-1"></i> Giải Quyết Sự Cố
-                                    </button>
-                                </div>
+                                <strong>Khối lượng thực tế:</strong>
+                                <span class="badge bg-success">{{ "{:,}".format(trip.actual_cargo_weight_kg) if
+                                    trip.actual_cargo_weight_kg is not none else '0' }} kg</span>
+                                {% if trip.actual_cargo_weight_kg is not none and trip.actual_cargo_weight_kg !=
+                                trip.cargo_weight_kg %}
+                                <span class="text-warning small ms-1">(Lệch {{
+                                    "{:+,}".format(trip.actual_cargo_weight_kg - trip.cargo_weight_kg) }}
+                                    kg)</span>
                                 {% endif %}
                             </div>
-                            {% endfor %}
-                        </div>
-                        {% else %}
-                        <div class="text-center py-4 text-muted">
-                            <i class="bi bi-shield-check fs-2 d-block mb-1 text-success"></i>
-                            Không có sự cố nào được ghi nhận cho chuyến hàng này.
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Column: Audit Timeline Events (US5) -->
-            <div class="col-lg-5">
-                <div class="card shadow-sm border-0 h-100 card-hover">
-                    <div
-                        class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0 fw-bold text-dark">
-                            <i class="bi bi-clock-history text-primary me-2"></i>Dòng Thời Gian Vận Chuyển
-                        </h6>
-                        <span class="badge bg-light text-dark border">{{ events|length }} sự kiện</span>
-                    </div>
-                    <div class="card-body p-4">
-                        {% if events %}
-                        <div class="timeline position-relative ps-4" style="border-left: 2px solid #dee2e6;">
-                            {% for e in events %}
-                            <div class="timeline-item mb-4 position-relative">
-                                <div class="position-absolute" style="left: -29px; top: 0;">
-                                    {% if e.event_type == 'PICKUP_CONFIRMED' %}
-                                    <span class="badge bg-success rounded-circle p-2"><i
-                                            class="bi bi-box-arrow-in-down"></i></span>
-                                    {% elif e.event_type == 'DEPARTURE_CONFIRMED' %}
-                                    <span class="badge bg-primary rounded-circle p-2"><i class="bi bi-truck"></i></span>
-                                    {% elif e.event_type == 'DELIVERY_CONFIRMED' %}
-                                    <span class="badge bg-info text-dark rounded-circle p-2"><i
-                                            class="bi bi-box-seam"></i></span>
-                                    {% elif e.event_type == 'DELIVERY_FAILED' %}
-                                    <span class="badge bg-danger rounded-circle p-2"><i
-                                            class="bi bi-exclamation-triangle-fill"></i></span>
-                                    {% elif e.event_type == 'TRIP_COMPLETED' %}
-                                    <span class="badge bg-success rounded-circle p-2"><i
-                                            class="bi bi-check2-all"></i></span>
-                                    {% elif e.event_type == 'ISSUE_LOGGED' %}
-                                    <span class="badge bg-danger rounded-circle p-2"><i
-                                            class="bi bi-exclamation-octagon-fill"></i></span>
-                                    {% elif e.event_type == 'ISSUE_RESOLVED' %}
-                                    <span class="badge bg-success rounded-circle p-2"><i
-                                            class="bi bi-check-circle-fill"></i></span>
-                                    {% elif e.event_type == 'SCHEDULE_DELAYED' %}
-                                    <span class="badge bg-warning text-dark rounded-circle p-2"><i
-                                            class="bi bi-clock-history"></i></span>
-                                    {% else %}
-                                    <span class="badge bg-secondary rounded-circle p-2"><i class="bi bi-dot"></i></span>
-                                    {% endif %}
-                                </div>
-                                <div class="fw-bold text-dark">
-                                    {% if e.event_type == 'PICKUP_CONFIRMED' %}
-                                    Xác Nhận Nhận Hàng (Đã Lấy Hàng)
-                                    {% elif e.event_type == 'DEPARTURE_CONFIRMED' %}
-                                    Khởi Hành Vận Chuyển (Đang Vận Chuyển)
-                                    {% elif e.event_type == 'DELIVERY_CONFIRMED' %}
-                                    Xác Nhận Giao Hàng Thành Công (Đã Giao Hàng)
-                                    {% elif e.event_type == 'DELIVERY_FAILED' %}
-                                    Giao Hàng Thất Bại - Lập Sự Cố
-                                    {% elif e.event_type == 'TRIP_COMPLETED' %}
-                                    Chốt Hoàn Tất Chuyến Hàng (Hoàn Tất)
-                                    {% elif e.event_type == 'ISSUE_LOGGED' %}
-                                    Lập Biên Bản Sự Cố Vận Chuyển
-                                    {% elif e.event_type == 'ISSUE_RESOLVED' %}
-                                    Giải Quyết Sự Cố Thành Công
-                                    {% elif e.event_type == 'SCHEDULE_DELAYED' %}
-                                    Điều Chỉnh Gia Hạn Lịch Trình
-                                    {% else %}
-                                    {{ e.event_type }}
-                                    {% endif %}
-                                </div>
-                                <div class="small text-muted mb-1">
-                                    <i class="bi bi-clock me-1 text-primary"></i>Thực tế: <strong>{{
-                                        e.actual_time.strftime('%d/%m/%Y %H:%M') }}</strong>
-                                </div>
-                                <div class="text-muted" style="font-size: 0.72rem;">
-                                    Ghi nhận lúc: {{ e.recorded_at.strftime('%d/%m/%Y %H:%M') }}
-                                </div>
-                                {% if e.notes %}
-                                <div class="bg-light rounded p-2 small mt-2 border">
-                                    {{ e.notes }}
-                                </div>
-                                {% endif %}
+                            <div class="col-md-6">
+                                <strong>Tình trạng hàng:</strong> {{ trip.cargo_condition or 'Nguyên vẹn' }}
                             </div>
-                            {% endfor %}
+                            {% if trip.discrepancy_notes %}
+                            <div class="col-12 mt-1">
+                                <strong>Ghi chú sai lệch:</strong> <span class="fst-italic text-secondary">{{
+                                    trip.discrepancy_notes }}</span>
+                            </div>
+                            {% endif %}
                         </div>
-                        {% else %}
-                        <div class="text-center py-5 text-muted">
-                            <i class="bi bi-hourglass-split fs-2 d-block mb-2 text-secondary"></i>
-                            Chưa có sự kiện mốc vận chuyển nào được ghi nhận.
-                        </div>
-                        {% endif %}
                     </div>
+                    {% endif %}
+
+                    <!-- Actual departure information if recorded -->
+                    {% if trip.actual_depart_time %}
+                    <div class="col-12 bg-light rounded p-3 mt-2">
+                        <h6 class="fw-bold text-primary mb-1"><i class="bi bi-truck me-1"></i>Thông Tin Khởi
+                            Hành (Đang Vận Chuyển)</h6>
+                        <div class="small">
+                            <strong>Thời điểm xuất phát:</strong> {{ trip.actual_depart_time.strftime('%d/%m/%Y
+                            %H:%M') }}
+                            <div class="text-muted" style="font-size: 0.75rem;">(Hệ thống ghi: {{
+                                trip.depart_recorded_at.strftime('%d/%m/%Y %H:%M') if trip.depart_recorded_at
+                                else '' }})</div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Actual delivery information if recorded -->
+                    {% if trip.actual_delivery_time %}
+                    <div class="col-12 pt-3 border-top bg-light rounded p-3 mt-2">
+                        <h6 class="fw-bold text-info mb-2"><i class="bi bi-box-seam me-1"></i>Thông Tin Giao
+                            Hàng Thực Tế (Đã Giao Hàng)</h6>
+                        <div class="row g-2 small">
+                            <div class="col-md-6">
+                                <strong>Thời điểm giao:</strong> {{ trip.actual_delivery_time.strftime('%d/%m/%Y
+                                %H:%M') }}
+                                <div class="text-muted" style="font-size: 0.75rem;">(Hệ thống ghi: {{
+                                    trip.delivery_recorded_at.strftime('%d/%m/%Y %H:%M') if
+                                    trip.delivery_recorded_at else '' }})</div>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Người nhận hàng:</strong> {{ trip.recipient_name or 'Chưa ghi nhận' }}
+                            </div>
+                            {% if trip.delivery_notes %}
+                            <div class="col-12 mt-1">
+                                <strong>Ghi chú giao hàng:</strong> <span class="fst-italic text-secondary">{{
+                                    trip.delivery_notes }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Actual completion information if recorded -->
+                    {% if trip.actual_completed_time %}
+                    <div class="col-12 bg-light rounded p-3 mt-2 border border-success">
+                        <h6 class="fw-bold text-success mb-1"><i class="bi bi-check2-all me-1"></i>Thông Tin
+                            Hoàn Tất Chuyến Hàng (Hoàn Tất)</h6>
+                        <div class="small">
+                            <strong>Thời điểm chốt hoàn tất:</strong> {{
+                            trip.actual_completed_time.strftime('%d/%m/%Y %H:%M') }}
+                            <div class="text-muted" style="font-size: 0.75rem;">(Hệ thống ghi: {{
+                                trip.completed_recorded_at.strftime('%d/%m/%Y %H:%M') if
+                                trip.completed_recorded_at else '' }})</div>
+                            <div class="text-success mt-1"><i class="bi bi-shield-check me-1"></i>Toàn bộ nguồn
+                                lực Xe & Tài xế đã được giải phóng thành công.</div>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
+
+        <!-- Assigned Resource Card -->
+        <div class="card shadow-sm border-0 card-hover mb-4">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-shield-check text-primary me-2"></i>Nguồn Lực
+                    Đảm Nhiệm</h6>
+            </div>
+            <div class="card-body p-4">
+                {% if trip.truck and trip.driver %}
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-truck text-primary fs-3 me-3"></i>
+                            <div>
+                                <div class="fw-bold fs-5">{{ trip.truck.plate_number }}</div>
+                                <div class="text-muted small">{{ trip.truck.truck_type }} • Tối đa {{
+                                    "{:,}".format(trip.truck.capacity_kg) }} kg</div>
+                                <span
+                                    class="badge {% if trip.truck.status == 'ACTIVE' %}bg-success{% elif trip.truck.status == 'MAINTENANCE' %}bg-warning text-dark{% else %}bg-secondary{% endif %} mt-1">
+                                    {% if trip.truck.status == 'ACTIVE' %}Sẵn sàng{% elif trip.truck.status ==
+                                    'MAINTENANCE' %}Bảo dưỡng{% else %}Ngừng hoạt động{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-person-circle text-primary fs-3 me-3"></i>
+                            <div>
+                                <div class="fw-bold fs-5">{{ trip.driver.full_name }}</div>
+                                <div class="text-muted small">Mã: {{ trip.driver.driver_code }} • SĐT: {{
+                                    trip.driver.phone_number }}</div>
+                                <span
+                                    class="badge {% if trip.driver.status == 'ACTIVE' %}bg-success{% else %}bg-secondary{% endif %} mt-1">
+                                    {% if trip.driver.status == 'ACTIVE' %}Đang làm việc{% else %}Nghỉ việc{%
+                                    endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-3 text-muted">
+                    <i class="bi bi-exclamation-circle fs-3 d-block mb-1 text-secondary"></i>
+                    Chưa phân công xe và tài xế cho chuyến hàng này.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- POD Evidence Card (US4) -->
+        <div class="card shadow-sm border-0 mb-4 card-hover">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold text-dark">
+                    <i class="bi bi-file-earmark-check text-primary me-2"></i>Chứng Từ & Bằng Chứng Bàn Giao
+                    (POD)
+                </h6>
+                {% if current_user and current_user.role == 'DSP' and trip.status in ['IN_TRANSIT', 'DELIVERED']
+                %}
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="showUploadEvidenceModal()">
+                    <i class="bi bi-upload me-1"></i> Tải Thêm Chứng Từ
+                </button>
+                {% endif %}
+            </div>
+            <div class="card-body p-4">
+                {% if evidences %}
+                <div class="list-group list-group-flush">
+                    {% for ev in evidences %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                        <div class="d-flex align-items-center">
+                            {% if 'pdf' in ev.mime_type %}
+                            <i class="bi bi-file-earmark-pdf-fill text-danger fs-3 me-3"></i>
+                            {% else %}
+                            <i class="bi bi-file-earmark-image-fill text-primary fs-3 me-3"></i>
+                            {% endif %}
+                            <div>
+                                <div class="fw-bold text-truncate" style="max-width: 280px;" title="{{ ev.file_name }}">
+                                    {{ ev.file_name }}</div>
+                                <div class="small text-muted">
+                                    <span class="badge bg-light text-dark border">{{ ev.evidence_type }}</span>
+                                    • {{ (ev.file_size_bytes / 1024)|round(1) }} KB
+                                    • {{ ev.uploaded_at.strftime('%d/%m/%Y %H:%M') if ev.uploaded_at else '' }}
+                                </div>
+                                {% if ev.notes %}
+                                <div class="text-muted small fst-italic">{{ ev.notes }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <a href="/trips/{{ trip.id }}/evidence/{{ ev.id }}/download"
+                            class="btn btn-outline-secondary btn-sm" title="Tải về chứng từ" target="_blank">
+                            <i class="bi bi-download me-1"></i> Tải Về
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-file-earmark-x fs-2 d-block mb-1 text-secondary"></i>
+                    Chưa có tệp chứng từ POD nào được tải lên cho chuyến hàng này.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Incidents Log Card (TRN-05) -->
+        <div class="card shadow-sm border-0 mb-4 card-hover {% if trip.has_open_issues %}border-danger{% endif %}">
+            <div
+                class="card-header {% if trip.has_open_issues %}bg-danger text-white{% else %}bg-white text-dark{% endif %} py-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Nhật Ký Sự Cố Chuyến Hàng ({{
+                    issues|length }})
+                </h6>
+                {% if current_user and current_user.role == 'DSP' %}
+                <button type="button"
+                    class="btn {% if trip.has_open_issues %}btn-light text-danger{% else %}btn-outline-danger{% endif %} btn-sm"
+                    onclick="showCreateIssueModal()">
+                    <i class="bi bi-plus-circle me-1"></i> Báo Cáo Sự Cố
+                </button>
+                {% endif %}
+            </div>
+            <div class="card-body p-4">
+                {% if issues %}
+                <div class="list-group list-group-flush">
+                    {% for issue in issues %}
+                    <div class="list-group-item px-0 py-3 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold text-danger"><i class="bi bi-exclamation-octagon me-1"></i>{{
+                                issue.issue_type }}</span>
+                            <span
+                                class="badge {% if issue.status == 'OPEN' %}bg-danger{% elif issue.status == 'RESOLVED' %}bg-success{% else %}bg-secondary{% endif %}">
+                                {% if issue.status == 'OPEN' %}Chờ xử lý{% elif issue.status == 'RESOLVED' %}Đã
+                                giải quyết{% else %}{{ issue.status }}{% endif %}
+                            </span>
+                        </div>
+                        <div class="small text-dark mb-2">{{ issue.description }}</div>
+                        <div class="row g-2 small text-muted bg-light p-2 rounded">
+                            <div class="col-md-6">
+                                <strong>Phát sinh lúc:</strong> {{ issue.occurred_at.strftime('%d/%m/%Y %H:%M')
+                                if issue.occurred_at else (issue.created_at.strftime('%d/%m/%Y %H:%M') if
+                                issue.created_at else '') }}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Người xử lý:</strong> {{ issue.handled_by or 'Chưa phân công' }}
+                            </div>
+                            {% if issue.estimated_resolution_time %}
+                            <div class="col-md-12">
+                                <strong>Dự kiến khắc phục:</strong> {{
+                                issue.estimated_resolution_time.strftime('%d/%m/%Y %H:%M') }}
+                            </div>
+                            {% endif %}
+                            {% if issue.status == 'RESOLVED' and issue.resolution_notes %}
+                            <div class="col-12 mt-1 pt-1 border-top text-success">
+                                <strong><i class="bi bi-check2-circle me-1"></i>Kết quả xử lý:</strong> {{
+                                issue.resolution_notes }}
+                                <span class="text-muted ms-1">({{ issue.resolved_at.strftime('%d/%m/%Y %H:%M')
+                                    if issue.resolved_at else '' }})</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% if issue.status == 'OPEN' and current_user and current_user.role == 'DSP' %}
+                        <div class="mt-2 text-end">
+                            <button type="button" class="btn btn-outline-success btn-sm"
+                                onclick="openResolveModal({{ issue.id }}, '{{ issue.issue_type }}')">
+                                <i class="bi bi-check2-circle me-1"></i> Giải Quyết Sự Cố
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-shield-check fs-2 d-block mb-1 text-success"></i>
+                    Không có sự cố nào được ghi nhận cho chuyến hàng này.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Audit Timeline Events (US5) -->
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 h-100 card-hover">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold text-dark">
+                    <i class="bi bi-clock-history text-primary me-2"></i>Dòng Thời Gian Vận Chuyển
+                </h6>
+                <span class="badge bg-light text-dark border">{{ events|length }} sự kiện</span>
+            </div>
+            <div class="card-body p-4">
+                {% if events %}
+                <div class="timeline position-relative ps-4" style="border-left: 2px solid #dee2e6;">
+                    {% for e in events %}
+                    <div class="timeline-item mb-4 position-relative">
+                        <div class="position-absolute" style="left: -29px; top: 0;">
+                            {% if e.event_type == 'PICKUP_CONFIRMED' %}
+                            <span class="badge bg-success rounded-circle p-2"><i
+                                    class="bi bi-box-arrow-in-down"></i></span>
+                            {% elif e.event_type == 'DEPARTURE_CONFIRMED' %}
+                            <span class="badge bg-primary rounded-circle p-2"><i class="bi bi-truck"></i></span>
+                            {% elif e.event_type == 'DELIVERY_CONFIRMED' %}
+                            <span class="badge bg-info text-dark rounded-circle p-2"><i
+                                    class="bi bi-box-seam"></i></span>
+                            {% elif e.event_type == 'DELIVERY_FAILED' %}
+                            <span class="badge bg-danger rounded-circle p-2"><i
+                                    class="bi bi-exclamation-triangle-fill"></i></span>
+                            {% elif e.event_type == 'TRIP_COMPLETED' %}
+                            <span class="badge bg-success rounded-circle p-2"><i class="bi bi-check2-all"></i></span>
+                            {% elif e.event_type == 'ISSUE_LOGGED' %}
+                            <span class="badge bg-danger rounded-circle p-2"><i
+                                    class="bi bi-exclamation-octagon-fill"></i></span>
+                            {% elif e.event_type == 'ISSUE_RESOLVED' %}
+                            <span class="badge bg-success rounded-circle p-2"><i
+                                    class="bi bi-check-circle-fill"></i></span>
+                            {% elif e.event_type == 'SCHEDULE_DELAYED' %}
+                            <span class="badge bg-warning text-dark rounded-circle p-2"><i
+                                    class="bi bi-clock-history"></i></span>
+                            {% else %}
+                            <span class="badge bg-secondary rounded-circle p-2"><i class="bi bi-dot"></i></span>
+                            {% endif %}
+                        </div>
+                        <div class="fw-bold text-dark">
+                            {% if e.event_type == 'PICKUP_CONFIRMED' %}
+                            Xác Nhận Nhận Hàng (Đã Lấy Hàng)
+                            {% elif e.event_type == 'DEPARTURE_CONFIRMED' %}
+                            Khởi Hành Vận Chuyển (Đang Vận Chuyển)
+                            {% elif e.event_type == 'DELIVERY_CONFIRMED' %}
+                            Xác Nhận Giao Hàng Thành Công (Đã Giao Hàng)
+                            {% elif e.event_type == 'DELIVERY_FAILED' %}
+                            Giao Hàng Thất Bại - Lập Sự Cố
+                            {% elif e.event_type == 'TRIP_COMPLETED' %}
+                            Chốt Hoàn Tất Chuyến Hàng (Hoàn Tất)
+                            {% elif e.event_type == 'ISSUE_LOGGED' %}
+                            Lập Biên Bản Sự Cố Vận Chuyển
+                            {% elif e.event_type == 'ISSUE_RESOLVED' %}
+                            Giải Quyết Sự Cố Thành Công
+                            {% elif e.event_type == 'SCHEDULE_DELAYED' %}
+                            Điều Chỉnh Gia Hạn Lịch Trình
+                            {% else %}
+                            {{ e.event_type }}
+                            {% endif %}
+                        </div>
+                        <div class="small text-muted mb-1">
+                            <i class="bi bi-clock me-1 text-primary"></i>Thực tế: <strong>{{
+                                e.actual_time.strftime('%d/%m/%Y %H:%M') }}</strong>
+                        </div>
+                        <div class="text-muted" style="font-size: 0.72rem;">
+                            Ghi nhận lúc: {{ e.recorded_at.strftime('%d/%m/%Y %H:%M') }}
+                        </div>
+                        {% if e.notes %}
+                        <div class="bg-light rounded p-2 small mt-2 border">
+                            {{ e.notes }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-hourglass-split fs-2 d-block mb-2 text-secondary"></i>
+                    Chưa có sự kiện mốc vận chuyển nào được ghi nhận.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Modal Xác Nhận Khởi Hành (IN_TRANSIT) -->
 <div class="modal fade" id="departModal" tabindex="-1" aria-hidden="true">
