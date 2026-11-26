@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Tạo Đơn Hàng Vận Tải Mới - Freight ERP{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9 col-xl-8">
+        <div class="p-4 p-xl-5 border bg-white shadow-sm mb-4" id="tripCreateCard" style="border-radius: 0 !important; border-color: #e2e8f0; background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);">
+            <!-- Header Bar -->
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom" style="border-color: #e2e8f0 !important;">
+                <div class="d-flex align-items-center">
+                    <span class="m-stripe-pill me-2"></span>
+                    <div>
+                        <span class="overline text-primary d-block" style="font-size: 0.72rem; letter-spacing: 1.8px;">KHỞI TẠO ĐƠN HÀNG VẬN TẢI</span>
+                        <h2 class="mb-0 fw-bold fs-5 text-ink text-uppercase" style="letter-spacing: 0.5px;">
+                            TẠO MỚI ĐƠN HÀNG & CHUYẾN VẬN CHUYỂN
+                        </h2>
+                    </div>
+                </div>
+                <a href="/trips" class="btn btn-outline-secondary btn-sm" style="border-radius: 0 !important; font-weight: 600; font-size: 0.78rem;">
+                    <i class="bi bi-arrow-left me-1"></i> QUAY LẠI
+                </a>
+            </div>
+
+            <!-- Operational Notice -->
+            <div class="alert alert-light border mb-4 p-3 d-flex align-items-center gap-3" style="border-radius: 0 !important; border-color: #e2e8f0; background: #ffffff;">
+                <div class="stat-icon-wrapper icon-soft-primary" style="width: 40px; height: 40px; font-size: 1.1rem; border-radius: 0 !important; flex-shrink: 0;">
+                    <i class="bi bi-info-circle"></i>
+                </div>
+                <div class="small text-muted" style="line-height: 1.5;">
+                    Đơn hàng tạo mới sẽ khởi tạo ở trạng thái <strong class="text-warning">CHƯA ĐIỀU PHỐI (UNASSIGNED)</strong>.
+                    Sau khi lưu, Điều phối viên (DSP) có thể phân công xe tải và tài xế phù hợp theo tải trọng và kiểm tra chống trùng lịch.
+                </div>
+            </div>
+
+            {% if error_message %}
+            <div class="alert alert-danger alert-dismissible fade show mb-4 border" role="alert" style="border-radius: 0 !important; border-color: #fecaca; background: #fef2f2;">
+                <i class="bi bi-exclamation-triangle-fill me-2 text-danger"></i><strong>Lỗi:</strong> {{ error_message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endif %}
+
+            <form method="post" action="/trips/create">
+                <!-- Section 1: Customer & Contact -->
+                <div class="mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge bg-primary text-white me-2 px-2 py-1" style="border-radius: 0; font-size: 0.7rem;">01</span>
+                        <span class="overline text-ink fw-bold" style="font-size: 0.75rem; letter-spacing: 1.5px;">THÔNG TIN NGƯỜI GỬI & ĐỐI TÁC</span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-7">
+                            <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                                TÊN NGƯỜI GỬI / DOANH NGHIỆP <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="sender_name" class="form-control" 
+                                   placeholder="Ví dụ: Công ty TNHH Vận Tải An Phát" 
+                                   value="{{ form_data.sender_name if form_data else '' }}" required
+                                   style="height: 46px; border-radius: 0 !important; border-color: #e2e8f0; font-weight: 600;">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                                SỐ ĐIỆN THOẠI LIÊN HỆ <span class="text-danger">*</span>
+                            </label>
+                            <input type="tel" name="sender_phone" class="form-control" 
+                                   placeholder="Ví dụ: 0901234567" 
+                                   value="{{ form_data.sender_phone if form_data else '' }}" required
+                                   style="height: 46px; border-radius: 0 !important; border-color: #e2e8f0; font-weight: 600;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Route & Addresses -->
+                <div class="mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge bg-primary text-white me-2 px-2 py-1" style="border-radius: 0; font-size: 0.7rem;">02</span>
+                        <span class="overline text-ink fw-bold" style="font-size: 0.75rem; letter-spacing: 1.5px;">LỘ TRÌNH VẬN CHUYỂN</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                            ĐỊA CHỈ NHẬN HÀNG (KHO XUẤT) <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border text-primary" style="border-radius: 0 !important; border-color: #e2e8f0;">
+                                <i class="bi bi-geo-alt"></i>
+                            </span>
+                            <input type="text" name="pickup_address" class="form-control" 
+                                   placeholder="Ví dụ: Kho ICD Tân Cảng - Sóng Thần, Dĩ An, Bình Dương" 
+                                   value="{{ form_data.pickup_address if form_data else '' }}" required
+                                   style="height: 46px; border-radius: 0 !important; border-color: #e2e8f0;">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                            ĐỊA CHỈ GIAO HÀNG (ĐIỂM ĐÍCH) <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border text-success" style="border-radius: 0 !important; border-color: #e2e8f0;">
+                                <i class="bi bi-geo-alt-fill"></i>
+                            </span>
+                            <input type="text" name="delivery_address" class="form-control" 
+                                   placeholder="Ví dụ: Cảng Cát Lái, Đường Nguyễn Thị Định, P. Cát Lái, TP. Thủ Đức, TP.HCM" 
+                                   value="{{ form_data.delivery_address if form_data else '' }}" required
+                                   style="height: 46px; border-radius: 0 !important; border-color: #e2e8f0;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Cargo Specifications -->
+                <div class="mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge bg-primary text-white me-2 px-2 py-1" style="border-radius: 0; font-size: 0.7rem;">03</span>
+                        <span class="overline text-ink fw-bold" style="font-size: 0.75rem; letter-spacing: 1.5px;">QUY CÁCH HÀNG HÓA & TẢI TRỌNG</span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                                KHỐI LƯỢNG HÀNG HÓA (KG) <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input type="number" name="cargo_weight_kg" class="form-control" min="1" 
+                                       placeholder="Ví dụ: 3500" 
+                                       value="{{ form_data.cargo_weight_kg if form_data else '' }}" required
+                                       style="height: 46px; border-radius: 0 !important; border-color: #e2e8f0; font-weight: 600;">
+                                <span class="input-group-text bg-light border" style="border-radius: 0 !important; border-color: #e2e8f0; font-weight: 600;">KG</span>
+                            </div>
+                            <div class="form-text text-muted" style="font-size: 0.78rem;">Khối lượng dùng để kiểm soát tải trọng an toàn của phương tiện khi điều phối.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                                LOẠI HÀNG HÓA <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="cargo_type" list="cargoTypeSuggestions" class="form-control" 
+                                   placeholder="Ví dụ: Hàng điện tử, Hàng bách hóa tiêu dùng..." 
+                                   value="{{ form_data.cargo_type if form_data else '' }}" required
+                                   style="height: 46px; border-radius: 0 !important; border-color: #e2e8f0;">
+                            <datalist id="cargoTypeSuggestions">
+                                <option value="Hàng điện tử & linh kiện">
+                                <option value="Hàng bách hóa tiêu dùng">
+                                <option value="Nông sản đóng thùng">
+                                <option value="Vật liệu xây dựng">
+                                <option value="Máy móc thiết bị công nghiệp">
+                                <option value="Hóa chất không nguy hại">
+                            </datalist>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Operational Notes -->
+                <div class="mb-4">
+                    <label class="overline text-muted d-block mb-1" style="font-size: 0.72rem; letter-spacing: 1.2px;">
+                        GHI CHÚ VẬN HÀNH / YÊU CẦU ĐẶC BIỆT
+                    </label>
+                    <textarea name="notes" class="form-control" rows="3" 
+                              placeholder="Ví dụ: Yêu cầu che bạt kỹ chống mưa, hàng dễ vỡ, bốc xếp giờ hành chính..." 
+                              style="border-radius: 0 !important; border-color: #e2e8f0;">{{ form_data.notes if form_data else '' }}</textarea>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top" style="border-color: #e2e8f0 !important;">
+                    <a href="/trips" class="btn btn-outline-secondary" style="border-radius: 0 !important; font-weight: 600; padding: 10px 24px;">
+                        HỦY BỎ
+                    </a>
+                    <button type="submit" class="btn btn-primary" style="border-radius: 0 !important; font-weight: 600; letter-spacing: 0.5px; padding: 10px 28px; background: #1c69d4; border-color: #1c69d4;">
+                        <i class="bi bi-check-circle me-1"></i> TẠO ĐƠN HÀNG MỚI
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

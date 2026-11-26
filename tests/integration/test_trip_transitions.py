@@ -217,3 +217,49 @@ def test_api_departure_and_rbac(client: TestClient, db_session: Session, seed_te
     resp_dsp = client.post(f"/api/v1/trips/{trip1.id}/depart", json={"actual_depart_time": "2026-12-01T08:30:00"})
     assert resp_dsp.status_code == 200
     assert resp_dsp.json()["data"]["status"] == "IN_TRANSIT"
+
+
+def test_trip_web_create_flow(client: TestClient, seed_test_users, db_session: Session):
+    """Test Web UI GET and POST /trips/create."""
+    # 1. Login as DSP
+    login_resp = client.post("/login", data={"username": "dsp_test", "password": "password123"}, follow_redirects=False)
+    assert login_resp.status_code == 303
+
+    # 2. GET /trips/create -> 200 OK
+    res_get = client.get("/trips/create")
+    assert res_get.status_code == 200
+    assert "TẠO MỚI ĐƠN HÀNG" in res_get.text
+
+    # 3. POST /trips/create with invalid weight -> 400 Bad Request
+    res_invalid = client.post("/trips/create", data={
+        "sender_name": "Công ty Test",
+        "sender_phone": "0911222333",
+        "pickup_address": "Kho A",
+        "delivery_address": "Kho B",
+        "cargo_weight_kg": 0,
+        "cargo_type": "Hàng nhẹ",
+    })
+    assert res_invalid.status_code == 400
+    assert "Khối lượng hàng hóa phải lớn hơn 0 kg" in res_invalid.text
+
+    # 4. POST /trips/create valid -> 303 Redirect to /trips?success=created
+    res_valid = client.post("/trips/create", data={
+        "sender_name": "Công ty Sản Xuất Á Châu",
+        "sender_phone": "0988776655",
+        "pickup_address": "Kho Tổng Sóng Thần",
+        "delivery_address": "Cảng Cát Lái",
+        "cargo_weight_kg": 4200,
+        "cargo_type": "Hàng dệt may",
+        "notes": "Hàng xuất khẩu đóng container",
+    }, follow_redirects=False)
+
+    assert res_valid.status_code == 303
+    assert "/trips?success=created" in res_valid.headers["location"]
+
+    # Verify created in DB
+    created_trip = db_session.query(Trip).filter(Trip.sender_name == "Công ty Sản Xuất Á Châu").first()
+    assert created_trip is not None
+    assert created_trip.status == TripStatus.UNASSIGNED.value
+    assert created_trip.cargo_weight_kg == 4200
+    assert created_trip.reference_code.startswith("TRIP-")
+

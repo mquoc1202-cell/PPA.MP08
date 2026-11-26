@@ -30,6 +30,9 @@
             </p>
         </div>
         <div class="col-lg-4 text-lg-end">
+            <a href="/trips/create" class="btn btn-primary shadow-sm btn-hero-action me-2" style="border-radius: 0 !important; font-weight: 600; letter-spacing: 0.5px; padding: 10px 18px; background: #1c69d4; border-color: #1c69d4;">
+                <i class="bi bi-plus-circle me-1"></i> TẠO ĐƠN HÀNG MỚI
+            </a>
             <a href="/schedule" class="btn btn-outline-primary shadow-sm btn-hero-action" style="border-radius: 0 !important; font-weight: 600; letter-spacing: 0.5px; padding: 10px 18px;">
                 <i class="bi bi-calendar3 me-1"></i> TRA CỨU LỊCH TRÌNH
             </a>
@@ -38,7 +41,12 @@
 </div>
 
 <!-- Alert Messages -->
-{% if request.query_params.get("success") == "dispatched" %}
+{% if request.query_params.get("success") == "created" %}
+<div class="alert alert-success alert-dismissible fade show mb-4 border" role="alert" style="border-radius: 0 !important; border-color: #bbf7d0; background: #f0fdf4;">
+    <i class="bi bi-check-circle-fill me-2 text-success"></i>Tạo đơn hàng vận tải mới thành công! Chuyến hàng đã sẵn sàng ở trạng thái <strong>CHƯA ĐIỀU PHỐI (UNASSIGNED)</strong>.
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% elif request.query_params.get("success") == "dispatched" %}
 <div class="alert alert-success alert-dismissible fade show mb-4 border" role="alert" style="border-radius: 0 !important; border-color: #bbf7d0; background: #f0fdf4;">
     <i class="bi bi-check-circle-fill me-2 text-success"></i>Điều phối phân công xe và tài xế thành công!
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -289,6 +297,11 @@
                     <td colspan="8" class="text-center py-5 text-muted">
                         <i class="bi bi-inbox fs-2 d-block mb-2 text-muted opacity-50"></i>
                         <span class="fw-medium">Chưa có chuyến hàng nào hoặc không khớp với bộ lọc tìm kiếm.</span>
+                        <div class="mt-3">
+                            <a href="/trips/create" class="btn btn-sm btn-primary" style="border-radius: 0 !important; font-weight: 600; padding: 6px 16px; background: #1c69d4; border-color: #1c69d4;">
+                                <i class="bi bi-plus-circle me-1"></i> Tạo Đơn Hàng Mới
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 {% endif %}

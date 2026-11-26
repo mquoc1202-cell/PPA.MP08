@@ -90,6 +90,103 @@ def trips_list_view(
     )
 
 
+@router.get("/create", response_class=HTMLResponse)
+def trip_create_form(
+    request: Request,
+    current_user: UserSession = Depends(require_role(["DSP", "SAL", "MGR"])),
+):
+    """Render creation form for a new transport trip / cargo order."""
+    return templates.TemplateResponse(
+        request=request,
+        name="trips/form.html",
+        context={
+            "active_tab": "trips",
+            "current_user": current_user,
+            "error_message": None,
+            "form_data": {},
+        },
+    )
+
+
+@router.post("/create")
+def trip_create_submit(
+    request: Request,
+    sender_name: str = Form(...),
+    sender_phone: str = Form(...),
+    pickup_address: str = Form(...),
+    delivery_address: str = Form(...),
+    cargo_weight_kg: int = Form(...),
+    cargo_type: str = Form(...),
+    notes: Optional[str] = Form(None),
+    db: Session = Depends(get_db),
+    current_user: UserSession = Depends(require_role(["DSP", "SAL", "MGR"])),
+):
+    """Submit new transport order / trip."""
+    if not sender_name.strip():
+        return templates.TemplateResponse(
+            request=request,
+            name="trips/form.html",
+            context={
+                "active_tab": "trips",
+                "current_user": current_user,
+                "error_message": "Tên người gửi không được để trống.",
+                "form_data": {
+                    "sender_name": sender_name,
+                    "sender_phone": sender_phone,
+                    "pickup_address": pickup_address,
+                    "delivery_address": delivery_address,
+                    "cargo_weight_kg": cargo_weight_kg,
+                    "cargo_type": cargo_type,
+                    "notes": notes,
+                },
+            },
+            status_code=400,
+        )
+
+    if cargo_weight_kg <= 0:
+        return templates.TemplateResponse(
+            request=request,
+            name="trips/form.html",
+            context={
+                "active_tab": "trips",
+                "current_user": current_user,
+                "error_message": "Khối lượng hàng hóa phải lớn hơn 0 kg.",
+                "form_data": {
+                    "sender_name": sender_name,
+                    "sender_phone": sender_phone,
+                    "pickup_address": pickup_address,
+                    "delivery_address": delivery_address,
+                    "cargo_weight_kg": cargo_weight_kg,
+                    "cargo_type": cargo_type,
+                    "notes": notes,
+                },
+            },
+            status_code=400,
+        )
+
+    repo = TripRepository(db)
+    timestamp_suffix = datetime.now(timezone.utc).strftime("%y%m%d%H%M%S")
+    ref_code = f"TRIP-{timestamp_suffix}"
+
+    trip = Trip(
+        reference_code=ref_code,
+        sender_name=sender_name.strip(),
+        sender_phone=sender_phone.strip(),
+        pickup_address=pickup_address.strip(),
+        delivery_address=delivery_address.strip(),
+        cargo_weight_kg=cargo_weight_kg,
+        cargo_type=cargo_type.strip(),
+        notes=notes.strip() if notes else None,
+        status=TripStatus.UNASSIGNED.value,
+    )
+    repo.create(trip)
+
+    return RedirectResponse(
+        url="/trips?success=created",
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
+
+
 @router.get("/{id}/dispatch", response_class=HTMLResponse)
 def trip_dispatch_form(
     id: int,
